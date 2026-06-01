@@ -1,18 +1,15 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useActionState, useRef } from "react";
 import data from "@/content/eruhomist-data.json";
 import { sendLead } from "@/app/actions/sendLead";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from "@/components/useReveal";
 
 /*
   Contact — фінальна секція (id="contact"). Дані: contact{} з JSON.
   Форма надсилає заявку в Telegram через server action sendLead (токен на сервері).
   Стани: idle → pending → success | error. При помилці — фолбек на Direct/телефон.
-  Моушен: fade-in секції.
+  Reveal: useReveal на data-anim. Логіка форми (useActionState/formAction/sendLead) — недоторкана.
 */
 
 const C = data.contact;
@@ -24,70 +21,64 @@ export default function Contact() {
   const sent = state?.ok === true;
   const failed = state?.ok === false;
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      const reveal = rootRef.current.querySelectorAll("[data-reveal]");
-      if (reduce) {
-        gsap.set(reveal, { opacity: 1, y: 0 });
-        return;
-      }
-      gsap.from(reveal, {
-        y: 34,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: rootRef.current, start: "top 75%" },
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
+  useReveal(rootRef, { stagger: 0.12 });
 
   return (
     <section
       ref={rootRef}
       id="contact"
-      className="section-shell section-shell--bordered"
+      className="section-shell section-shell--bordered section-shell--air"
       aria-label="Контакт"
-      style={{ paddingTop: "clamp(80px, 14vh, 180px)", paddingBottom: "clamp(80px, 14vh, 180px)" }}
     >
       <div className="contact-grid" style={S.grid}>
         {/* ліворуч — заклик + контакти */}
         <div style={S.left}>
-          <p className="kicker" data-reveal>
+          <p className="kicker" data-anim="blur">
             Контакт
           </p>
-          <h2 className="headline" data-reveal>
+          <h2 className="headline" data-anim="rise">
             Знайдемо те, що працює <b>саме для вас</b>
           </h2>
-          <p className="subhead" data-reveal style={{ maxWidth: "none" }}>
+          <p className="subhead" data-anim="blur" style={{ maxWidth: "none" }}>
             Напишіть або зателефонуйте — підберемо рішення під ваші цілі: для
             життя, оренди чи інвестицій.
           </p>
 
-          <div data-reveal style={S.contacts}>
-            <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.contactLink}>
-              {C.phone}
+          {/* Ієрархія: телефон — головний (display, важчий), IG — вторинний (sans, легший). */}
+          <div data-anim="blur" style={S.contacts}>
+            <a
+              href={`tel:${C.phone.replace(/\s/g, "")}`}
+              className="cta-line tnum"
+              style={S.phoneLink}
+              aria-label={`Зателефонувати ${C.phone}`}
+            >
+              <span style={S.phoneLabel}>Зателефонувати</span>
+              <span style={S.phoneNumber}>{C.phone}</span>
             </a>
+
             <a
               href={C.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              style={S.contactLink}
+              className="cta-line"
+              style={S.igLink}
             >
-              {C.instagramHandle}
+              <span style={S.igLabel}>Direct в Instagram</span>
+              <span style={S.igHandle}>
+                {C.instagramHandle}{" "}
+                <span className="arrow" aria-hidden>
+                  →
+                </span>
+              </span>
             </a>
+
             <span style={S.city}>{C.city}</span>
           </div>
         </div>
 
         {/* праворуч — форма (success → підтвердження; решта — форма з можливою помилкою) */}
         {sent ? (
-          <div data-reveal style={S.sentBox} role="status" aria-live="polite">
+          <div data-anim="rise" style={S.sentBox} role="status" aria-live="polite">
             <p style={S.sentTitle}>Дякуємо! Заявку отримано.</p>
             <p style={S.sentText}>
               Звʼяжемося з вами протягом робочого дня. Хочете швидше — напишіть
@@ -98,21 +89,31 @@ export default function Contact() {
                 href={C.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="field"
+                className="field cta-fill"
                 style={S.submit}
               >
                 Написати в Direct
               </a>
-              <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.sentTel}>
+              <a
+                href={`tel:${C.phone.replace(/\s/g, "")}`}
+                className="cta-line tnum"
+                style={S.sentTel}
+              >
                 {C.phone}
               </a>
             </div>
           </div>
         ) : (
-          <form data-reveal style={S.form} action={formAction}>
+          <form data-anim="rise" style={S.form} action={formAction}>
             <label style={S.label}>
               Ім'я
-              <input name="name" required className="field" style={S.input} autoComplete="name" />
+              <input
+                name="name"
+                required
+                className="field"
+                style={S.input}
+                autoComplete="name"
+              />
             </label>
             <label style={S.label}>
               Телефон або контакт
@@ -136,7 +137,7 @@ export default function Contact() {
             </label>
             <button
               type="submit"
-              className="field"
+              className="field cta-fill"
               style={{ ...S.submit, opacity: pending ? 0.7 : 1 }}
               disabled={pending}
             >
@@ -156,7 +157,11 @@ export default function Contact() {
                   >
                     {C.instagramHandle}
                   </a>
-                  <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.errLink}>
+                  <a
+                    href={`tel:${C.phone.replace(/\s/g, "")}`}
+                    className="tnum"
+                    style={S.errLink}
+                  >
                     {C.phone}
                   </a>
                 </div>
@@ -181,18 +186,72 @@ const S = {
     alignItems: "start",
   },
   left: { maxWidth: 520 },
-  contacts: { marginTop: 40, display: "flex", flexDirection: "column", gap: 16 },
-  contactLink: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontSize: "clamp(22px, 2.2vw, 32px)",
-    fontWeight: 300,
+
+  // Контакт-блок: телефон головний, IG вторинний, місто — caption.
+  contacts: {
+    marginTop: 44,
+    display: "flex",
+    flexDirection: "column",
+    gap: 28,
+    alignItems: "flex-start",
+  },
+
+  // Головний канал — телефон. Стек: каптіон зверху + великий display-номер.
+  phoneLink: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
     color: "var(--text-1)",
     textDecoration: "none",
     width: "fit-content",
-    borderBottom: "1px solid var(--accent-line)",
-    paddingBottom: 4,
   },
-  city: { fontSize: 14, letterSpacing: "0.1em", color: "var(--text-4)" },
+  phoneLabel: {
+    fontSize: 11,
+    letterSpacing: "0.32em",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+  },
+  phoneNumber: {
+    fontFamily: "var(--font-display), Georgia, serif",
+    fontSize: "clamp(28px, 3.2vw, 44px)",
+    fontWeight: 300,
+    lineHeight: 1.1,
+    color: "var(--text-1)",
+    borderBottom: "1px solid var(--accent-line)",
+    paddingBottom: 6,
+    letterSpacing: "-0.01em",
+  },
+
+  // Вторинний канал — IG. Менший розмір, sans, легша вага.
+  igLink: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    color: "var(--text-2)",
+    textDecoration: "none",
+    width: "fit-content",
+  },
+  igLabel: {
+    fontSize: 11,
+    letterSpacing: "0.32em",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+  },
+  igHandle: {
+    fontSize: "clamp(16px, 1.4vw, 19px)",
+    fontWeight: 400,
+    color: "var(--text-2)",
+    letterSpacing: "0.01em",
+  },
+
+  city: {
+    fontSize: 12,
+    letterSpacing: "0.3em",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+    marginTop: 4,
+  },
+
   form: { display: "flex", flexDirection: "column", gap: 20 },
   label: {
     display: "flex",
@@ -214,7 +273,7 @@ const S = {
   },
   submit: {
     marginTop: 8,
-    background: "var(--accent)",
+    background: "var(--lamp-glow)",
     color: "var(--obsidian)",
     border: "none",
     borderRadius: "var(--r-sharp)",
@@ -224,6 +283,9 @@ const S = {
     textTransform: "uppercase",
     fontWeight: 600,
     cursor: "pointer",
+    textAlign: "center",
+    textDecoration: "none",
+    display: "inline-block",
   },
   note: { margin: 0, fontSize: 12, color: "var(--text-4)", lineHeight: 1.5 },
   sentBox: {

@@ -1,8 +1,10 @@
 :root {
-  /* ── Core palette (brand-named) ───────────────────────────── */
-  --obsidian: #0a0c0f; /* near-black background, slightly cool */
-  --lamp-glow: #e8a35c; /* warm gold — the lamp light from the hero frames */
-  --linen: #ffffff; /* primary text */
+  /* ── Core palette (brand-named, OKLCH with micro-chroma — pure black is an AI tell) ── */
+  --obsidian: oklch(0.16 0.008 250); /* near-black, faint cool cast (was #0a0c0f) */
+  --obsidian-lift: oklch(0.19 0.009 250); /* +elevation surface — depth, not flat */
+  --obsidian-sink: oklch(0.13 0.008 250); /* recessed surface — cinematic depth */
+  --lamp-glow: oklch(0.74 0.11 62); /* warm gold — lamp light from hero (~#e8a35c) */
+  --linen: oklch(0.98 0.004 90); /* primary text — warm white, not pure #fff */
 
   /* Back-compat aliases (existing components still read these) */
   --bg: var(--obsidian);
@@ -26,8 +28,10 @@
   --surface-1: rgba(255, 255, 255, 0.015); /* faint raised card */
   --surface-glass: rgba(10, 12, 15, 0.6); /* badge over photo */
 
-  /* ── Spacing rhythm ───────────────────────────────────────── */
-  --space-section-y: clamp(72px, 12vh, 160px);
+  /* ── Spacing rhythm (varied, not one value everywhere) ────── */
+  --space-section-y: clamp(72px, 12vh, 160px); /* default */
+  --space-section-y-air: clamp(110px, 18vh, 240px); /* spacious takt */
+  --space-section-y-dense: clamp(56px, 8vh, 110px); /* compact takt */
   --space-section-x: clamp(24px, 8vw, 140px);
 
   /* ── Radii ────────────────────────────────────────────────── */
@@ -51,6 +55,18 @@
 .section-shell--bordered {
   border-top: 1px solid var(--hairline-soft);
 }
+/* rhythm takts — break the "same padding everywhere" tell */
+.section-shell--air {
+  padding-top: var(--space-section-y-air);
+  padding-bottom: var(--space-section-y-air);
+}
+.section-shell--dense {
+  padding-top: var(--space-section-y-dense);
+  padding-bottom: var(--space-section-y-dense);
+}
+/* surface elevation — depth instead of one flat plane after the hero */
+.section-shell--sink { background: var(--obsidian-sink); }
+.section-shell--lift { background: var(--obsidian-lift); }
 .kicker {
   font-size: var(--text-kicker);
   letter-spacing: var(--ls-kicker);
@@ -65,6 +81,7 @@
   line-height: 1.05;
   letter-spacing: -0.015em;
   margin: 0;
+  text-wrap: balance; /* even line lengths on headings, no orphans */
 }
 .headline b {
   font-weight: 600;
@@ -74,14 +91,49 @@
   margin-top: 22px;
   font-size: var(--text-sub);
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.7; /* light text on dark needs more leading (perceived lighter) */
   color: var(--text-3);
-  max-width: 460px;
+  max-width: 52ch; /* character-based measure */
+  text-wrap: pretty;
 }
 /* tabular figures for metric/number readouts */
 .tnum {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+/* ── Differentiated entrance vocabularies (not fade-up ×6) ──────
+   Each section opts into ONE via a class; JS animates from the
+   data-* state to rest. Transform/opacity only → cheap on low RAM. */
+[data-anim] { will-change: transform, opacity; }
+[data-anim].is-in { will-change: auto; }
+
+/* ── CTA hover/focus (inline styles can't do :hover; classes can) ── */
+.cta-line {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.4s ease;
+}
+.cta-line .arrow {
+  display: inline-block;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cta-line:hover .arrow { transform: translateX(6px); }
+.cta-line:focus-visible {
+  outline: 2px solid var(--lamp-glow);
+  outline-offset: 4px;
+}
+.cta-fill {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease, background 0.4s ease;
+}
+.cta-fill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -12px var(--lamp-glow);
+}
+.cta-fill:focus-visible {
+  outline: 2px solid var(--lamp-glow);
+  outline-offset: 3px;
 }
 
 * {
@@ -147,6 +199,93 @@ a {
   transform: scale(1.06);
 }
 
+/* ---- Catalog: hero-card (1st object spans full width, photo+text side-by-side) ---- */
+.cat-hero {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--surface-1);
+  margin-bottom: clamp(28px, 4vw, 56px);
+  transition: border-color 0.5s ease, transform 0.5s ease;
+}
+.cat-hero:hover { border-color: var(--accent-line); transform: translateY(-3px); }
+.cat-hero__img {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+}
+.cat-hero__img img {
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cat-hero:hover .cat-hero__img img { transform: scale(1.05); }
+.cat-hero__body {
+  padding: clamp(28px, 3.6vw, 56px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+@media (max-width: 880px) {
+  .cat-hero { grid-template-columns: 1fr; }
+  .cat-hero__body { padding: 26px 24px 30px; }
+}
+
+/* ---- Directions: asymmetric ratio, ghost-number behind headline ---- */
+.dir-block {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: clamp(40px, 7vw, 120px);
+  min-height: 78vh;
+  padding: clamp(56px, 9vh, 140px) var(--space-section-x);
+}
+.dir-block[data-side="left"]  { grid-template-columns: 0.85fr 1.15fr; }
+.dir-block[data-side="right"] { grid-template-columns: 1.15fr 0.85fr; }
+.dir-text { position: relative; max-width: 520px; }
+.dir-ghost-num {
+  position: absolute;
+  top: -0.42em;
+  left: -0.08em;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(180px, 22vw, 340px);
+  line-height: 0.78;
+  letter-spacing: -0.04em;
+  color: var(--lamp-glow);
+  opacity: 0.13;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+.dir-text > *:not(.dir-ghost-num) { position: relative; z-index: 1; }
+.dir-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  border: 1px solid var(--hairline);
+}
+.dir-media img {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dir-block:hover .dir-media img { transform: scale(1.04); }
+@media (max-width: 880px) {
+  .dir-block,
+  .dir-block[data-side="left"],
+  .dir-block[data-side="right"] {
+    grid-template-columns: 1fr;
+    grid-template-areas: "media" "text" !important;
+  }
+  .dir-block .dir-media-wrap { grid-area: media; }
+  .dir-block .dir-text { grid-area: text; }
+  .dir-ghost-num { font-size: clamp(140px, 38vw, 220px); }
+}
+
 /* ---- Investment: larger hero headline + metrics row spacing ---- */
 #investment .headline { font-size: clamp(38px, 5.2vw, 80px); line-height: 1.02; letter-spacing: -0.02em; }
 #investment > header { margin-bottom: clamp(44px, 7vh, 84px); }
@@ -165,6 +304,8 @@ a {
 @media (max-width: 860px) {
   .about-top { grid-template-columns: 1fr !important; }
   .tl { grid-template-columns: repeat(2, 1fr) !important; row-gap: 36px !important; }
+  /* На мобільному 4→2 колонки лінія-зʼєднувач губить сенс — ховаємо */
+  .tl .tl-line { display: none !important; }
 }
 @media (max-width: 480px) {
   .tl { grid-template-columns: 1fr !important; }

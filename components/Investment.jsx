@@ -1,72 +1,35 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
 import data from "@/content/eruhomist-data.json";
 import SectionHeader from "@/components/SectionHeader";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from "@/components/useReveal";
 
 /*
   Investment — інвестиції та девелопмент. Дані: investment{} з JSON.
-  Темна секція, акцент на цифрах. Метрики (поріг входу, дохідність + 2),
-  4 фактори прибутковості (нумерований ряд), формати (пілюлі).
-  Моушен: метрики fade-in зі stagger при in-view.
+  Композиція: одна метрика-зірка («до 25% річних») домінує масштабом,
+  поряд — три дрібні контекстні нотатки. Нижче — нумеровані фактори
+  й формати-пілюлі. Ритм: section-shell--sink (заглиблена поверхня).
 */
 
 const INV = data.investment;
 
-const METRICS = [
+// Дрібні контекстні нотатки навколо зірки — без дублювання yield.
+const NOTES = [
   { value: INV.entry, label: "Поріг входу" },
-  { value: INV.yield, label: "Прогнозована дохідність" },
   { value: "8–12 міс", label: "Горизонт обороту" },
   { value: INV.formats.length + " формати", label: "Ліквідні напрямки" },
 ];
 
 export default function Investment() {
   const rootRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      const reveal = rootRef.current.querySelectorAll("[data-reveal]");
-      const metrics = gsap.utils.toArray(".inv-metric");
-
-      if (reduce) {
-        gsap.set([...reveal, ...metrics], { opacity: 1, y: 0 });
-        return;
-      }
-
-      gsap.from(reveal, {
-        y: 32,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: rootRef.current, start: "top 72%" },
-      });
-
-      gsap.from(metrics, {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: ".inv-metrics", start: "top 82%" },
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
+  useReveal(rootRef, {});
 
   return (
     <section
       ref={rootRef}
       id="investment"
-      className="section-shell section-shell--bordered"
+      className="section-shell section-shell--bordered section-shell--sink"
       aria-label="Інвестиції"
     >
       <SectionHeader
@@ -76,41 +39,67 @@ export default function Investment() {
         maxWidth={660}
       />
 
-      <div className="inv-metrics" style={S.metrics}>
-        {METRICS.map((m) => (
-          <div key={m.label} className="inv-metric" style={S.metric}>
-            <div className="tnum" style={S.metricValue}>{m.value}</div>
-            <div style={S.metricLabel}>{m.label}</div>
+      {/* Hero metric — одна цифра-домінанта */}
+      <div style={S.heroRow}>
+        <div style={S.heroMetric}>
+          <span className="kicker" data-anim="blur" style={S.heroKicker}>
+            Прогнозована дохідність
+          </span>
+          <div className="tnum" data-anim="scale" style={S.heroValue}>
+            {INV.yield}
           </div>
-        ))}
+          <p data-anim="blur" style={S.disclaimer}>
+            Орієнтовно, на основі реалізованих угод. Не є гарантією.
+          </p>
+        </div>
+
+        <ul style={S.notes} aria-label="Контекст інвестиції">
+          {NOTES.map((n) => (
+            <li key={n.label} data-anim="blur" style={S.note}>
+              <span className="tnum" style={S.noteValue}>{n.value}</span>
+              <span style={S.noteLabel}>{n.label}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div className="inv-lower" style={S.lower}>
-        <div data-reveal style={S.factorsCol}>
-          <h3 style={S.blockTitle}>4 фактори прибутковості</h3>
+      <div style={S.divider} />
+
+      <div style={S.lower}>
+        <div style={S.factorsCol}>
+          <h3 data-anim="rise" style={S.blockTitle}>
+            4 фактори прибутковості
+          </h3>
           <ol style={S.factors}>
             {INV.factors.map((f, i) => (
-              <li key={f} style={S.factor}>
-                <span style={S.factorNum}>
+              <li key={f} data-anim="rise" style={S.factor}>
+                <span className="tnum" style={S.factorNum}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span>{f}</span>
+                <span style={S.factorText}>{f}</span>
               </li>
             ))}
           </ol>
         </div>
 
-        <div data-reveal style={S.formatsCol}>
-          <h3 style={S.blockTitle}>Формати</h3>
+        <div style={S.formatsCol}>
+          <h3 data-anim="rise" style={S.blockTitle}>
+            Формати
+          </h3>
           <div style={S.formats}>
             {INV.formats.map((f) => (
-              <span key={f} style={S.pill}>
+              <span key={f} data-anim="blur" style={S.pill}>
                 {f}
               </span>
             ))}
           </div>
-          <a href="#contact" style={S.cta}>
-            Дізнатись про інвестиції <span style={{ color: "var(--accent)" }}>→</span>
+          <a
+            href="#contact"
+            className="cta-line"
+            data-anim="blur"
+            style={S.cta}
+          >
+            Порахувати дохідність <span className="arrow">→</span>
           </a>
         </div>
       </div>
@@ -119,67 +108,113 @@ export default function Investment() {
 }
 
 const S = {
-  metrics: {
+  // Hero row — асиметрія: домінанта зліва (~64%), нотатки справа (~36%).
+  heroRow: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "clamp(20px, 3vw, 48px)",
-    paddingBottom: "clamp(44px, 7vh, 84px)",
-    borderBottom: "1px solid var(--hairline)",
+    gridTemplateColumns: "minmax(0, 1.7fr) minmax(0, 1fr)",
+    gap: "clamp(32px, 6vw, 96px)",
+    alignItems: "end",
   },
-  metric: {},
-  metricValue: {
+  heroMetric: { minWidth: 0 },
+  heroKicker: { display: "block", marginBottom: 18 },
+  heroValue: {
     fontFamily: "var(--font-display), Georgia, serif",
     fontWeight: 300,
-    fontSize: "clamp(30px, 3.4vw, 52px)",
+    fontSize: "clamp(72px, 11vw, 132px)",
+    lineHeight: 0.9,
+    letterSpacing: "-0.035em",
+    color: "var(--lamp-glow)",
+    textWrap: "balance",
+  },
+  disclaimer: {
+    marginTop: 22,
+    fontSize: 12,
+    lineHeight: 1.55,
+    color: "var(--text-4)",
+    maxWidth: "38ch",
+    letterSpacing: "0.01em",
+  },
+  // Дрібні нотатки — стовпчик, тонші за зірку, з лівим хайрлайном.
+  notes: {
+    listStyle: "none",
+    margin: 0,
+    padding: "8px 0 8px 28px",
+    borderLeft: "1px solid var(--hairline)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "clamp(22px, 3vw, 36px)",
+  },
+  note: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  noteValue: {
+    fontFamily: "var(--font-display), Georgia, serif",
+    fontWeight: 300,
+    fontSize: "clamp(22px, 2.2vw, 30px)",
     lineHeight: 1,
-    color: "var(--accent)",
+    color: "var(--text-1)",
     letterSpacing: "-0.01em",
   },
-  metricLabel: {
-    marginTop: 14,
-    fontSize: 13,
-    letterSpacing: "0.06em",
-    color: "var(--text-3)",
+  noteLabel: {
+    fontSize: 12,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+  },
+  divider: {
+    height: 1,
+    background: "var(--hairline)",
+    margin: "clamp(56px, 9vh, 104px) 0 clamp(40px, 6vh, 72px)",
   },
   lower: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "1.2fr 1fr",
     gap: "clamp(32px, 6vw, 96px)",
-    marginTop: "clamp(44px, 7vh, 84px)",
   },
-  factorsCol: {},
-  formatsCol: { display: "flex", flexDirection: "column" },
+  factorsCol: { minWidth: 0 },
+  formatsCol: { display: "flex", flexDirection: "column", minWidth: 0 },
   blockTitle: {
     fontFamily: "var(--font-display), Georgia, serif",
     fontWeight: 300,
-    fontSize: "clamp(22px, 2vw, 30px)",
+    fontSize: "clamp(20px, 1.8vw, 26px)",
     margin: "0 0 28px",
+    letterSpacing: "-0.005em",
+    color: "var(--text-2)",
   },
   factors: { listStyle: "none", margin: 0, padding: 0 },
   factor: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "44px 1fr",
     alignItems: "baseline",
     gap: 18,
-    padding: "16px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    padding: "18px 0",
+    borderBottom: "1px solid var(--hairline)",
     fontSize: "clamp(16px, 1.4vw, 20px)",
     fontWeight: 300,
-    color: "rgba(255,255,255,0.85)",
   },
   factorNum: {
     fontFamily: "var(--font-display), Georgia, serif",
-    color: "var(--accent)",
-    opacity: 0.5,
-    fontSize: 18,
-    minWidth: 28,
-  },
-  formats: { display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 40 },
-  pill: {
+    color: "var(--lamp-glow)",
+    opacity: 0.55,
     fontSize: 14,
-    color: "rgba(255,255,255,0.85)",
-    border: "1px solid rgba(232,163,92,0.4)",
-    borderRadius: 999,
-    padding: "10px 20px",
+    letterSpacing: "0.05em",
+  },
+  factorText: { color: "var(--text-2)" },
+  formats: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: "clamp(32px, 4vh, 48px)",
+  },
+  pill: {
+    fontSize: 13,
+    color: "var(--text-2)",
+    border: "1px solid var(--accent-line)",
+    borderRadius: "var(--r-pill)",
+    padding: "9px 18px",
+    letterSpacing: "0.01em",
   },
   cta: {
     marginTop: "auto",
@@ -189,10 +224,10 @@ const S = {
     fontSize: 13,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
-    color: "#fff",
+    color: "var(--text-1)",
     textDecoration: "none",
     width: "fit-content",
     paddingBottom: 6,
-    borderBottom: "1px solid rgba(232,163,92,0.4)",
+    borderBottom: "1px solid var(--accent-line)",
   },
 };

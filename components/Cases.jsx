@@ -1,132 +1,159 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
 import data from "@/content/eruhomist-data.json";
 import SectionHeader from "@/components/SectionHeader";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from "@/components/useReveal";
 
 /*
   Cases — результати. Дані: cases[] з JSON.
-  3 блоки-докази: велика метрика акцентом, заголовок, текст.
-  Моушен: reveal зі stagger при скролі.
+  Чергуємо композицію кейсів: метрика зліва / справа / зліва. Метрики —
+  data-anim="scale" (наближення підкреслює доказ), заголовок — "rise",
+  текст — "blur". Ритм секції: --dense (контраст із air-сусідами).
+  Розділювач між кейсами — тонкий --hairline.
 */
 
 const CASES = data.cases;
 
 export default function Cases() {
   const rootRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      const reveal = rootRef.current.querySelectorAll("[data-reveal]");
-      const rows = gsap.utils.toArray(".case-row");
-
-      if (reduce) {
-        gsap.set([...reveal, ...rows], { opacity: 1, y: 0 });
-        return;
-      }
-
-      gsap.from(reveal, {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: rootRef.current, start: "top 75%" },
-      });
-
-      rows.forEach((row) => {
-        gsap.from(row.querySelectorAll("[data-cr]"), {
-          y: 40,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: { trigger: row, start: "top 80%" },
-        });
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
+  useReveal(rootRef, {});
 
   return (
     <section
       ref={rootRef}
       id="cases"
-      className="section-shell section-shell--bordered"
+      className="section-shell section-shell--bordered section-shell--dense"
       aria-label="Результати"
     >
-      <SectionHeader kicker="Результати" title={<>Цифри, які <b>говорять</b></>} />
+      <SectionHeader
+        kicker="Результати"
+        title={<>Цифри, які <b>говорять</b></>}
+      />
 
+      <ol style={S.list}>
+        {CASES.map((c, i) => {
+          // Чергування: 0 — метрика зліва, 1 — справа, 2 — зліва.
+          const right = i % 2 === 1;
+          // Варіація ширин — друга колонка-доказ трохи ширша.
+          const cols = right
+            ? "minmax(0, 1.5fr) minmax(220px, 0.9fr)"
+            : i === 2
+            ? "minmax(200px, 0.7fr) minmax(0, 1.7fr)"
+            : "minmax(220px, 0.9fr) minmax(0, 1.5fr)";
 
-      <div style={S.list}>
-        {CASES.map((c, i) => (
-          <div
-            key={i}
-            className="case-row"
-            style={{
-              ...S.row,
-              borderTop:
-                i === 0 ? "1px solid rgba(255,255,255,0.1)" : undefined,
-            }}
-          >
-            <div data-cr style={S.metric}>
-              {c.metric}
-            </div>
-            <div style={S.content}>
-              <h3 data-cr style={S.caseTitle}>
-                {c.title}
-              </h3>
-              <p data-cr style={S.text}>
-                {c.text}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+          return (
+            <li
+              key={i}
+              style={{
+                ...S.row,
+                gridTemplateColumns: cols,
+                borderTop:
+                  i === 0 ? "1px solid var(--hairline)" : undefined,
+              }}
+            >
+              {/* index marker — тонкий counter зверху */}
+              <span style={S.index} data-anim="blur">
+                {String(i + 1).padStart(2, "0")} / {String(CASES.length).padStart(2, "0")}
+              </span>
+
+              {right ? (
+                <>
+                  <div style={{ ...S.content, ...S.contentRight }}>
+                    <h3 data-anim="rise" style={S.caseTitle}>
+                      {c.title}
+                    </h3>
+                    <p data-anim="blur" style={S.text}>
+                      {c.text}
+                    </p>
+                  </div>
+                  <div
+                    className="tnum"
+                    data-anim="scale"
+                    style={{ ...S.metric, ...S.metricRight }}
+                  >
+                    {c.metric}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="tnum"
+                    data-anim="scale"
+                    style={S.metric}
+                  >
+                    {c.metric}
+                  </div>
+                  <div style={S.content}>
+                    <h3 data-anim="rise" style={S.caseTitle}>
+                      {c.title}
+                    </h3>
+                    <p data-anim="blur" style={S.text}>
+                      {c.text}
+                    </p>
+                  </div>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }
 
 const S = {
-  list: {},
+  list: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    position: "relative",
+  },
   row: {
+    position: "relative",
     display: "grid",
-    gridTemplateColumns: "minmax(180px, 0.8fr) 1.6fr",
     gap: "clamp(24px, 5vw, 80px)",
     alignItems: "center",
-    padding: "clamp(36px, 5vh, 56px) 0",
+    padding: "clamp(40px, 6vh, 72px) 0",
     borderBottom: "1px solid var(--hairline)",
+  },
+  index: {
+    position: "absolute",
+    top: "clamp(20px, 2.6vh, 28px)",
+    right: 0,
+    fontSize: 11,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+    fontVariantNumeric: "tabular-nums",
   },
   metric: {
     fontFamily: "var(--font-display), Georgia, serif",
     fontWeight: 300,
-    fontSize: "clamp(40px, 5.5vw, 88px)",
-    lineHeight: 0.95,
-    color: "var(--accent)",
-    letterSpacing: "-0.02em",
-    fontVariantNumeric: "tabular-nums",
+    fontSize: "clamp(48px, 7vw, 112px)",
+    lineHeight: 0.92,
+    color: "var(--lamp-glow)",
+    letterSpacing: "-0.03em",
+    textWrap: "balance",
   },
-  content: { maxWidth: 560 },
+  metricRight: { textAlign: "right" },
+  content: { maxWidth: 560, minWidth: 0 },
+  contentRight: { justifySelf: "start" },
   caseTitle: {
     fontFamily: "var(--font-display), Georgia, serif",
     fontWeight: 400,
-    fontSize: "clamp(20px, 2vw, 30px)",
+    fontSize: "clamp(22px, 2.1vw, 32px)",
     lineHeight: 1.2,
     margin: 0,
+    color: "var(--text-1)",
+    letterSpacing: "-0.01em",
   },
   text: {
-    marginTop: 16,
+    marginTop: 18,
     fontSize: "clamp(15px, 1.3vw, 18px)",
     fontWeight: 300,
-    lineHeight: 1.65,
-    color: "rgba(255,255,255,0.7)",
+    lineHeight: 1.7,
+    color: "var(--text-3)",
+    maxWidth: "52ch",
   },
 };

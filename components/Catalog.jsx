@@ -1,73 +1,119 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import data from "@/content/eruhomist-data.json";
 import SectionHeader from "@/components/SectionHeader";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from "@/components/useReveal";
 
 /*
   Catalog — каталог об'єктів. Дані: objects[] з content/eruhomist-data.json.
-  Сітка карток (десктоп 3, планшет 2, моб 1 — у globals.css .cat-grid).
-  Картка: фото 4:3 (hover zoom), бейджі типу+статусу, заголовок, локація, площа+ціна, теги.
-  Ціни/площі — рівно з JSON. Моушен: картки fade-up зі stagger при скролі.
+  Композиція ламається спеціально (Von Restorff):
+    - 1-й об'єкт (Соборна 22, 128k$) — HERO-card: на всю ширину, фото+текст поруч.
+    - Решта 5 — звичайна 3-в-ряд сітка.
+  Бейдж "у продажу" (дефолт) приховано як banner-blind. Лишаються тільки значущі статуси:
+  "ціну знижено" та "інвестиційна".
+  Моушен: useReveal — hero data-anim="clip" (кінематографічний розкрив), картки rise зі stagger.
 */
 
 const OBJECTS = data.objects;
+const STATUS_MEANINGFUL = new Set(["ціну знижено", "інвестиційна"]);
+
+function ObjectMeta({ o, size = "card" }) {
+  const titleSize =
+    size === "hero"
+      ? "clamp(26px, 2.6vw, 38px)"
+      : "clamp(20px, 1.7vw, 26px)";
+  return (
+    <>
+      <h3
+        style={{
+          ...S.cardTitle,
+          fontSize: titleSize,
+          fontWeight: size === "hero" ? 300 : 400,
+        }}
+      >
+        {o.title}
+      </h3>
+      <p style={S.loc}>
+        <span style={S.pin} aria-hidden>
+          ◍
+        </span>
+        {o.location}
+      </p>
+      <div style={S.row}>
+        <span style={S.area}>{o.area}</span>
+        <span className="tnum" style={S.price}>
+          {o.price}
+        </span>
+      </div>
+      <div style={S.tags}>
+        {o.tags.slice(0, size === "hero" ? 4 : 3).map((t) => (
+          <span key={t} style={S.tag}>
+            {t}
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function StatusBadge({ status }) {
+  if (!STATUS_MEANINGFUL.has(status)) return null;
+  return (
+    <span style={{ ...S.badge, ...S.badgeStatus }}>
+      {status}
+    </span>
+  );
+}
 
 export default function Catalog() {
   const rootRef = useRef(null);
+  useReveal(rootRef, { stagger: 0.09, duration: 1.1 });
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      const head = rootRef.current.querySelectorAll("[data-reveal]");
-      const cards = gsap.utils.toArray(".cat-card");
-
-      if (reduce) {
-        gsap.set([...head, ...cards], { opacity: 1, y: 0 });
-        return;
-      }
-
-      gsap.from(head, {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: rootRef.current, start: "top 75%" },
-      });
-
-      gsap.from(cards, {
-        y: 44,
-        opacity: 0,
-        duration: 0.9,
-        ease: "power3.out",
-        stagger: 0.1,
-        scrollTrigger: { trigger: ".cat-grid", start: "top 80%" },
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
+  const [hero, ...rest] = OBJECTS;
 
   return (
-    <section ref={rootRef} id="catalog" className="section-shell" aria-label="Об'єкти">
+    <section
+      ref={rootRef}
+      id="catalog"
+      className="section-shell section-shell--bordered section-shell--lift"
+      aria-label="Об'єкти"
+    >
       <SectionHeader
         kicker="Каталог"
-        title={<>Об'єкти, які варто <b>розглянути</b></>}
+        title={
+          <>
+            Об'єкти, які варто <b>розглянути</b>
+          </>
+        }
         sub="Добірка під різні цілі — для життя, оренди та інвестицій. Підберемо й те, чого тут немає."
       />
 
+      {/* ── Hero card: 1-й об'єкт (Соборна 22) ─────────────────── */}
+      <article className="cat-hero" data-anim="clip">
+        <div className="cat-hero__img">
+          <Image
+            src={hero.image}
+            alt={hero.title}
+            fill
+            sizes="(max-width: 880px) 100vw, 60vw"
+            style={{ objectFit: "cover" }}
+            priority
+          />
+          <span style={{ ...S.badge, ...S.badgeType }}>{hero.type}</span>
+          <StatusBadge status={hero.status} />
+        </div>
+        <div className="cat-hero__body">
+          <span style={S.heroKicker}>Витвір центру</span>
+          <ObjectMeta o={hero} size="hero" />
+        </div>
+      </article>
 
+      {/* ── Решта сітка 3-в-ряд ──────────────────────────────── */}
       <div className="cat-grid">
-        {OBJECTS.map((o) => (
-          <article key={o.id} className="cat-card">
+        {rest.map((o) => (
+          <article key={o.id} className="cat-card" data-anim="rise">
             <div className="cat-card__img">
               <Image
                 src={o.image}
@@ -77,38 +123,21 @@ export default function Catalog() {
                 style={{ objectFit: "cover" }}
               />
               <span style={{ ...S.badge, ...S.badgeType }}>{o.type}</span>
-              <span style={{ ...S.badge, ...S.badgeStatus }}>{o.status}</span>
+              <StatusBadge status={o.status} />
             </div>
-
             <div style={S.cardBody}>
-              <h3 style={S.cardTitle}>{o.title}</h3>
-              <p style={S.loc}>
-                <span style={S.pin} aria-hidden>
-                  ◍
-                </span>
-                {o.location}
-              </p>
-
-              <div style={S.row}>
-                <span style={S.area}>{o.area}</span>
-                <span style={S.price}>{o.price}</span>
-              </div>
-
-              <div style={S.tags}>
-                {o.tags.slice(0, 3).map((t) => (
-                  <span key={t} style={S.tag}>
-                    {t}
-                  </span>
-                ))}
-              </div>
+              <ObjectMeta o={o} size="card" />
             </div>
           </article>
         ))}
       </div>
 
       <div style={S.ctaWrap}>
-        <a href="#contact" style={S.cta}>
-          Підібрати під запит <span style={{ color: "var(--accent)" }}>→</span>
+        <a href="#contact" className="cta-line" data-anim="blur" style={S.cta}>
+          Знайти свій об'єкт{" "}
+          <span className="arrow" style={{ color: "var(--lamp-glow)" }}>
+            →
+          </span>
         </a>
       </div>
     </section>
@@ -138,13 +167,20 @@ const S = {
     color: "var(--obsidian)",
     fontWeight: 600,
   },
+  heroKicker: {
+    fontSize: "var(--text-kicker)",
+    letterSpacing: "var(--ls-kicker)",
+    textTransform: "uppercase",
+    color: "var(--text-4)",
+    marginBottom: 4,
+  },
   cardBody: { padding: "22px 22px 26px" },
   cardTitle: {
     fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 400,
-    fontSize: "clamp(20px, 1.7vw, 26px)",
-    lineHeight: 1.2,
+    lineHeight: 1.18,
     margin: 0,
+    color: "var(--text-1)",
+    letterSpacing: "-0.01em",
   },
   loc: {
     display: "flex",
@@ -152,9 +188,9 @@ const S = {
     gap: 7,
     margin: "12px 0 0",
     fontSize: 14,
-    color: "rgba(255,255,255,0.55)",
+    color: "var(--text-4)",
   },
-  pin: { color: "var(--accent)", fontSize: 12 },
+  pin: { color: "var(--lamp-glow)", fontSize: 12 },
   row: {
     display: "flex",
     justifyContent: "space-between",
@@ -162,35 +198,35 @@ const S = {
     gap: 12,
     margin: "20px 0 0",
     paddingTop: 18,
-    borderTop: "1px solid rgba(255,255,255,0.08)",
+    borderTop: "1px solid var(--hairline)",
   },
-  area: { fontSize: 14, color: "rgba(255,255,255,0.7)" },
+  area: { fontSize: 14, color: "var(--text-3)" },
   price: {
-    fontSize: "clamp(18px, 1.5vw, 22px)",
+    fontSize: "clamp(18px, 1.6vw, 24px)",
     fontWeight: 600,
-    color: "var(--accent)",
+    color: "var(--lamp-glow)",
+    letterSpacing: "-0.005em",
   },
   tags: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 18 },
   tag: {
     fontSize: 11,
     letterSpacing: "0.04em",
-    color: "rgba(255,255,255,0.5)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 999,
+    color: "var(--text-4)",
+    border: "1px solid var(--hairline)",
+    borderRadius: "var(--r-pill)",
     padding: "5px 11px",
   },
-  ctaWrap: { marginTop: "clamp(40px, 6vh, 72px)", textAlign: "center" },
+  ctaWrap: { marginTop: "clamp(48px, 7vh, 84px)", textAlign: "center" },
   cta: {
     display: "inline-flex",
     alignItems: "center",
-    gap: 10,
-    fontSize: 13,
-    letterSpacing: "0.18em",
+    gap: 12,
+    fontSize: 12,
+    letterSpacing: "0.22em",
     textTransform: "uppercase",
-    color: "#fff",
+    color: "var(--text-2)",
     textDecoration: "none",
-    padding: "16px 34px",
-    border: "1px solid rgba(255,255,255,0.25)",
-    borderRadius: 2,
+    paddingBottom: 8,
+    borderBottom: "1px solid var(--accent-line)",
   },
 };

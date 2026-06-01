@@ -8,15 +8,15 @@ export default function SectionHeader({ kicker, title, sub, maxWidth = 640 }) {
   return (
     <header style={{ maxWidth, marginBottom: "clamp(40px, 6vh, 72px)" }}>
       {kicker && (
-        <p className="kicker" data-reveal>
+        <p className="kicker" data-anim="blur">
           {kicker}
         </p>
       )}
-      <h2 className="headline" data-reveal>
+      <h2 className="headline" data-anim="rise">
         {title}
       </h2>
       {sub && (
-        <p className="subhead" data-reveal>
+        <p className="subhead" data-anim="blur">
           {sub}
         </p>
       )}
