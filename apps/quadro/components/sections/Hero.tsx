@@ -155,6 +155,9 @@ export function Hero({ m }: { m: Messages }) {
       if (Math.abs(s.target - s.current) < 0.01) s.current = s.target;
       drawFrame(s.current);
       if (++windowTick % 6 === 0) updateWindow();
+      // decay the chromatic-aberration var toward 0 when scrolling settles
+      const cur = parseFloat(wrap!.style.getPropertyValue("--hero-aberration") || "0");
+      if (cur > 0.001) wrap!.style.setProperty("--hero-aberration", (cur * 0.9).toFixed(3));
       s.raf = requestAnimationFrame(tick);
     }
 
@@ -167,6 +170,13 @@ export function Hero({ m }: { m: Messages }) {
         scrub: true,
         onUpdate: (self) => {
           stateRef.current.target = self.progress * (HERO_FRAME_COUNT - 1);
+          // Film-grade CSS drivers (R-CSS, no WebGL): --hero-night ramps the warm
+          // window-glow in as we reach evening; --hero-aberration spikes the chromatic
+          // edge-split with scroll velocity, then decays in the rAF loop.
+          const el = wrap!;
+          el.style.setProperty("--hero-night", self.progress.toFixed(3));
+          const v = Math.min(1, Math.abs(self.getVelocity()) / 2500);
+          el.style.setProperty("--hero-aberration", v.toFixed(3));
         },
       });
       ScrollTrigger.refresh();
@@ -238,7 +248,8 @@ export function Hero({ m }: { m: Messages }) {
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0a0c0f]">
         <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
 
-        {/* cinematic grain + vignette (CSS overlay — replaces the GLSL shader). */}
+        {/* film-grade (R-CSS, no WebGL): grain + vignette + scroll-velocity chromatic
+            aberration + warm window-glow that ramps in toward night. */}
         <div aria-hidden className="hero-grain pointer-events-none absolute inset-0 z-[1]" />
         <div
           aria-hidden
@@ -248,6 +259,11 @@ export function Hero({ m }: { m: Messages }) {
               "radial-gradient(ellipse at 60% 45%, transparent 38%, rgba(0,0,0,0.5) 100%)",
           }}
         />
+        {/* warm window-glow — opacity tracks --hero-night so the building "lights up"
+            as the page reaches evening. Sits over the building's window band. */}
+        <div aria-hidden className="hero-window-glow pointer-events-none absolute inset-0 z-[1]" />
+        {/* chromatic aberration — RGB edge fringes that intensify with scroll velocity. */}
+        <div aria-hidden className="hero-aberration pointer-events-none absolute inset-0 z-[1]" />
 
         {/* text scrim for guaranteed legibility over the bright daytime frames */}
         <div

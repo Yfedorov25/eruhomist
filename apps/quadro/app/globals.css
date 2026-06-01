@@ -104,6 +104,35 @@ body {
   .hero-grain { display: none; }
 }
 
+/* Warm window-glow — opacity tracks --hero-night (0 day → 1 evening), set by the hero
+   ScrollTrigger. Two soft warm pools over the building's window bands so the building
+   reads as "lighting up from inside" as night falls. Screen-blend for additive glow. */
+.hero-window-glow {
+  opacity: calc(var(--hero-night, 0) * 0.55);
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(40% 16% at 38% 46%, rgba(224, 169, 109, 0.5) 0%, transparent 70%),
+    radial-gradient(40% 16% at 64% 46%, rgba(224, 169, 109, 0.45) 0%, transparent 70%),
+    radial-gradient(50% 12% at 50% 62%, rgba(224, 169, 109, 0.32) 0%, transparent 75%);
+  transition: opacity 0.25s linear;
+}
+
+/* Chromatic aberration — cyan/red edge fringes whose strength tracks --hero-aberration
+   (scroll velocity). Pure CSS: two thin inset color rings via box-shadow, intensity
+   scaled by the var. Subtle by design (≤ a few px feel) so it reads cinematic, not broken. */
+.hero-aberration {
+  opacity: calc(var(--hero-aberration, 0) * 0.9);
+  box-shadow:
+    inset 3px 0 6px rgba(255, 40, 40, 0.5),
+    inset -3px 0 6px rgba(40, 200, 255, 0.5);
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-window-glow,
+  .hero-aberration { display: none; }
+}
+
 /* Text sitting over the hero/media: guaranteed contrast via a paint-behind scrim. */
 .over-media {
   position: relative;
