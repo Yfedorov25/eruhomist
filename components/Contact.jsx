@@ -51,15 +51,10 @@ export default function Contact() {
       contact: form.contact.value,
       message: form.message.value,
     };
-    // TODO: підключити реальне надсилання (бекенд / форм-сервіс).
-    console.log("[Єрухомість] заявка з форми:", payload);
-    const body = encodeURIComponent(
-      `Ім'я: ${payload.name}\nКонтакт: ${payload.contact}\n\n${payload.message}`
-    );
-    // mailto-фолбек поки немає бекенду
-    window.location.href = `mailto:?subject=${encodeURIComponent(
-      "Заявка з сайту Єрухомість"
-    )}&body=${body}`;
+    // TODO: підключити реальне надсилання (Telegram Bot / Formspree / Resend).
+    // Поки бекенду немає — НЕ вдаємо, що заявку надіслано (це втрачало б ліди й
+    // підривало довіру). Показуємо чесне підтвердження з реальними каналами звʼязку.
+    console.log("[Єрухомість] заявка з форми (бекенд ще не підключено):", payload);
     setSent(true);
   }
 
@@ -101,39 +96,66 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* праворуч — форма */}
-        <form data-reveal style={S.form} onSubmit={handleSubmit}>
-          <label style={S.label}>
-            Ім'я
-            <input name="name" required className="field" style={S.input} autoComplete="name" />
-          </label>
-          <label style={S.label}>
-            Телефон або контакт
-            <input
-              name="contact"
-              required
-              className="field"
-              style={S.input}
-              placeholder="+380 / @нік"
-            />
-          </label>
-          <label style={S.label}>
-            Повідомлення
-            <textarea
-              name="message"
-              rows={4}
-              className="field"
-              style={{ ...S.input, resize: "vertical" }}
-              placeholder="Що шукаєте?"
-            />
-          </label>
-          <button type="submit" className="field" style={S.submit}>
-            {sent ? "Дякуємо! Відкриваємо пошту…" : "Надіслати заявку"}
-          </button>
-          <p style={S.note}>
-            Натискаючи, ви погоджуєтесь, що ми зв'яжемося з вами. {/* TODO: бекенд */}
-          </p>
-        </form>
+        {/* праворуч — форма (або підтвердження після надсилання) */}
+        {sent ? (
+          <div data-reveal style={S.sentBox} role="status" aria-live="polite">
+            <p style={S.sentTitle}>Дякуємо за заявку.</p>
+            <p style={S.sentText}>
+              Поки що найшвидше відповімо у Direct або по телефону — напишіть нам
+              напряму, і ми звʼяжемося протягом дня.
+            </p>
+            <div style={S.sentActions}>
+              <a
+                href={C.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="field"
+                style={S.submit}
+              >
+                Написати в Direct
+              </a>
+              <a
+                href={`tel:${C.phone.replace(/\s/g, "")}`}
+                style={S.sentTel}
+              >
+                {C.phone}
+              </a>
+            </div>
+          </div>
+        ) : (
+          <form data-reveal style={S.form} onSubmit={handleSubmit}>
+            <label style={S.label}>
+              Ім'я
+              <input name="name" required className="field" style={S.input} autoComplete="name" />
+            </label>
+            <label style={S.label}>
+              Телефон або контакт
+              <input
+                name="contact"
+                required
+                className="field"
+                style={S.input}
+                placeholder="+380 / @нік"
+              />
+            </label>
+            <label style={S.label}>
+              Повідомлення
+              <textarea
+                name="message"
+                rows={4}
+                className="field"
+                style={{ ...S.input, resize: "vertical" }}
+                placeholder="Що шукаєте?"
+              />
+            </label>
+            <button type="submit" className="field" style={S.submit}>
+              Надіслати заявку
+            </button>
+            <p style={S.note}>
+              Не передаємо ваші дані третім особам. Відповідаємо протягом робочого дня.
+            </p>
+          </form>
+        )}
       </div>
     </section>
   );
@@ -192,4 +214,38 @@ const S = {
     cursor: "pointer",
   },
   note: { margin: 0, fontSize: 12, color: "var(--text-4)", lineHeight: 1.5 },
+  sentBox: {
+    border: "1px solid var(--accent-line)",
+    borderRadius: "var(--r-card)",
+    padding: "clamp(28px, 4vw, 44px)",
+    background: "var(--surface-1)",
+  },
+  sentTitle: {
+    fontFamily: "var(--font-display), Georgia, serif",
+    fontWeight: 300,
+    fontSize: "clamp(24px, 2.4vw, 34px)",
+    margin: 0,
+    color: "var(--text-1)",
+  },
+  sentText: {
+    marginTop: 14,
+    fontSize: "clamp(15px, 1.3vw, 17px)",
+    fontWeight: 300,
+    lineHeight: 1.6,
+    color: "var(--text-3)",
+  },
+  sentActions: {
+    marginTop: 28,
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 20,
+  },
+  sentTel: {
+    fontSize: 16,
+    color: "var(--text-2)",
+    textDecoration: "none",
+    borderBottom: "1px solid var(--accent-line)",
+    paddingBottom: 3,
+  },
 };

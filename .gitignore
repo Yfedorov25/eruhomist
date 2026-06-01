@@ -48,3 +48,7 @@ hero-verify.png
 eruhomist-hero-package.zip
 _hero_unpacked/
 scaffold-tmp/
+.gstack/
+
+# gstack working artifacts
+/.gstack/
