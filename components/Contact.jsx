@@ -1,24 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import data from "@/content/eruhomist-data.json";
+import { sendLead } from "@/app/actions/sendLead";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /*
   Contact — фінальна секція (id="contact"). Дані: contact{} з JSON.
-  Заклик, телефон (tel:), Instagram, проста форма.
-  ФОРМА БЕЗ БЕКЕНДУ: console.log + mailto-фолбек. TODO: підключити надсилання.
+  Форма надсилає заявку в Telegram через server action sendLead (токен на сервері).
+  Стани: idle → pending → success | error. При помилці — фолбек на Direct/телефон.
   Моушен: fade-in секції.
 */
 
 const C = data.contact;
+const initialState = { ok: null };
 
 export default function Contact() {
   const rootRef = useRef(null);
-  const [sent, setSent] = useState(false);
+  const [state, formAction, pending] = useActionState(sendLead, initialState);
+  const sent = state?.ok === true;
+  const failed = state?.ok === false;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -42,21 +46,6 @@ export default function Contact() {
 
     return () => ctx.revert();
   }, []);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const payload = {
-      name: form.name.value,
-      contact: form.contact.value,
-      message: form.message.value,
-    };
-    // TODO: підключити реальне надсилання (Telegram Bot / Formspree / Resend).
-    // Поки бекенду немає — НЕ вдаємо, що заявку надіслано (це втрачало б ліди й
-    // підривало довіру). Показуємо чесне підтвердження з реальними каналами звʼязку.
-    console.log("[Єрухомість] заявка з форми (бекенд ще не підключено):", payload);
-    setSent(true);
-  }
 
   return (
     <section
@@ -96,13 +85,13 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* праворуч — форма (або підтвердження після надсилання) */}
+        {/* праворуч — форма (success → підтвердження; решта — форма з можливою помилкою) */}
         {sent ? (
           <div data-reveal style={S.sentBox} role="status" aria-live="polite">
-            <p style={S.sentTitle}>Дякуємо за заявку.</p>
+            <p style={S.sentTitle}>Дякуємо! Заявку отримано.</p>
             <p style={S.sentText}>
-              Поки що найшвидше відповімо у Direct або по телефону — напишіть нам
-              напряму, і ми звʼяжемося протягом дня.
+              Звʼяжемося з вами протягом робочого дня. Хочете швидше — напишіть
+              напряму в Direct або зателефонуйте.
             </p>
             <div style={S.sentActions}>
               <a
@@ -114,16 +103,13 @@ export default function Contact() {
               >
                 Написати в Direct
               </a>
-              <a
-                href={`tel:${C.phone.replace(/\s/g, "")}`}
-                style={S.sentTel}
-              >
+              <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.sentTel}>
                 {C.phone}
               </a>
             </div>
           </div>
         ) : (
-          <form data-reveal style={S.form} onSubmit={handleSubmit}>
+          <form data-reveal style={S.form} action={formAction}>
             <label style={S.label}>
               Ім'я
               <input name="name" required className="field" style={S.input} autoComplete="name" />
@@ -148,9 +134,35 @@ export default function Contact() {
                 placeholder="Що шукаєте?"
               />
             </label>
-            <button type="submit" className="field" style={S.submit}>
-              Надіслати заявку
+            <button
+              type="submit"
+              className="field"
+              style={{ ...S.submit, opacity: pending ? 0.7 : 1 }}
+              disabled={pending}
+            >
+              {pending ? "Надсилаємо…" : "Надіслати заявку"}
             </button>
+
+            {failed && (
+              <div style={S.errBox} role="alert" aria-live="assertive">
+                {state.message ||
+                  "Не вдалося надіслати. Напишіть нам напряму — так найшвидше:"}
+                <div style={S.errActions}>
+                  <a
+                    href={C.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={S.errLink}
+                  >
+                    {C.instagramHandle}
+                  </a>
+                  <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.errLink}>
+                    {C.phone}
+                  </a>
+                </div>
+              </div>
+            )}
+
             <p style={S.note}>
               Не передаємо ваші дані третім особам. Відповідаємо протягом робочого дня.
             </p>
@@ -247,5 +259,21 @@ const S = {
     textDecoration: "none",
     borderBottom: "1px solid var(--accent-line)",
     paddingBottom: 3,
+  },
+  errBox: {
+    fontSize: 14,
+    lineHeight: 1.6,
+    color: "var(--text-2)",
+    border: "1px solid rgba(232,163,92,0.5)",
+    borderRadius: "var(--r-card)",
+    padding: "16px 18px",
+    background: "rgba(232,163,92,0.06)",
+  },
+  errActions: { display: "flex", flexWrap: "wrap", gap: 18, marginTop: 12 },
+  errLink: {
+    color: "var(--lamp-glow)",
+    textDecoration: "none",
+    borderBottom: "1px solid var(--accent-line)",
+    paddingBottom: 2,
   },
 };
