@@ -24,12 +24,16 @@ export default async function HomePage({
       <Header locale={locale} m={m} />
       <main>
         <Hero m={m} />
-        <Concept m={m} />
-        <Architecture m={m} />
-        <Courtyard m={m} />
-        <Roof m={m} />
-        <Specs m={m} />
-        <Contact m={m} />
+        {/* Post-hero content rides a stable evening surface so body copy keeps a
+            guaranteed contrast floor (the hero owns the full day→night sweep). */}
+        <div className="content-surface">
+          <Concept m={m} />
+          <Architecture m={m} />
+          <Courtyard m={m} />
+          <Roof m={m} />
+          <Specs m={m} />
+          <Contact m={m} />
+        </div>
       </main>
       <Footer locale={locale} m={m} />
     </>

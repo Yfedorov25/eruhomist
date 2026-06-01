@@ -78,9 +78,9 @@ export function Specs({ m }: { m: Messages }) {
               <div
                 key={key}
                 data-reveal
-                className="flex flex-col border-t border-[var(--fg-muted)]/20 pt-4"
+                className="flex flex-col border-t border-[var(--ink-muted)]/20 pt-4"
               >
-                <dt className="text-xs uppercase tracking-[0.2em] text-[var(--fg-muted)]">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
                   {item.label}
                 </dt>
                 <dd

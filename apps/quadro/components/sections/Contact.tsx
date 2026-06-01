@@ -20,7 +20,7 @@ export function Contact({ m }: { m: Messages }) {
         <h2 data-reveal className="font-display text-3xl leading-tight md:text-5xl">
           {richText(m.cta.h2)}
         </h2>
-        <p data-reveal className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--fg-muted)]">
+        <p data-reveal className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--ink-muted)]">
           {richText(m.cta.body)}
         </p>
 
@@ -55,7 +55,7 @@ export function Contact({ m }: { m: Messages }) {
         {developer.name && (
           <div
             data-reveal
-            className="mt-14 border-t border-[var(--fg-muted)]/15 pt-8 text-[var(--fg-muted)]"
+            className="mt-14 border-t border-[var(--ink-muted)]/15 pt-8 text-[var(--ink-muted)]"
           >
             <p className="text-sm uppercase tracking-[0.2em]">{developer.name}</p>
             {developer.blurb && <p className="mt-3 max-w-xl leading-relaxed">{developer.blurb}</p>}

@@ -30,7 +30,7 @@ export function ContactForm({ m }: { m: Messages }) {
   return (
     <form action={formAction} className="flex max-w-md flex-col gap-5">
       <label className="flex flex-col gap-2">
-        <span className="text-xs uppercase tracking-[0.2em] text-[var(--fg-muted)]">
+        <span className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
           {m.cta.form.name}
         </span>
         <input
@@ -39,12 +39,12 @@ export function ContactForm({ m }: { m: Messages }) {
           required
           maxLength={100}
           autoComplete="name"
-          className="border-b border-[var(--fg-muted)]/40 bg-transparent py-3 text-lg text-[var(--fg)] outline-none transition-colors focus:border-[var(--accent)]"
+          className="border-b border-[var(--ink-muted)]/40 bg-transparent py-3 text-lg text-[var(--ink)] outline-none transition-colors focus:border-[var(--accent)]"
         />
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className="text-xs uppercase tracking-[0.2em] text-[var(--fg-muted)]">
+        <span className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
           {m.cta.form.phone}
         </span>
         <input
@@ -54,12 +54,12 @@ export function ContactForm({ m }: { m: Messages }) {
           required
           maxLength={100}
           autoComplete="tel"
-          className="border-b border-[var(--fg-muted)]/40 bg-transparent py-3 text-lg text-[var(--fg)] outline-none transition-colors focus:border-[var(--accent)]"
+          className="border-b border-[var(--ink-muted)]/40 bg-transparent py-3 text-lg text-[var(--ink)] outline-none transition-colors focus:border-[var(--accent)]"
         />
       </label>
 
       {fieldError && (
-        <p className="text-sm text-[var(--fg-muted)]" role="alert">
+        <p className="text-sm text-[var(--ink-muted)]" role="alert">
           {state && !state.ok && state.error === "fill"
             ? m.cta.form.errorName
             : m.cta.form.errorPhone}
@@ -69,7 +69,7 @@ export function ContactForm({ m }: { m: Messages }) {
       {deliveryFailed && (
         // Honest fallback — never fakes success. Shows the real contact if supplied
         // (conversion.phone/telegram), otherwise a generic ask to try again.
-        <p className="text-sm text-[var(--fg-muted)]" role="alert">
+        <p className="text-sm text-[var(--ink-muted)]" role="alert">
           {conversion.phone || conversion.telegram
             ? `${m.cta.form.errorPhone} ${[conversion.phone, conversion.telegram].filter(Boolean).join(" · ")}`
             : m.cta.form.errorPhone}

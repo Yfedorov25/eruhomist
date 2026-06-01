@@ -16,25 +16,46 @@
   --bg-night: 10 14 22;      /* deep evening blue-black */
   --fg-night: 240 238 234;   /* warm white text on dark */
 
-  /* Interpolated by calc() using --scroll-progress (linear is fine for color). */
+  /* Background interpolates linearly across the full scroll (smooth day -> night). */
   --bg: rgb(
     calc(248 + (16 - 248) * var(--scroll-progress)),
     calc(245 + (20 - 245) * var(--scroll-progress)),
     calc(240 + (30 - 240) * var(--scroll-progress))
   );
+
+  /* Text must NOT cross the bg's mid-grey at the dusk midpoint (a contrast hole).
+     The bg sweeps the full light->dark range, so any mid-grey text token collides
+     with it somewhere. Fix: flip text near-instantly across a tiny band (0.49..0.52)
+     so text is always clearly dark-on-light OR clearly light-on-dark, never mid-grey.
+     Endpoints are pushed apart (dark 40 / light 205 muted) for a real contrast floor. */
+  --text-flip: clamp(0, calc((var(--scroll-progress) - 0.49) / 0.03), 1);
+
   --fg: rgb(
-    calc(26 + (240 - 26) * var(--scroll-progress)),
-    calc(24 + (238 - 24) * var(--scroll-progress)),
-    calc(22 + (234 - 22) * var(--scroll-progress))
+    calc(24 + (242 - 24) * var(--text-flip)),
+    calc(22 + (240 - 22) * var(--text-flip)),
+    calc(20 + (236 - 20) * var(--text-flip))
   );
+  /* muted = same flip, lower contrast at each end but still clearly off the bg. */
   --fg-muted: rgb(
-    calc(120 + (170 - 120) * var(--scroll-progress)),
-    calc(116 + (168 - 116) * var(--scroll-progress)),
-    calc(110 + (162 - 110) * var(--scroll-progress))
+    calc(70 + (200 - 70) * var(--text-flip)),
+    calc(66 + (196 - 66) * var(--text-flip)),
+    calc(60 + (190 - 60) * var(--text-flip))
   );
 
   --accent: #e0a96d;         /* warm window light ~2700K */
   --deep: #0a1018;           /* evening blue, deepest shadow */
+
+  /* Content surface + ink: the hero owns the full day->night sweep; the scrolling
+     content below reads on a STABLE evening surface so body text has a guaranteed
+     contrast floor (no dusk-crossover hole). Surface darkens slightly with scroll
+     for atmosphere but stays well below the light ink. */
+  --surface: rgb(
+    calc(20 + (10 - 20) * var(--scroll-progress)),
+    calc(24 + (14 - 24) * var(--scroll-progress)),
+    calc(34 + (22 - 34) * var(--scroll-progress))
+  );
+  --ink: #f1efea;            /* ~15:1 on --surface */
+  --ink-muted: rgb(186, 184, 178); /* ~7:1 on --surface */
 
   /* Readability scrim: a soft dark veil behind text-over-media. Strengthens toward
      night so display/body keep >=3:1 / >=4.5:1 contrast at the dusk crossover. */
@@ -59,6 +80,15 @@ body {
 
 .font-display {
   font-family: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+/* Stable evening surface for the scrolling content (post-hero). Guarantees body-copy
+   contrast independent of the page's day->night bg sweep. Text inside uses --ink. */
+.content-surface {
+  background: var(--surface);
+  color: var(--ink);
+  position: relative;
+  z-index: 1;
 }
 
 /* Text sitting over the hero/media: guaranteed contrast via a paint-behind scrim. */

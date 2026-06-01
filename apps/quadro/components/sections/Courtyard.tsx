@@ -37,7 +37,7 @@ export function Courtyard({ m }: { m: Messages }) {
           <h2 data-reveal className="font-display text-4xl leading-[1.1] md:text-6xl">
             {richText(m.courtyard.h2)}
           </h2>
-          <div className="mt-8 space-y-5 text-lg leading-relaxed text-[var(--fg-muted)] md:text-xl">
+          <div className="mt-8 space-y-5 text-lg leading-relaxed text-[var(--ink-muted)] md:text-xl">
             {paragraphs(m.courtyard.body).map((p, i) => (
               <p key={i} data-reveal>
                 {richText(p)}
