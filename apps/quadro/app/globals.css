@@ -91,6 +91,19 @@ body {
   z-index: 1;
 }
 
+/* Film grain over the hero canvas — replaces the GLSL grain shader (council verdict:
+   2D canvas + CSS overlay, no WebGL). SVG fractal-noise, low opacity, screen blend. */
+.hero-grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-grain { display: none; }
+}
+
 /* Text sitting over the hero/media: guaranteed contrast via a paint-behind scrim. */
 .over-media {
   position: relative;
