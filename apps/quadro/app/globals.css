@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/*
+  QUADRO HOUSE theme. The page travels from warm daylight (top) to deep evening
+  blue (bottom). --scroll-progress (0..1, set by SmoothScrollProvider) interpolates
+  the day and night ends of each token. Text-over-WebGL stays legible via --scrim
+  (a contrast floor) plus text colors that cross-fade on the same timeline.
+*/
+:root {
+  --scroll-progress: 0;
+
+  /* Day end */
+  --bg-day: 30 28 25;        /* warm near-white */
+  --fg-day: 24 22 20;        /* warm near-black text on light */
+  /* Night end */
+  --bg-night: 10 14 22;      /* deep evening blue-black */
+  --fg-night: 240 238 234;   /* warm white text on dark */
+
+  /* Interpolated by calc() using --scroll-progress (linear is fine for color). */
+  --bg: rgb(
+    calc(248 + (16 - 248) * var(--scroll-progress)),
+    calc(245 + (20 - 245) * var(--scroll-progress)),
+    calc(240 + (30 - 240) * var(--scroll-progress))
+  );
+  --fg: rgb(
+    calc(26 + (240 - 26) * var(--scroll-progress)),
+    calc(24 + (238 - 24) * var(--scroll-progress)),
+    calc(22 + (234 - 22) * var(--scroll-progress))
+  );
+  --fg-muted: rgb(
+    calc(120 + (170 - 120) * var(--scroll-progress)),
+    calc(116 + (168 - 116) * var(--scroll-progress)),
+    calc(110 + (162 - 110) * var(--scroll-progress))
+  );
+
+  --accent: #e0a96d;         /* warm window light ~2700K */
+  --deep: #0a1018;           /* evening blue, deepest shadow */
+
+  /* Readability scrim: a soft dark veil behind text-over-media. Strengthens toward
+     night so display/body keep >=3:1 / >=4.5:1 contrast at the dusk crossover. */
+  --scrim: rgba(8, 10, 16, calc(0.18 + 0.34 * var(--scroll-progress)));
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.2s linear;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+/* Text sitting over the hero/media: guaranteed contrast via a paint-behind scrim. */
+.over-media {
+  position: relative;
+}
+.over-media::before {
+  content: "";
+  position: absolute;
+  inset: -2rem -3rem;
+  background: radial-gradient(
+    120% 100% at 30% 50%,
+    var(--scrim) 0%,
+    transparent 75%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
+}

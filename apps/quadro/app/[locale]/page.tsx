@@ -1,0 +1,37 @@
+import { notFound } from "next/navigation";
+import { isLocale, getMessages } from "@/lib/i18n";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { Hero } from "@/components/sections/Hero";
+import { Concept } from "@/components/sections/Concept";
+import { Architecture } from "@/components/sections/Architecture";
+import { Courtyard } from "@/components/sections/Courtyard";
+import { Roof } from "@/components/sections/Roof";
+import { Specs } from "@/components/sections/Specs";
+import { Contact } from "@/components/sections/Contact";
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+  const m = getMessages(locale);
+
+  return (
+    <>
+      <Header locale={locale} m={m} />
+      <main>
+        <Hero m={m} />
+        <Concept m={m} />
+        <Architecture m={m} />
+        <Courtyard m={m} />
+        <Roof m={m} />
+        <Specs m={m} />
+        <Contact m={m} />
+      </main>
+      <Footer locale={locale} m={m} />
+    </>
+  );
+}

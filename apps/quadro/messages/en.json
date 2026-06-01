@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "",
+    "description": "",
+    "ogTitle": "",
+    "ogDescription": ""
+  },
+  "nav": {
+    "concept": "",
+    "architecture": "",
+    "courtyard": "",
+    "roof": "",
+    "specs": "",
+    "contact": "",
+    "cta": ""
+  },
+  "hero": {
+    "h1": "",
+    "sub": "",
+    "scrollHint": ""
+  },
+  "concept": {
+    "h2": "",
+    "body": ""
+  },
+  "architecture": {
+    "h2": "",
+    "body": ""
+  },
+  "courtyard": {
+    "h2": "",
+    "body": ""
+  },
+  "roof": {
+    "h2": "",
+    "body": "",
+    "cta": ""
+  },
+  "specs": {
+    "h2": "",
+    "items": {
+      "apartments": {
+        "label": "",
+        "value": ""
+      },
+      "totalArea": {
+        "label": "",
+        "value": ""
+      },
+      "plot": {
+        "label": "",
+        "value": ""
+      },
+      "yard": {
+        "label": "",
+        "value": ""
+      },
+      "parking": {
+        "label": "",
+        "value": ""
+      },
+      "shelter": {
+        "label": "",
+        "value": ""
+      },
+      "storage": {
+        "label": "",
+        "value": ""
+      },
+      "architect": {
+        "label": "",
+        "value": ""
+      },
+      "construction": {
+        "label": "",
+        "value": ""
+      },
+      "landscaping": {
+        "label": "",
+        "value": ""
+      }
+    }
+  },
+  "cta": {
+    "h2": "",
+    "body": "",
+    "form": {
+      "name": "",
+      "phone": "",
+      "submit": "",
+      "success": "",
+      "errorName": "",
+      "errorPhone": ""
+    }
+  },
+  "footer": {
+    "location": "",
+    "rights": "",
+    "langSwitch": ""
+  },
+  "a11y": {
+    "heroVideoAlt": "",
+    "muteToggle": "",
+    "menuOpen": "",
+    "menuClose": ""
+  }
+}
