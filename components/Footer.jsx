@@ -1,4 +1,5 @@
 import data from "@/content/eruhomist-data.json";
+import Logo from "@/components/Logo";
 
 /*
   Footer — лого, телефон, Instagram, copyright. Дані з JSON.
@@ -10,9 +11,7 @@ export default function Footer() {
   return (
     <footer style={S.footer}>
       <div style={S.row}>
-        <a href="#" style={S.logo}>
-          Є<span style={{ color: "var(--accent)" }}>·</span>рухомість
-        </a>
+        <Logo size={24} />
         <div style={S.links}>
           <a href={`tel:${C.phone.replace(/\s/g, "")}`} style={S.link}>
             {C.phone}
@@ -52,17 +51,11 @@ const S = {
     alignItems: "center",
     gap: 24,
     paddingBottom: 36,
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-  },
-  logo: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontSize: 24,
-    color: "#fff",
-    textDecoration: "none",
+    borderBottom: "1px solid var(--hairline)",
   },
   links: { display: "flex", flexWrap: "wrap", gap: "clamp(16px, 3vw, 40px)", alignItems: "center" },
-  link: { fontSize: 15, color: "rgba(255,255,255,0.85)", textDecoration: "none" },
-  muted: { fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" },
+  link: { fontSize: 15, color: "var(--text-2)", textDecoration: "none" },
+  muted: { fontSize: 13, color: "var(--text-4)", letterSpacing: "0.04em" },
   bottom: {
     display: "flex",
     flexWrap: "wrap",

@@ -5,6 +5,7 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import data from "@/content/eruhomist-data.json";
+import SectionHeader from "@/components/SectionHeader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,19 +57,13 @@ export default function Catalog() {
   }, []);
 
   return (
-    <section ref={rootRef} id="catalog" style={S.section} aria-label="Об'єкти">
-      <header style={S.head}>
-        <p data-reveal style={S.kicker}>
-          Каталог
-        </p>
-        <h2 data-reveal style={S.title}>
-          Об'єкти, які варто <b style={S.titleAccent}>розглянути</b>
-        </h2>
-        <p data-reveal style={S.sub}>
-          Добірка під різні цілі — для життя, оренди та інвестицій. Підберемо й те,
-          чого тут немає.
-        </p>
-      </header>
+    <section ref={rootRef} id="catalog" className="section-shell" aria-label="Об'єкти">
+      <SectionHeader
+        kicker="Каталог"
+        title={<>Об'єкти, які варто <b>розглянути</b></>}
+        sub="Добірка під різні цілі — для життя, оренди та інвестицій. Підберемо й те, чого тут немає."
+      />
+
 
       <div className="cat-grid">
         {OBJECTS.map((o) => (
@@ -121,36 +116,6 @@ export default function Catalog() {
 }
 
 const S = {
-  section: {
-    background: "var(--bg)",
-    color: "var(--text)",
-    padding: "clamp(72px, 12vh, 160px) clamp(24px, 8vw, 140px)",
-  },
-  head: { maxWidth: 640, marginBottom: "clamp(40px, 6vh, 72px)" },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.4em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
-    margin: "0 0 20px",
-  },
-  title: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 300,
-    fontSize: "clamp(34px, 4.4vw, 64px)",
-    lineHeight: 1.05,
-    letterSpacing: "-0.015em",
-    margin: 0,
-  },
-  titleAccent: { fontWeight: 600, color: "var(--accent)" },
-  sub: {
-    marginTop: 22,
-    fontSize: "clamp(15px, 1.3vw, 18px)",
-    fontWeight: 300,
-    lineHeight: 1.6,
-    color: "rgba(255,255,255,0.7)",
-    maxWidth: 460,
-  },
   badge: {
     position: "absolute",
     top: 14,
@@ -158,19 +123,19 @@ const S = {
     letterSpacing: "0.08em",
     textTransform: "uppercase",
     padding: "6px 12px",
-    borderRadius: 2,
+    borderRadius: "var(--r-sharp)",
     backdropFilter: "blur(8px)",
   },
   badgeType: {
     left: 14,
-    background: "rgba(10,12,15,0.6)",
-    color: "rgba(255,255,255,0.92)",
+    background: "var(--surface-glass)",
+    color: "var(--text-1)",
     border: "1px solid rgba(255,255,255,0.18)",
   },
   badgeStatus: {
     right: 14,
-    background: "rgba(232,163,92,0.92)",
-    color: "#0a0c0f",
+    background: "var(--accent-strong)",
+    color: "var(--obsidian)",
     fontWeight: 600,
   },
   cardBody: { padding: "22px 22px 26px" },

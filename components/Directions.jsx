@@ -124,7 +124,7 @@ const S = {
   section: { background: "var(--bg)", color: "var(--text)", width: "100%" },
   divider: {
     height: 1,
-    background: "rgba(255,255,255,0.08)",
+    background: "var(--hairline)",
     margin: "0 clamp(24px, 8vw, 140px)",
   },
   block: {
@@ -182,7 +182,7 @@ const S = {
     textDecoration: "none",
     width: "fit-content",
     paddingBottom: 6,
-    borderBottom: "1px solid rgba(232,163,92,0.4)",
+    borderBottom: "1px solid var(--accent-line)",
   },
   arrow: { color: "var(--accent)" },
   mediaWrap: {
@@ -195,6 +195,6 @@ const S = {
     inset: 0,
     overflow: "hidden",
     borderRadius: 2,
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid var(--hairline)",
   },
 };

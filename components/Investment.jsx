@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import data from "@/content/eruhomist-data.json";
+import SectionHeader from "@/components/SectionHeader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,24 +63,23 @@ export default function Investment() {
   }, []);
 
   return (
-    <section ref={rootRef} id="investment" style={S.section} aria-label="Інвестиції">
-      <header style={S.head}>
-        <p data-reveal style={S.kicker}>
-          Інвестиції та девелопмент
-        </p>
-        <h2 data-reveal style={S.title}>
-          Капітал, що <b style={S.accent}>працює</b>
-        </h2>
-        <p data-reveal style={S.sub}>
-          Підбираємо об'єкти з інвестиційною логікою: ліквідність, таймінг входу й
-          реальний потенціал зростання — а не обіцянки.
-        </p>
-      </header>
+    <section
+      ref={rootRef}
+      id="investment"
+      className="section-shell section-shell--bordered"
+      aria-label="Інвестиції"
+    >
+      <SectionHeader
+        kicker="Інвестиції та девелопмент"
+        title={<>Капітал, що <b>працює</b></>}
+        sub="Підбираємо об'єкти з інвестиційною логікою: ліквідність, таймінг входу й реальний потенціал зростання — а не обіцянки."
+        maxWidth={660}
+      />
 
       <div className="inv-metrics" style={S.metrics}>
         {METRICS.map((m) => (
           <div key={m.label} className="inv-metric" style={S.metric}>
-            <div style={S.metricValue}>{m.value}</div>
+            <div className="tnum" style={S.metricValue}>{m.value}</div>
             <div style={S.metricLabel}>{m.label}</div>
           </div>
         ))}
@@ -119,43 +119,12 @@ export default function Investment() {
 }
 
 const S = {
-  section: {
-    background: "var(--bg)",
-    color: "var(--text)",
-    padding: "clamp(72px, 12vh, 160px) clamp(24px, 8vw, 140px)",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
-  },
-  head: { maxWidth: 660, marginBottom: "clamp(44px, 7vh, 84px)" },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.4em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
-    margin: "0 0 20px",
-  },
-  title: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 300,
-    fontSize: "clamp(38px, 5.2vw, 80px)",
-    lineHeight: 1.02,
-    letterSpacing: "-0.02em",
-    margin: 0,
-  },
-  accent: { fontWeight: 600, color: "var(--accent)" },
-  sub: {
-    marginTop: 24,
-    fontSize: "clamp(15px, 1.3vw, 18px)",
-    fontWeight: 300,
-    lineHeight: 1.65,
-    color: "rgba(255,255,255,0.7)",
-    maxWidth: 520,
-  },
   metrics: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
     gap: "clamp(20px, 3vw, 48px)",
     paddingBottom: "clamp(44px, 7vh, 84px)",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    borderBottom: "1px solid var(--hairline)",
   },
   metric: {},
   metricValue: {
@@ -170,7 +139,7 @@ const S = {
     marginTop: 14,
     fontSize: 13,
     letterSpacing: "0.06em",
-    color: "rgba(255,255,255,0.6)",
+    color: "var(--text-3)",
   },
   lower: {
     display: "grid",

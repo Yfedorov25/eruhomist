@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import data from "@/content/eruhomist-data.json";
+import SectionHeader from "@/components/SectionHeader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,15 +57,14 @@ export default function Cases() {
   }, []);
 
   return (
-    <section ref={rootRef} id="cases" style={S.section} aria-label="Результати">
-      <header style={S.head}>
-        <p data-reveal style={S.kicker}>
-          Результати
-        </p>
-        <h2 data-reveal style={S.title}>
-          Цифри, які <b style={S.accent}>говорять</b>
-        </h2>
-      </header>
+    <section
+      ref={rootRef}
+      id="cases"
+      className="section-shell section-shell--bordered"
+      aria-label="Результати"
+    >
+      <SectionHeader kicker="Результати" title={<>Цифри, які <b>говорять</b></>} />
+
 
       <div style={S.list}>
         {CASES.map((c, i) => (
@@ -96,29 +96,6 @@ export default function Cases() {
 }
 
 const S = {
-  section: {
-    background: "var(--bg)",
-    color: "var(--text)",
-    padding: "clamp(72px, 12vh, 160px) clamp(24px, 8vw, 140px)",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
-  },
-  head: { maxWidth: 640, marginBottom: "clamp(40px, 6vh, 72px)" },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.4em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
-    margin: "0 0 20px",
-  },
-  title: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 300,
-    fontSize: "clamp(34px, 4.6vw, 68px)",
-    lineHeight: 1.05,
-    letterSpacing: "-0.02em",
-    margin: 0,
-  },
-  accent: { fontWeight: 600, color: "var(--accent)" },
   list: {},
   row: {
     display: "grid",
@@ -126,7 +103,7 @@ const S = {
     gap: "clamp(24px, 5vw, 80px)",
     alignItems: "center",
     padding: "clamp(36px, 5vh, 56px) 0",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid var(--hairline)",
   },
   metric: {
     fontFamily: "var(--font-display), Georgia, serif",
@@ -135,6 +112,7 @@ const S = {
     lineHeight: 0.95,
     color: "var(--accent)",
     letterSpacing: "-0.02em",
+    fontVariantNumeric: "tabular-nums",
   },
   content: { maxWidth: 560 },
   caseTitle: {

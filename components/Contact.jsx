@@ -64,17 +64,23 @@ export default function Contact() {
   }
 
   return (
-    <section ref={rootRef} id="contact" style={S.section} aria-label="Контакт">
+    <section
+      ref={rootRef}
+      id="contact"
+      className="section-shell section-shell--bordered"
+      aria-label="Контакт"
+      style={{ paddingTop: "clamp(80px, 14vh, 180px)", paddingBottom: "clamp(80px, 14vh, 180px)" }}
+    >
       <div className="contact-grid" style={S.grid}>
         {/* ліворуч — заклик + контакти */}
         <div style={S.left}>
-          <p data-reveal style={S.kicker}>
+          <p className="kicker" data-reveal>
             Контакт
           </p>
-          <h2 data-reveal style={S.title}>
-            Знайдемо те, що працює <b style={S.accent}>саме для вас</b>
+          <h2 className="headline" data-reveal>
+            Знайдемо те, що працює <b>саме для вас</b>
           </h2>
-          <p data-reveal style={S.sub}>
+          <p className="subhead" data-reveal style={{ maxWidth: "none" }}>
             Напишіть або зателефонуйте — підберемо рішення під ваші цілі: для
             життя, оренди чи інвестицій.
           </p>
@@ -99,13 +105,14 @@ export default function Contact() {
         <form data-reveal style={S.form} onSubmit={handleSubmit}>
           <label style={S.label}>
             Ім'я
-            <input name="name" required style={S.input} autoComplete="name" />
+            <input name="name" required className="field" style={S.input} autoComplete="name" />
           </label>
           <label style={S.label}>
             Телефон або контакт
             <input
               name="contact"
               required
+              className="field"
               style={S.input}
               placeholder="+380 / @нік"
             />
@@ -115,11 +122,12 @@ export default function Contact() {
             <textarea
               name="message"
               rows={4}
+              className="field"
               style={{ ...S.input, resize: "vertical" }}
               placeholder="Що шукаєте?"
             />
           </label>
-          <button type="submit" style={S.submit}>
+          <button type="submit" className="field" style={S.submit}>
             {sent ? "Дякуємо! Відкриваємо пошту…" : "Надіслати заявку"}
           </button>
           <p style={S.note}>
@@ -132,12 +140,6 @@ export default function Contact() {
 }
 
 const S = {
-  section: {
-    background: "var(--bg)",
-    color: "var(--text)",
-    padding: "clamp(80px, 14vh, 180px) clamp(24px, 8vw, 140px)",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
-  },
   grid: {
     display: "grid",
     gridTemplateColumns: "1.1fr 0.9fr",
@@ -145,41 +147,18 @@ const S = {
     alignItems: "start",
   },
   left: { maxWidth: 520 },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.4em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
-    margin: "0 0 20px",
-  },
-  title: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 300,
-    fontSize: "clamp(34px, 4.6vw, 68px)",
-    lineHeight: 1.05,
-    letterSpacing: "-0.02em",
-    margin: 0,
-  },
-  accent: { fontWeight: 600, color: "var(--accent)" },
-  sub: {
-    marginTop: 24,
-    fontSize: "clamp(15px, 1.3vw, 18px)",
-    fontWeight: 300,
-    lineHeight: 1.65,
-    color: "rgba(255,255,255,0.7)",
-  },
   contacts: { marginTop: 40, display: "flex", flexDirection: "column", gap: 16 },
   contactLink: {
     fontFamily: "var(--font-display), Georgia, serif",
     fontSize: "clamp(22px, 2.2vw, 32px)",
     fontWeight: 300,
-    color: "#fff",
+    color: "var(--text-1)",
     textDecoration: "none",
     width: "fit-content",
-    borderBottom: "1px solid rgba(232,163,92,0.4)",
+    borderBottom: "1px solid var(--accent-line)",
     paddingBottom: 4,
   },
-  city: { fontSize: 14, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" },
+  city: { fontSize: 14, letterSpacing: "0.1em", color: "var(--text-4)" },
   form: { display: "flex", flexDirection: "column", gap: 20 },
   label: {
     display: "flex",
@@ -188,24 +167,23 @@ const S = {
     fontSize: 12,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
+    color: "var(--text-4)",
   },
   input: {
     background: "rgba(255,255,255,0.03)",
     border: "1px solid rgba(255,255,255,0.14)",
-    borderRadius: 2,
+    borderRadius: "var(--r-sharp)",
     padding: "14px 16px",
-    color: "#fff",
+    color: "var(--text-1)",
     fontSize: 16,
     fontFamily: "inherit",
-    outline: "none",
   },
   submit: {
     marginTop: 8,
     background: "var(--accent)",
-    color: "#0a0c0f",
+    color: "var(--obsidian)",
     border: "none",
-    borderRadius: 2,
+    borderRadius: "var(--r-sharp)",
     padding: "17px 28px",
     fontSize: 13,
     letterSpacing: "0.16em",
@@ -213,5 +191,5 @@ const S = {
     fontWeight: 600,
     cursor: "pointer",
   },
-  note: { margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 },
+  note: { margin: 0, fontSize: 12, color: "var(--text-4)", lineHeight: 1.5 },
 };

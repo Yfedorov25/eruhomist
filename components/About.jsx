@@ -57,14 +57,19 @@ export default function About() {
   }, []);
 
   return (
-    <section ref={rootRef} id="about" style={S.section} aria-label="Про нас">
+    <section
+      ref={rootRef}
+      id="about"
+      className="section-shell section-shell--bordered"
+      aria-label="Про нас"
+    >
       <div className="about-top" style={S.top}>
         <div style={S.manifestCol}>
-          <p data-reveal style={S.kicker}>
+          <p className="kicker" data-reveal>
             Про нас
           </p>
-          <h2 data-reveal style={S.title}>
-            Про людей, ідеї та <b style={S.accent}>масштабні можливості</b>
+          <h2 className="headline" data-reveal>
+            Про людей, ідеї та <b>масштабні можливості</b>
           </h2>
           <p data-reveal style={S.manifest}>
             Єрухомість — це шлях від перших кроків в оренді до девелоперських
@@ -107,12 +112,6 @@ export default function About() {
 }
 
 const S = {
-  section: {
-    background: "var(--bg)",
-    color: "var(--text)",
-    padding: "clamp(72px, 12vh, 160px) clamp(24px, 8vw, 140px)",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
-  },
   top: {
     display: "grid",
     gridTemplateColumns: "1.2fr 0.9fr",
@@ -121,35 +120,19 @@ const S = {
     marginBottom: "clamp(56px, 9vh, 120px)",
   },
   manifestCol: { maxWidth: 560 },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.4em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.55)",
-    margin: "0 0 20px",
-  },
-  title: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontWeight: 300,
-    fontSize: "clamp(32px, 4vw, 58px)",
-    lineHeight: 1.08,
-    letterSpacing: "-0.015em",
-    margin: 0,
-  },
-  accent: { fontWeight: 600, color: "var(--accent)" },
   manifest: {
     marginTop: 24,
     fontSize: "clamp(15px, 1.3vw, 18px)",
     fontWeight: 300,
     lineHeight: 1.7,
-    color: "rgba(255,255,255,0.7)",
+    color: "var(--text-3)",
   },
   values: { display: "flex", flexWrap: "wrap", gap: 10, marginTop: 32 },
   value: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.75)",
+    color: "var(--text-2)",
     border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: 999,
+    borderRadius: "var(--r-pill)",
     padding: "8px 16px",
   },
   photoWrap: { position: "relative", width: "100%", height: "min(56vh, 520px)" },

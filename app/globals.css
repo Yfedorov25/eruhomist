@@ -1,8 +1,87 @@
 :root {
-  --bg: #0a0c0f;
-  --accent: #e8a35c;
-  --text: #ffffff;
-  --text-dim: rgba(255, 255, 255, 0.75);
+  /* ── Core palette (brand-named) ───────────────────────────── */
+  --obsidian: #0a0c0f; /* near-black background, slightly cool */
+  --lamp-glow: #e8a35c; /* warm gold — the lamp light from the hero frames */
+  --linen: #ffffff; /* primary text */
+
+  /* Back-compat aliases (existing components still read these) */
+  --bg: var(--obsidian);
+  --accent: var(--lamp-glow);
+  --text: var(--linen);
+
+  /* ── Text emphasis scale (4 steps, not 9 random alphas) ───── */
+  --text-1: rgba(255, 255, 255, 1); /* headlines / primary */
+  --text-2: rgba(255, 255, 255, 0.85); /* strong body / links */
+  --text-3: rgba(255, 255, 255, 0.7); /* body / descriptions */
+  --text-4: rgba(255, 255, 255, 0.5); /* captions / muted */
+  --text-dim: var(--text-3); /* legacy alias */
+
+  /* ── Accent variants ──────────────────────────────────────── */
+  --accent-line: rgba(232, 163, 92, 0.4); /* hairline / underline */
+  --accent-strong: rgba(232, 163, 92, 0.92); /* filled badges */
+
+  /* ── Hairlines & surfaces ─────────────────────────────────── */
+  --hairline: rgba(255, 255, 255, 0.08); /* dividers, card borders */
+  --hairline-soft: rgba(255, 255, 255, 0.06); /* section tops */
+  --surface-1: rgba(255, 255, 255, 0.015); /* faint raised card */
+  --surface-glass: rgba(10, 12, 15, 0.6); /* badge over photo */
+
+  /* ── Spacing rhythm ───────────────────────────────────────── */
+  --space-section-y: clamp(72px, 12vh, 160px);
+  --space-section-x: clamp(24px, 8vw, 140px);
+
+  /* ── Radii ────────────────────────────────────────────────── */
+  --r-sharp: 2px;
+  --r-card: 3px;
+  --r-pill: 999px;
+
+  /* ── Type scale ───────────────────────────────────────────── */
+  --text-kicker: 12px;
+  --ls-kicker: 0.4em;
+  --text-h2: clamp(34px, 4.6vw, 64px);
+  --text-sub: clamp(15px, 1.3vw, 18px);
+}
+
+/* ── Section primitives (replace per-component S objects) ───── */
+.section-shell {
+  background: var(--obsidian);
+  color: var(--text-1);
+  padding: var(--space-section-y) var(--space-section-x);
+}
+.section-shell--bordered {
+  border-top: 1px solid var(--hairline-soft);
+}
+.kicker {
+  font-size: var(--text-kicker);
+  letter-spacing: var(--ls-kicker);
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin: 0 0 20px;
+}
+.headline {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 300;
+  font-size: var(--text-h2);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.headline b {
+  font-weight: 600;
+  color: var(--lamp-glow);
+}
+.subhead {
+  margin-top: 22px;
+  font-size: var(--text-sub);
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--text-3);
+  max-width: 460px;
+}
+/* tabular figures for metric/number readouts */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 * {
@@ -68,7 +147,9 @@ a {
   transform: scale(1.06);
 }
 
-/* ---- Investment: stack the two lower columns on mobile ---- */
+/* ---- Investment: larger hero headline + metrics row spacing ---- */
+#investment .headline { font-size: clamp(38px, 5.2vw, 80px); line-height: 1.02; letter-spacing: -0.02em; }
+#investment > header { margin-bottom: clamp(44px, 7vh, 84px); }
 @media (max-width: 760px) {
   .inv-lower { grid-template-columns: 1fr !important; }
 }
@@ -78,6 +159,8 @@ a {
   .case-row { grid-template-columns: 1fr !important; gap: 14px !important; }
 }
 
+/* ---- About: slightly smaller headline + tabular years ---- */
+#about .headline { font-size: clamp(32px, 4vw, 58px); line-height: 1.08; }
 /* ---- About: stack manifest/photo, collapse timeline ---- */
 @media (max-width: 860px) {
   .about-top { grid-template-columns: 1fr !important; }
@@ -87,6 +170,12 @@ a {
   .tl { grid-template-columns: 1fr !important; }
 }
 
+/* ---- Contact: visible keyboard focus (a11y, WCAG 2.4.7) ---- */
+.field:focus-visible {
+  outline: 2px solid var(--lamp-glow);
+  outline-offset: 2px;
+}
+.field:focus { border-color: var(--lamp-glow); }
 /* ---- Contact: stack form below text on mobile ---- */
 @media (max-width: 820px) {
   .contact-grid { grid-template-columns: 1fr !important; }

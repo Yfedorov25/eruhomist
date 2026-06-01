@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import data from "@/content/eruhomist-data.json";
+import Logo from "@/components/Logo";
 
 /*
   Header — sticky. Прозорий на hero, фон #0a0c0f при скролі.
@@ -38,9 +39,7 @@ export default function Header() {
         backdropFilter: scrolled ? "blur(10px)" : "none",
       }}
     >
-      <a href="#" style={S.logo}>
-        Є<span style={{ color: "var(--accent)" }}>·</span>рухомість
-      </a>
+      <Logo size={22} />
 
       <nav className="hdr-nav" style={S.nav}>
         {NAV.map((n) => (
@@ -99,14 +98,6 @@ const S = {
     justifyContent: "space-between",
     padding: "18px clamp(24px, 8vw, 140px)",
     transition: "background 0.4s ease, border-color 0.4s ease",
-  },
-  logo: {
-    fontFamily: "var(--font-display), Georgia, serif",
-    fontSize: 22,
-    fontWeight: 400,
-    letterSpacing: "0.02em",
-    color: "#fff",
-    textDecoration: "none",
   },
   nav: { display: "flex", gap: "clamp(18px, 2.4vw, 40px)" },
   link: {
