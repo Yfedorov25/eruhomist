@@ -3,69 +3,127 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { richText, paragraphs } from "@/lib/format";
 import type { Messages } from "@/lib/i18n";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// S3 — Architecture (R11 sticky window-reveal). Pinned section: a "window" mask opens
-// from a small rectangle to the full frame as you scroll, like a camera moving in
-// through an opening — the second, deeper echo of the hero. Paired with a slow scale
-// "push-in" for depth. reduced-motion -> full frame, no pin.
+// S3 — Architecture (R11 sticky window-reveal). Pinned: a "window" mask opens from a
+// small rectangle to the full frame as you scroll, camera pushing in. As the window
+// opens, the DAY render cross-fades to the lit NIGHT building and a warm glow ramps up
+// over the windows — literally "увечері світло вмикається зсередини" (the H2). The H2
+// reveals in sync with the opening. reduced-motion -> full lit frame, no pin/anim.
 export function Architecture({ m }: { m: Messages }) {
   const wrap = useRef<HTMLDivElement | null>(null);
   const maskRef = useRef<HTMLDivElement | null>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
+  const dayRef = useRef<HTMLImageElement | null>(null);
+  const nightRef = useRef<HTMLImageElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
+  const h2Ref = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
     const el = wrap.current;
     const mask = maskRef.current;
-    const img = imgRef.current;
-    if (!el || !mask || !img) return;
+    const day = dayRef.current;
+    const night = nightRef.current;
+    const glow = glowRef.current;
+    const h2 = h2Ref.current;
+    if (!el || !mask || !day || !night || !glow || !h2) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       gsap.set(mask, { clipPath: "inset(0% 0% 0% 0% round 0px)" });
-      gsap.set(img, { scale: 1 });
+      gsap.set([day, night], { scale: 1 });
+      gsap.set(night, { opacity: 1 });
+      gsap.set(glow, { opacity: 0.5 });
       return;
     }
 
     const ctx = gsap.context(() => {
+      let split: SplitText | null = null;
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: "+=130%",
+          end: "+=160%",
           pin: true,
           scrub: 1,
+          onLeaveBack: () => h2 && gsap.set(h2, { clearProps: "" }),
         },
       });
+
+      // window opens + camera push-in
       tl.fromTo(
         mask,
-        { clipPath: "inset(34% 40% 34% 40% round 10px)" },
+        { clipPath: "inset(36% 41% 36% 41% round 12px)" },
         { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none" },
-      ).fromTo(img, { scale: 1.45 }, { scale: 1.06, ease: "none" }, "<"); // camera push-in
+        0,
+      )
+        .fromTo([day, night], { scale: 1.5 }, { scale: 1.06, ease: "none" }, 0)
+        // day -> night as the window opens: the building lights up from inside
+        .fromTo(night, { opacity: 0 }, { opacity: 1, ease: "none" }, 0.15)
+        // warm window-glow ramps in slightly AFTER the night fade, so the lights read
+        // as "turning on" (an event), not a co-timed dissolve
+        .fromTo(glow, { opacity: 0 }, { opacity: 0.6, ease: "power1.in" }, 0.45);
+
+      // H2 reveal synced to the opening (split into lines, rises in)
+      split = new SplitText(h2, { type: "lines", linesClass: "overflow-hidden py-[0.06em]" });
+      tl.from(
+        split.lines,
+        { yPercent: 110, opacity: 0, duration: 0.4, ease: "power3.out", stagger: 0.12 },
+        0.25,
+      );
+
+      return () => split?.revert();
     }, el);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="architecture" ref={wrap} className="relative h-screen w-full overflow-hidden">
+    <section
+      id="architecture"
+      ref={wrap}
+      className="relative h-screen w-full overflow-hidden bg-[#06080e]"
+    >
       <div ref={maskRef} className="absolute inset-0">
         {/* eslint-disable @next/next/no-img-element */}
         <img
-          ref={imgRef}
-          src="/renders/render_06.jpg"
-          alt="Архітектура QUADRO HOUSE"
+          ref={dayRef}
+          src="/renders/render_05.jpg"
+          alt="Архітектура QUADRO HOUSE удень"
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "center 38%" }}
+        />
+        <img
+          ref={nightRef}
+          src="/renders/render_N_02.jpg"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover opacity-0"
+          style={{ objectPosition: "center 38%" }}
         />
         {/* eslint-enable @next/next/no-img-element */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(6,8,14,0.78)] via-transparent to-transparent" />
+        {/* warm window-glow over the night building's window bands (mirrors the hero glow) */}
+        <div
+          ref={glowRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0"
+          style={{
+            mixBlendMode: "screen",
+            background:
+              "radial-gradient(38% 14% at 38% 44%, rgba(224,169,109,0.55) 0%, transparent 70%)," +
+              "radial-gradient(38% 14% at 64% 44%, rgba(224,169,109,0.5) 0%, transparent 70%)," +
+              "radial-gradient(48% 11% at 50% 60%, rgba(224,169,109,0.34) 0%, transparent 75%)",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(6,8,14,0.8)] via-transparent to-transparent" />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-20 md:px-12 md:pb-28">
         <div className="mx-auto max-w-4xl">
           <h2
+            ref={h2Ref}
             className="font-display text-4xl leading-tight text-[#f0eeea] md:text-6xl"
             style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}
           >
