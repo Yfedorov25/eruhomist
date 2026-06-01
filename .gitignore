@@ -1,8 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Monorepo: patterns are NOT root-anchored so they match inside apps/*/ too.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -11,14 +12,12 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
+# next.js / build output
+.next/
+out/
+build/
 
 # misc
 .DS_Store
@@ -30,7 +29,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (secrets) — keep the example template
 .env*
 !.env.local.example
 
@@ -41,15 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# playwright-mcp working artifacts
-/.playwright-mcp/
-hero-verify.png
-
-# original hero source archive (kept local)
+# original hero source archive (kept local, too large for git)
 eruhomist-hero-package.zip
 _hero_unpacked/
 scaffold-tmp/
-.gstack/
 
-# gstack working artifacts
-/.gstack/
+# playwright-mcp / gstack working artifacts
+.playwright-mcp/
+hero-verify.png
+.gstack/
