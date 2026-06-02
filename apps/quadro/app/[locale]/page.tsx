@@ -6,7 +6,6 @@ import { Hero } from "@/components/sections/Hero";
 import { Concept } from "@/components/sections/Concept";
 import { Architecture } from "@/components/sections/Architecture";
 import { Courtyard } from "@/components/sections/Courtyard";
-import { Rules } from "@/components/sections/Rules";
 import { Roof } from "@/components/sections/Roof";
 import { DistrictMap } from "@/components/sections/DistrictMap";
 import { Specs } from "@/components/sections/Specs";
@@ -32,7 +31,6 @@ export default async function HomePage({
           <Concept m={m} />
           <Architecture m={m} />
           <Courtyard m={m} />
-          <Rules m={m} />
           <Roof m={m} />
           <DistrictMap m={m} />
           <Specs m={m} />
