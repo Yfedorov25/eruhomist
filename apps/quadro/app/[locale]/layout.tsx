@@ -18,7 +18,13 @@ export async function generateMetadata({
   return {
     title: m.title,
     description: m.description,
-    openGraph: { title: m.ogTitle, description: m.ogDescription },
+    // The root-level opengraph-image file is not auto-merged once a segment supplies its
+    // own openGraph object, so reference it explicitly (resolved absolute via metadataBase).
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      images: ["/opengraph-image.jpg"],
+    },
   };
 }
 
