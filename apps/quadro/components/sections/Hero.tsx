@@ -56,12 +56,18 @@ export function Hero({ m }: { m: Messages }) {
     };
 
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Cap DPR at 1.5: the source frames are 1920×1080, so a 2× backing store just upscales
+      // (no detail gained) at ~1.8× the per-frame draw cost. 1.5 is sharp enough and much
+      // cheaper to redraw every scroll frame.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas!.width = window.innerWidth * dpr;
       canvas!.height = window.innerHeight * dpr;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // "low" smoothing: on a moving frame-scrub the quality difference is invisible, but
+      // "high" resampling of a 1080p image into a DPR-scaled canvas every frame was the main
+      // per-draw cost behind the scroll hitches. Cheap draw = smooth scrub.
       ctx!.imageSmoothingEnabled = true;
-      ctx!.imageSmoothingQuality = "high";
+      ctx!.imageSmoothingQuality = "low";
       lastDrawn = -1;
       drawFrame(stateRef.current.current);
     }
@@ -149,19 +155,31 @@ export function Hero({ m }: { m: Messages }) {
     }
 
     let windowTick = 0;
+    let aberration = 0;
     function tick() {
       const s = stateRef.current;
+      const moving = Math.abs(s.target - s.current) >= 0.01;
+      // Idle fast-path: when the scrub is settled AND the aberration has decayed to ~0, do
+      // NOTHING but keep the rAF alive. Previously this loop redrew + WROTE a CSS var every
+      // frame forever — even while scrolling content sections far below the hero — forcing a
+      // page-wide style recalc 60×/s that competed with the rest of the page's scroll.
+      if (!moving && aberration <= 0.001) {
+        s.raf = requestAnimationFrame(tick);
+        return;
+      }
       // Tight follow (was 0.12 — too floaty on a frame-scrub: it double-eased on top of
       // ScrollTrigger's own scrub and trailed ~23 frames / 400ms behind a flick, reading
       // as "the picture keeps moving after I stop"). 0.4 stays buttery but feels locked to
       // the wheel, and keeps the displayed frame within the decode window below.
       s.current += (s.target - s.current) * 0.4;
-      if (Math.abs(s.target - s.current) < 0.01) s.current = s.target;
+      if (!moving) s.current = s.target;
       drawFrame(s.current);
       if (++windowTick % 6 === 0) updateWindow();
       // decay the chromatic-aberration var toward 0 when scrolling settles
-      const cur = parseFloat(wrap!.style.getPropertyValue("--hero-aberration") || "0");
-      if (cur > 0.001) wrap!.style.setProperty("--hero-aberration", (cur * 0.9).toFixed(3));
+      if (aberration > 0.001) {
+        aberration *= 0.9;
+        wrap!.style.setProperty("--hero-aberration", aberration.toFixed(3));
+      }
       s.raf = requestAnimationFrame(tick);
     }
 
@@ -180,6 +198,7 @@ export function Hero({ m }: { m: Messages }) {
           const el = wrap!;
           el.style.setProperty("--hero-night", self.progress.toFixed(3));
           const v = Math.min(1, Math.abs(self.getVelocity()) / 2500);
+          aberration = v; // seed the decay var the tick loop reads (and writes the CSS var)
           el.style.setProperty("--hero-aberration", v.toFixed(3));
         },
       });
