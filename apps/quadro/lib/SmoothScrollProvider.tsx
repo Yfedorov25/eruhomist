@@ -34,15 +34,18 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     }
 
     // Drive a global 0..1 scroll-progress CSS var on :root for the day->night theme.
-    // Throttle to ~2-decimal steps: a :root var change invalidates style for every
-    // element referencing it, so updating only on a perceptible delta (0.01) keeps the
-    // theme smooth while cutting full-document style recalcs on throttled CPUs.
+    // A :root var change invalidates style for EVERY element referencing it → a full-document
+    // "Recalculate style". A clean perf trace showed that recalc was the #1 scroll cost (571ms,
+    // 22%) at a 0.01 step (~100 full recalcs per page). The day→night background tint is a slow,
+    // smooth sweep — the eye can't tell 100 steps from 25 — so step at 0.04 (≈25 recalcs over
+    // the whole page) for a ~4× cut in style-recalc work with no visible difference.
+    const STEP = 0.04;
     let lastProgress = -1;
     const progressTrigger = ScrollTrigger.create({
       start: 0,
       end: "max",
       onUpdate: (self) => {
-        const p = Math.round(self.progress * 100) / 100;
+        const p = Math.round(self.progress / STEP) * STEP;
         if (p === lastProgress) return;
         lastProgress = p;
         document.documentElement.style.setProperty("--scroll-progress", String(p));

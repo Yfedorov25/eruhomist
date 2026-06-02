@@ -122,7 +122,9 @@ body {
     radial-gradient(40% 16% at 38% 46%, rgba(224, 169, 109, 0.5) 0%, transparent 70%),
     radial-gradient(40% 16% at 64% 46%, rgba(224, 169, 109, 0.45) 0%, transparent 70%),
     radial-gradient(50% 12% at 50% 62%, rgba(224, 169, 109, 0.32) 0%, transparent 75%);
-  transition: opacity 0.25s linear;
+  /* No opacity transition: --hero-night already moves smoothly with the hero scrub. A 0.25s
+     transition restarted an opacity tween on every scrub step = continuous per-frame repaint
+     of this layer during hero scroll (same anti-pattern as the html bg-color transition). */
 }
 
 /* Chromatic aberration — cyan/red edge fringes whose strength tracks --hero-aberration

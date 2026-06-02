@@ -141,8 +141,9 @@ export function CrossfadeMedia({
         className="pointer-events-none absolute inset-[-22%] opacity-0"
         style={{
           // was mix-blend-mode:screen — re-blended the whole backdrop every scroll frame.
-          // Plain opacity over the dark evening surface looks the same; will-change promotes it.
-          willChange: "opacity",
+          // Plain opacity over the dark evening surface looks the same. (No always-on
+          // will-change: a clean trace showed Layerize was 15% of scroll time — permanent
+          // promoted layers churn the compositor tree; GSAP promotes on-demand during the tween.)
           background:
             "radial-gradient(52% 40% at 58% 64%, rgba(236,178,118,0.4) 0%, transparent 70%)",
         }}
@@ -188,7 +189,6 @@ export function CrossfadeMedia({
           aria-hidden
           className="pointer-events-none absolute inset-[-12%] opacity-0"
           style={{
-            willChange: "opacity",
             background:
               "radial-gradient(46% 30% at 62% 70%, rgba(238,180,120,0.6) 0%, transparent 72%)," +
               "radial-gradient(40% 26% at 30% 58%, rgba(238,180,120,0.44) 0%, transparent 74%)",

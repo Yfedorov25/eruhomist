@@ -120,7 +120,6 @@ export function Architecture({ m }: { m: Messages }) {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0"
           style={{
-            willChange: "opacity",
             background:
               "radial-gradient(38% 14% at 38% 44%, rgba(238,180,120,0.6) 0%, transparent 70%)," +
               "radial-gradient(38% 14% at 64% 44%, rgba(238,180,120,0.55) 0%, transparent 70%)," +
