@@ -15,9 +15,12 @@ export type LeadResult = { ok: true } | { ok: false; error: string };
 export async function sendLead(_prev: LeadResult | null, formData: FormData): Promise<LeadResult> {
   const name = (formData.get("name") || "").toString().trim();
   const phone = (formData.get("phone") || "").toString().trim();
+  const consent = formData.get("consent") === "on";
 
   if (!name || !phone) return { ok: false, error: "fill" };
   if (name.length > 100 || phone.length > 100) return { ok: false, error: "length" };
+  // Personal-data consent is required (Ukraine PDPL) — enforce server-side, not just in the UI.
+  if (!consent) return { ok: false, error: "consent" };
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;

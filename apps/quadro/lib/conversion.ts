@@ -10,7 +10,7 @@ export const conversion = {
 
   // visible tap-to-call. Also used as the form's failure-state fallback contact.
   // e.g. "+380 67 000 00 00". Empty = hidden + form falls back to a generic message.
-  phone: "",
+  phone: "+380 67 989 12 51",
   telegram: "", // e.g. "@quadro_house" — optional Direct fallback
 
   // developer / trust block. Empty title = whole block hidden.

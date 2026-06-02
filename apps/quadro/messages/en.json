@@ -104,8 +104,17 @@
       "submit": "",
       "success": "",
       "errorName": "",
-      "errorPhone": ""
+      "errorPhone": "",
+      "errorConsent": "",
+      "consent": "",
+      "consentLink": ""
     }
+  },
+  "privacy": {
+    "title": "",
+    "updated": "",
+    "body": "",
+    "back": ""
   },
   "footer": {
     "location": "",

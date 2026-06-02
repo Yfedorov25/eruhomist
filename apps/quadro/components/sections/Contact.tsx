@@ -10,7 +10,7 @@ import { ContactForm } from "./ContactForm";
 // S7 — CTA / footer block at the dark (evening) end of the page.
 // Conversion slots (price / phone / developer) render only when the user supplies the
 // content in lib/conversion.ts — nothing is invented or placeheld.
-export function Contact({ m }: { m: Messages }) {
+export function Contact({ m, locale }: { m: Messages; locale: string }) {
   const ref = useReveal<HTMLDivElement>();
   const { priceFrom, phone, telegram, developer } = conversion;
 
@@ -31,7 +31,7 @@ export function Contact({ m }: { m: Messages }) {
         )}
 
         <div className="mt-12" data-reveal>
-          <ContactForm m={m} />
+          <ContactForm m={m} locale={locale} />
         </div>
 
         {(phone || telegram) && (

@@ -19,8 +19,16 @@ const body = Manrope({
   display: "swap",
 });
 
+// Absolute base for OG/canonical URLs. Prefer an explicit site URL; fall back to the
+// Vercel deployment URL; finally localhost for dev. Without metadataBase the
+// opengraph-image resolves to a relative path and link previews break in messengers.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3210");
+
 export const metadata: Metadata = {
-  // Per-locale metadata is set in app/[locale]/layout.tsx; this is the fallback.
+  // Per-locale title/description/OG live in app/[locale]/layout.tsx; this is the fallback.
+  metadataBase: new URL(siteUrl),
   title: "QUADRO HOUSE",
 };
 

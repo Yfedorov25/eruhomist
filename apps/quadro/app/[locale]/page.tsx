@@ -36,7 +36,7 @@ export default async function HomePage({
           <Roof m={m} />
           <DistrictMap m={m} />
           <Specs m={m} />
-          <Contact m={m} />
+          <Contact m={m} locale={locale} />
         </div>
       </main>
       <Footer locale={locale} m={m} />

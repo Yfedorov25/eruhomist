@@ -7,7 +7,7 @@ import { conversion } from "@/lib/conversion";
 
 // S7 form. States: idle / submitting / success (replaces form) / error (inline +
 // honest fallback to phone/Direct on a config/network failure — never fakes success).
-export function ContactForm({ m }: { m: Messages }) {
+export function ContactForm({ m, locale }: { m: Messages; locale: string }) {
   const [state, formAction, pending] = useActionState<LeadResult | null, FormData>(
     sendLead,
     null,
@@ -23,6 +23,7 @@ export function ContactForm({ m }: { m: Messages }) {
 
   const fieldError =
     state && !state.ok && (state.error === "fill" || state.error === "length");
+  const consentError = state && !state.ok && state.error === "consent";
   // A delivery failure (config/api/network) — show the form again but surface a fallback.
   const deliveryFailed =
     state && !state.ok && !["fill", "length"].includes(state.error);
@@ -63,6 +64,31 @@ export function ContactForm({ m }: { m: Messages }) {
           {state && !state.ok && state.error === "fill"
             ? m.cta.form.errorName
             : m.cta.form.errorPhone}
+        </p>
+      )}
+
+      {/* Personal-data consent (Ukraine PDPL). Required; also enforced server-side. */}
+      <label className="flex items-start gap-3 text-sm leading-snug text-[var(--ink-muted)]">
+        <input
+          name="consent"
+          type="checkbox"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+        />
+        <span>
+          {m.cta.form.consent}.{" "}
+          <a
+            href={`/${locale}/privacy`}
+            className="underline decoration-[var(--ink-muted)]/40 underline-offset-2 hover:text-[var(--ink)]"
+          >
+            {m.cta.form.consentLink}
+          </a>
+        </span>
+      </label>
+
+      {consentError && (
+        <p className="text-sm text-[var(--ink-muted)]" role="alert">
+          {m.cta.form.errorConsent}
         </p>
       )}
 
