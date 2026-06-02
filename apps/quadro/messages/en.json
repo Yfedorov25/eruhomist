@@ -10,6 +10,7 @@
     "architecture": "",
     "courtyard": "",
     "roof": "",
+    "map": "",
     "specs": "",
     "contact": "",
     "cta": ""
@@ -35,6 +36,14 @@
     "h2": "",
     "body": "",
     "cta": ""
+  },
+  "map": {
+    "h2": "",
+    "body": "",
+    "modalCta": "",
+    "minWalk": "",
+    "minDrive": "",
+    "allFilter": ""
   },
   "specs": {
     "h2": "",

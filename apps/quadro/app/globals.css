@@ -133,6 +133,21 @@ body {
   .hero-aberration { display: none; }
 }
 
+/* District map (S6): the QUADRO point breathes a slow warm 2700K halo — the brand light,
+   a calm heartbeat, NOT a HUD pulse. Screen-blend so it glows additively over the dark map. */
+.quadro-halo {
+  background: radial-gradient(circle, rgba(224, 169, 109, 0.5) 0%, transparent 65%);
+  mix-blend-mode: screen;
+  animation: quadro-breathe 4s ease-in-out infinite;
+}
+@keyframes quadro-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.78); opacity: 0.55; }
+  50%      { transform: translate(-50%, -50%) scale(1.05); opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quadro-halo { animation: none; opacity: 0.7; }
+}
+
 /* Text sitting over the hero/media: guaranteed contrast via a paint-behind scrim. */
 .over-media {
   position: relative;

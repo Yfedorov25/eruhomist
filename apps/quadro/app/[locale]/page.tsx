@@ -7,6 +7,7 @@ import { Concept } from "@/components/sections/Concept";
 import { Architecture } from "@/components/sections/Architecture";
 import { Courtyard } from "@/components/sections/Courtyard";
 import { Roof } from "@/components/sections/Roof";
+import { DistrictMap } from "@/components/sections/DistrictMap";
 import { Specs } from "@/components/sections/Specs";
 import { Contact } from "@/components/sections/Contact";
 
@@ -31,6 +32,7 @@ export default async function HomePage({
           <Architecture m={m} />
           <Courtyard m={m} />
           <Roof m={m} />
+          <DistrictMap m={m} />
           <Specs m={m} />
           <Contact m={m} />
         </div>

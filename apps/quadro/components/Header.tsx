@@ -19,14 +19,17 @@ export function Header({ locale, m }: { locale: Locale; m: Messages }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems: Array<[string, string]> = [
-    ["concept", m.nav.concept],
-    ["architecture", m.nav.architecture],
-    ["courtyard", m.nav.courtyard],
-    ["roof", m.nav.roof],
-    ["specs", m.nav.specs],
-    ["contact", m.nav.contact],
-  ];
+  const navItems: Array<[string, string]> = (
+    [
+      ["concept", m.nav.concept],
+      ["architecture", m.nav.architecture],
+      ["courtyard", m.nav.courtyard],
+      ["roof", m.nav.roof],
+      ["map", m.nav.map],
+      ["specs", m.nav.specs],
+      ["contact", m.nav.contact],
+    ] as Array<[string, string]>
+  ).filter(([, label]) => label); // skip entries whose label is still empty (awaiting copy)
 
   return (
     <header
