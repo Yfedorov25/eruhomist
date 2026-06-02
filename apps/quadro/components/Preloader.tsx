@@ -12,12 +12,16 @@ import gsap from "gsap";
 // the veil even if the event never fires (slow network / decode failure) — never traps.
 // Shows once per session (sessionStorage); reduced-motion skips it entirely.
 const SESSION_KEY = "quadro:splash-seen";
-const MIN_MS = 650; // elegance floor so the splash never just blinks
+// Elegance floor, capped at 900ms (council): hero LCP is ~180ms, so a longer floor would just
+// trap an affluent return-visitor behind the veil for a counter that counts nothing. ≤900 reads
+// considered without being a waiting-tax.
+const MIN_MS = 900;
 const SAFETY_MS = 5000; // hard cap — lift no matter what
 
 export function Preloader() {
   const root = useRef<HTMLDivElement | null>(null);
   const countRef = useRef<HTMLSpanElement | null>(null);
+  const ruleRef = useRef<HTMLSpanElement | null>(null);
 
   // The veil ALWAYS renders on the server and on the first client paint (identical markup,
   // so no hydration mismatch) — this prevents a hero flash before hydration. The effect then
@@ -38,23 +42,36 @@ export function Preloader() {
     let lifted = false;
     let liftCall: gsap.core.Tween | null = null; // delayedCall returns a Tween; track to kill
 
-    // counter 0→100 over ~1.4s (decorative; capped well under SAFETY)
+    // counter 0→100 + a hairline rule that fills 0→1 in lockstep (the visible "loading" signal).
     const counter = { v: 0 };
     const countTween = gsap.to(counter, {
       v: 100,
-      duration: 1.4,
+      duration: 1.6,
       ease: "power2.out",
       onUpdate: () => {
-        if (countRef.current) countRef.current.textContent = String(Math.round(counter.v));
+        const v = Math.round(counter.v);
+        if (countRef.current) countRef.current.textContent = String(v);
+        if (ruleRef.current) ruleRef.current.style.transform = `scaleX(${counter.v / 100})`;
       },
     });
+
+    // Snap to a finished, terracotta "100" — coinciding with the REAL ready signal, not an
+    // arbitrary tween end (honest: the number lands when the page is actually ready).
+    const finish = () => {
+      countTween.kill();
+      if (countRef.current) {
+        countRef.current.textContent = "100";
+        countRef.current.style.color = "var(--accent)";
+      }
+      if (ruleRef.current) ruleRef.current.style.transform = "scaleX(1)";
+    };
 
     const lift = () => {
       if (lifted) return;
       lifted = true;
+      finish();
       const wait = Math.max(0, MIN_MS - (performance.now() - mountedAt));
       liftCall = gsap.delayedCall(wait / 1000, () => {
-        if (countRef.current) countRef.current.textContent = "100";
         gsap.to(el, {
           opacity: 0,
           duration: 0.8,
@@ -94,17 +111,27 @@ export function Preloader() {
             "radial-gradient(60% 50% at 50% 45%, rgba(224,169,109,0.08) 0%, transparent 70%)",
         }}
       />
-      <div className="splash-word font-display text-4xl tracking-[0.5em] text-[#f1efea] md:text-6xl">
+      {/* The wordmark IS the entry beat — promoted big (the real fix for "barely visible"). */}
+      <div className="splash-word font-display text-6xl tracking-[0.5em] text-[#f1efea] md:text-8xl">
         QUADRO
       </div>
-      {/* a quiet film-leader frame-count in the corner — NOT a centerstage progress bar
-          (council/design: a 0→100 counter under the wordmark is the generic-loader slop tell) */}
-      <span
-        ref={countRef}
-        className="absolute bottom-8 left-8 font-display text-[11px] tracking-[0.35em] text-[var(--accent)] opacity-60"
-      >
-        0
-      </span>
+      {/* Restrained, legible loading signal centered beneath the wordmark: a hairline rule that
+          fills left→right + a small tabular-nums count. Visible (per the ask) but not a loud
+          dashboard progress bar — counter warm-white, turning terracotta only on the final 100. */}
+      <div className="mt-8 flex flex-col items-center gap-3">
+        <span
+          ref={ruleRef}
+          aria-hidden
+          className="block h-px w-40 origin-left bg-[rgba(241,239,234,0.55)]"
+          style={{ transform: "scaleX(0)" }}
+        />
+        <span
+          ref={countRef}
+          className="font-display text-sm tabular-nums tracking-[0.4em] text-[rgba(241,239,234,0.7)]"
+        >
+          0
+        </span>
+      </div>
     </div>
   );
 }

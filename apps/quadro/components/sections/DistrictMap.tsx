@@ -109,25 +109,52 @@ export function DistrictMap({ m }: { m: Messages }) {
 
   return (
     <Section id="map" className="mx-auto max-w-7xl">
-      <div ref={wrap}>
-        {m.map.h2 && (
-          <SplitReveal as="h2" className="font-display text-4xl leading-[1.1] md:text-6xl">
-            {richText(m.map.h2)}
-          </SplitReveal>
-        )}
-        {m.map.body && (
-          <p data-reveal className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--ink-muted)] md:text-xl">
-            {richText(m.map.body)}
-          </p>
-        )}
+      {/* Sticky-rail (council verdict): the user's complaint was the heading "ran away" before the
+          map was read — claim divorced from evidence. On lg+ the section becomes a 2-column track
+          (min-h-120vh): the LEFT rail (heading + body + filter) is position:sticky and stays welded
+          beside the enlarged map for the whole scroll, so the privacy-claim is co-present with its
+          proof. Pure CSS sticky (NOT a GSAP pin → no Lenis/teardown fight). Mobile/below-lg keeps
+          the original single-column stack. NOT full-screen (council: full-bleed = "Google-Maps
+          web-app", cheapens the $10k feel). */}
+      <div ref={wrap} className="lg:grid lg:min-h-[120vh] lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="lg:sticky lg:top-[12vh] lg:self-start">
+          {m.map.h2 && (
+            <SplitReveal as="h2" className="font-display text-4xl leading-[1.1] md:text-6xl">
+              {richText(m.map.h2)}
+            </SplitReveal>
+          )}
+          {m.map.body && (
+            <p data-reveal className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--ink-muted)] md:text-xl">
+              {richText(m.map.body)}
+            </p>
+          )}
 
-        {/* The map stage. perspective on the stage, tilt on the plate (so markers ride the tilt).
-            Padding gives the tilted plate room to project (~6° rotateX + parallax push the
-            edges out ~11-15px) so it never bleeds past the stage; the plate fills the padded box.
-            overflow-x clip is a belt-and-braces guard against horizontal page scroll on the tilt. */}
+          {/* Category filter — under the heading on the sticky rail (lg+), or under the map (mobile). */}
+          <div data-reveal className="mt-8 hidden flex-wrap gap-2.5 lg:flex">
+            {(Object.keys(CATEGORIES) as PoiCategory[]).map((c) => (
+              <button
+                key={`rail-${c}`}
+                type="button"
+                onClick={() => toggle(c)}
+                aria-pressed={active[c]}
+                className={`rounded-full border px-4 py-2 text-sm tracking-wide transition-colors ${
+                  active[c]
+                    ? "border-[var(--accent)]/70 bg-[var(--accent)]/10 text-[var(--accent)]"
+                    : "border-[var(--ink-muted)]/25 text-[var(--ink-muted)] hover:border-[var(--ink-muted)]/45"
+                }`}
+              >
+                {CATEGORIES[c].icon} {CATEGORIES[c].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT column: the enlarged map. perspective on the stage, tilt on the plate (markers ride
+            the tilt). Padding gives the tilted plate room to project so it never bleeds past the
+            stage; overflow-x clip guards against horizontal page scroll on the tilt. */}
         <div
           ref={stage}
-          className="relative mt-10 aspect-square w-full max-w-3xl px-4 pb-5"
+          className="relative mt-10 aspect-square w-full max-w-3xl px-4 pb-5 lg:mt-0 lg:max-w-[min(64vh,720px)] lg:justify-self-center"
           style={{ perspective: "1400px", overflowX: "clip" }}
         >
           <div
@@ -185,8 +212,8 @@ export function DistrictMap({ m }: { m: Messages }) {
           </div>
         </div>
 
-        {/* Category filter — sits close under the map, in the same warm light system */}
-        <div data-reveal className="mt-5 flex flex-wrap gap-2.5">
+        {/* Category filter — under the map on mobile (on lg+ it lives on the sticky rail above). */}
+        <div data-reveal className="mt-5 flex flex-wrap gap-2.5 lg:hidden">
           {(Object.keys(CATEGORIES) as PoiCategory[]).map((c) => (
             <button
               key={c}

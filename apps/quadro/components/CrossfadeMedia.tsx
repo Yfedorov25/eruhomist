@@ -59,28 +59,34 @@ export function CrossfadeMedia({
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
 
-      // crossfade day -> evening across the section's scroll span (heroic moment).
-      // Runs on every device — the emotional payload, not a perf cost.
+      // Day→evening as a DWELL → transition → DWELL over the section's OWN travel (council
+      // verdict): the old fade hit opacity 1 by "center 48%" — evening replaced day before the
+      // section was even centered, so the day render never got a read. Now the evening opacity
+      // keyframes [0, 0, 1, 1] across the full section span (top 80% → bottom 20%): DAY holds the
+      // first ~third, a deliberate crossfade lands in the middle third, EVENING holds the last
+      // third. The swap becomes a noticed dusk event, not an early smear. NARROW transition (not
+      // a long mushy 50/50 dissolve of two near-identical frames) via the power2.inOut ease on
+      // the active segment. scrub 1 = the light-change trails scroll = authored, not cursor-follow.
       gsap.fromTo(
         ev,
         { opacity: 0 },
         {
-          opacity: 1,
+          keyframes: { opacity: [0, 0, 1, 1], ease: "power2.inOut" },
           ease: "none",
-          scrollTrigger: { trigger: el, start: "top 72%", end: "center 48%", scrub: 1 },
+          scrollTrigger: { trigger: el, start: "top 80%", end: "bottom 20%", scrub: 1 },
         },
       );
 
-      // warm light-leak ramps in slightly AFTER the night fade, so the evening reads as
-      // light "arriving" (an event), not a flat dissolve. Brightens toward dusk. The in-frame
-      // glow and the frame-escaping bleed share one timeline so the light reads continuous.
+      // Warm light-leak motivates the dusk: anchored to the SAME middle-third window as the
+      // crossfade (keyframes hold at 0 through the day-dwell, ramp during the transition) so the
+      // light "arrives" with the evening rather than leading or trailing it.
       gsap.fromTo(
         [glow, bleed],
         { opacity: 0 },
         {
-          opacity: 0.5 * glowIntensity,
-          ease: "power1.in",
-          scrollTrigger: { trigger: el, start: "top 60%", end: "center 45%", scrub: 1 },
+          keyframes: { opacity: [0, 0, 0.5 * glowIntensity, 0.5 * glowIntensity], ease: "power1.in" },
+          ease: "none",
+          scrollTrigger: { trigger: el, start: "top 80%", end: "bottom 20%", scrub: 1 },
         },
       );
 

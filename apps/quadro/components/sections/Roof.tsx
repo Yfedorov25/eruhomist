@@ -104,8 +104,11 @@ export function Roof({ m }: { m: Messages }) {
           </a>
         </div>
 
-        {/* Terrace depth: one feathered hero plate + ONE floating detail (z-offset + faster
-            parallax) — cinematic depth, not a 3-up thumbnail strip. */}
+        {/* The lake-view hero owns the golden-hour climax SOLO (council verdict). A second small
+            floating image used to sit cornered over it with a ring+shadow — a stock "feature card"
+            tell that clashed (cool daytime lounge over a warm dusk lake) and split the held breath
+            the wash is built to deliver. Removed; render_terasa_04 will be re-homed to its own calm
+            full-width beat elsewhere (follow-up). One feathered plate + the wash is the apex. */}
         <div className="relative">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm">
             {/* eslint-disable @next/next/no-img-element */}
@@ -122,17 +125,8 @@ export function Roof({ m }: { m: Messages }) {
                 WebkitMaskComposite: "source-in",
               }}
             />
+            {/* eslint-enable @next/next/no-img-element */}
           </div>
-          {/* floating detail — offset over the hero's lower-right, soft shadow, faster drift */}
-          <img
-            data-reveal
-            data-parallax="22"
-            src="/renders/render_terasa_04.jpg"
-            alt="Lounge-зона на даху"
-            loading="lazy"
-            className="absolute -bottom-10 right-2 z-10 hidden aspect-[4/3] w-2/5 rounded-sm object-cover shadow-[0_24px_60px_-12px_rgba(0,0,0,0.65)] ring-1 ring-white/10 md:block"
-          />
-          {/* eslint-enable @next/next/no-img-element */}
         </div>
       </div>
     </Section>
