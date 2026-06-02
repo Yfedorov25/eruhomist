@@ -203,6 +203,8 @@ export function Hero({ m }: { m: Messages }) {
       });
       if (!mounted) return;
       setReady(true);
+      // signal the preloader (Phase 6) that the hero's first frames are painted (LCP moment)
+      window.dispatchEvent(new Event("quadro:hero-ready"));
       resize();
       if (reduced) {
         drawFrame(0); // static day frame, no scrub/raf

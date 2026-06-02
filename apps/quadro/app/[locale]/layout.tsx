@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, getMessages, locales, type Locale } from "@/lib/i18n";
+import { Preloader } from "@/components/Preloader";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -35,6 +36,7 @@ export default async function LocaleLayout({
   // so a locale switch never recreates them. We just scope the lang + render content.
   return (
     <div lang={locale} data-locale={locale as Locale}>
+      <Preloader />
       {children}
     </div>
   );

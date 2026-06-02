@@ -26,10 +26,12 @@ export function SplitReveal({
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    let cancelled = false; // guard the async fonts.ready -> don't split after unmount
     const ctx = gsap.context(() => {
       let split: SplitText | null = null;
       // wait for fonts so the split measures final glyph metrics (no reflow jump)
       const run = () => {
+        if (cancelled || !el.isConnected) return;
         // Mask each line generously: a tight clip box shears descenders/ascenders
         // during the yPercent rise (the "broken glyph" slop tell). pb leaves room for
         // descenders, the negative margin keeps the visual line-height unchanged.
@@ -50,7 +52,10 @@ export function SplitReveal({
       else run();
       return () => split?.revert();
     }, el);
-    return () => ctx.revert();
+    return () => {
+      cancelled = true;
+      ctx.revert();
+    };
   }, []);
 
   return createElement(as, { ref, className }, children);

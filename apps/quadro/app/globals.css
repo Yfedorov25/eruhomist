@@ -133,6 +133,21 @@ body {
   .hero-aberration { display: none; }
 }
 
+/* Phase 6 splash. While the veil is up, lock scroll so the reveal isn't scrolled past.
+   The wordmark eases in from tight tracking + low opacity (luxury: slow, never a blink). */
+.splash-lock { overflow: hidden; }
+.splash-word {
+  opacity: 0;
+  animation: splash-word-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+@keyframes splash-word-in {
+  0%   { opacity: 0; letter-spacing: 0.85em; filter: blur(6px); }
+  100% { opacity: 1; letter-spacing: 0.5em; filter: blur(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-word { animation: none; opacity: 1; }
+}
+
 /* District map (S6): the QUADRO point breathes a slow warm 2700K halo — the brand light,
    a calm heartbeat, NOT a HUD pulse. Screen-blend so it glows additively over the dark map. */
 .quadro-halo {

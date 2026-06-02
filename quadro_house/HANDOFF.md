@@ -9,8 +9,8 @@
 ## 0. TL;DR
 QUADRO HOUSE — кінематографічний scroll-сайт нерухомості (клубний дім на 4 квартири, Вінниця).
 Збудований у `apps/quadro/` (Next 16 + Lenis + GSAP, **БЕЗ WebGL** — лише 2D-canvas hero + DOM).
-Базовий сайт (7 секцій) + 5 фаз ERA-апгрейду готові. Наступна — **Фаза 6** (preloader + фінальний поліш/QA).
-Деплой ще не робили (push на Vercel — дія користувача).
+Базовий сайт (7 секцій) + УСІ 6 фаз ERA-апгрейду готові. ERA-апгрейд завершено. Лишилось:
+копірайт карти від користувача + деплой (push на Vercel — дія користувача, /ship→/land-and-deploy→/canary).
 
 ---
 
@@ -117,6 +117,18 @@ Gemini раніше — користувач на цьому обпікся). EN
   POI-фото: де photo:true очікує /public/poi/{id}.jpg (нема → graceful warm-gradient placeholder, onError ховає img).
   Озерний рендер: render_lake_terasa.jpg замінив плейсхолдер у S5.
 - **Оригінальний план Фази 5 (3D R3F) — відхилено, лишаю для контексту:** ІЗОЛЬОВАНИЙ R3F-canvas через webgl-guard + fallback.
+- **✅ Фаза 6 — кінематографічний preloader + поліш + фінальний QA — ЗРОБЛЕНО.** `components/Preloader.tsx`:
+  splash-веаль над hero, QUADRO-вордмарк reveal (letter-spacing 0.85→0.5em + blur→sharp, 1.6s ease-out),
+  тихий film-leader лічильник у кутку (НЕ centerstage progress-bar — design verdict), fade 0.8s на подію
+  `quadro:hero-ready` (Hero дispatch після drawFrame(0) = LCP-момент), scroll-lock під час splash, раз на
+  сесію (sessionStorage), reduced-motion пропускає, 5s safety-timeout. Веаль завжди в SSR+1й client-paint
+  (однакова розмітка → нуль hydration mismatch), effect вирішує грати чи зняти на кадрі 1. Splash→hero =
+  безперервний daylight-dissolve (не night→day cut). Easing-аудит: усі reveal power3/power2/expo, `ease:none`
+  лише на scrub (правильно), нуль linear на UI. Hero grain/vignette/glow/aberration — з Фази 2, на місці.
+  /design-review splash 8.5/10. /review (code) знайшов 3 баги — ВСІ виправлено: (1) Preloader hydration
+  mismatch (тепер веаль завжди рендериться, effect знімає); (2) SplitReveal fonts.ready leak (cancelled-флаг
+  + isConnected guard); (3) Preloader delayedCall leak (тепер kill у cleanup). QA vs baseline: CLS 0 (incl
+  splash lift), ~50fps steady (headless; real hw вище), FCP 248ms (без регресії), 0 console errors. deps=5.
   КРОК 0: прочитати `quadro_house/poi-candidates.js` (25 точок), вивести список, ЗУПИНИТИСЬ — користувач
   обере ~10-12 точок + категорії. Тільки потім будувати. Текстура мапи: Nano (district_map.webp, ще нема).
   Команди: **/autoplan ПЕРЕД білдом** (WebGL!), gsap-timeline+CustomEase (flyTo proxy-таргет), gsap-react
