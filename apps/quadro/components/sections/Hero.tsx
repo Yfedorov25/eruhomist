@@ -19,10 +19,15 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const SCRUB_VH = 250; // hero occupies 250vh of scroll (was 400 — too slow: 96 frames over 4
 // screens = ~24 frames/screen, so the building barely moved per screen. 250 = faster traverse.)
 const MOBILE_BREAKPOINT = 768;
-const WINDOW_BACK = 8;
-const WINDOW_AHEAD = 24; // was 16 — keep ahead of the scrub on fast flicks so drawFrame never
-const INITIAL_PRELOAD = 20; // falls back to a distant nearest-decoded frame (the "image stutter")
-const MAX_CONCURRENT = 8; // was 6 — refill the window faster after a flick
+// Memory/GPU budget tuned for low-RAM machines (the user's M2 has 8GB, ~1.5GB free): each
+// decoded 1920×1080 frame is ~8MB live in RAM/GPU, so the window size directly sets the
+// hero's memory footprint. 14 ahead + 6 back = ~160MB peak (was 24+8 ≈ 256MB → memory
+// pressure on 8GB → texture eviction → the day→night scrub lag). The manual rAF lerp is gone
+// now, so a smaller ahead-window no longer risks the old "frame can't keep up" stutter.
+const WINDOW_BACK = 6;
+const WINDOW_AHEAD = 14;
+const INITIAL_PRELOAD = 16;
+const MAX_CONCURRENT = 6;
 
 type Decoded = ImageBitmap | HTMLImageElement;
 
@@ -57,10 +62,11 @@ export function Hero({ m }: { m: Messages }) {
     };
 
     function resize() {
-      // Cap DPR at 1.5: the source frames are 1920×1080, so a 2× backing store just upscales
-      // (no detail gained) at ~1.8× the per-frame draw cost. 1.5 is sharp enough and much
-      // cheaper to redraw every scroll frame.
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      // DPR 1 for the scrubbing canvas: a retina 2× backing store of a full-viewport canvas is
+      // a huge GPU texture to repaint 60×/s (the main scrub cost on a low-RAM/retina Mac). The
+      // 1920-wide source frame downscaled into a 1×-viewport canvas is already sharp on a moving
+      // scrub — the detail a 2× store would add is invisible while scrolling. Biggest paint win.
+      const dpr = 1;
       canvas!.width = window.innerWidth * dpr;
       canvas!.height = window.innerHeight * dpr;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
