@@ -105,16 +105,20 @@ export function Architecture({ m }: { m: Messages }) {
         />
         {/* eslint-enable @next/next/no-img-element */}
         {/* warm window-glow over the night building's window bands (mirrors the hero glow) */}
+        {/* No mix-blend-mode: screen-blend forces the GPU to read back + re-blend the full
+            image stack EVERY scroll frame (a top scroll-stutter source). Over the dark night
+            render a plain warm radial-gradient at opacity reads ~identical; will-change:opacity
+            promotes it to its own layer so the backdrop isn't re-composited per frame. */}
         <div
           ref={glowRef}
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0"
           style={{
-            mixBlendMode: "screen",
+            willChange: "opacity",
             background:
-              "radial-gradient(38% 14% at 38% 44%, rgba(224,169,109,0.55) 0%, transparent 70%)," +
-              "radial-gradient(38% 14% at 64% 44%, rgba(224,169,109,0.5) 0%, transparent 70%)," +
-              "radial-gradient(48% 11% at 50% 60%, rgba(224,169,109,0.34) 0%, transparent 75%)",
+              "radial-gradient(38% 14% at 38% 44%, rgba(238,180,120,0.6) 0%, transparent 70%)," +
+              "radial-gradient(38% 14% at 64% 44%, rgba(238,180,120,0.55) 0%, transparent 70%)," +
+              "radial-gradient(48% 11% at 50% 60%, rgba(238,180,120,0.38) 0%, transparent 75%)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(6,8,14,0.8)] via-transparent to-transparent" />

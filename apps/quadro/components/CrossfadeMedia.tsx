@@ -140,9 +140,11 @@ export function CrossfadeMedia({
         aria-hidden
         className="pointer-events-none absolute inset-[-22%] opacity-0"
         style={{
-          mixBlendMode: "screen",
+          // was mix-blend-mode:screen — re-blended the whole backdrop every scroll frame.
+          // Plain opacity over the dark evening surface looks the same; will-change promotes it.
+          willChange: "opacity",
           background:
-            "radial-gradient(52% 40% at 58% 64%, rgba(224,169,109,0.36) 0%, transparent 70%)",
+            "radial-gradient(52% 40% at 58% 64%, rgba(236,178,118,0.4) 0%, transparent 70%)",
         }}
       />
 
@@ -179,16 +181,17 @@ export function CrossfadeMedia({
         </div>
 
         {/* atmospheric warm light-leak (near plane). Soft 2700K pools over the window/lamp
-            bands; screen-blend for additive glow; ramps toward evening. */}
+            bands; ramps toward evening. No screen-blend (per-frame backdrop re-blend = jank);
+            plain opacity over the evening render reads ~the same, will-change promotes it. */}
         <div
           ref={glowRef}
           aria-hidden
           className="pointer-events-none absolute inset-[-12%] opacity-0"
           style={{
-            mixBlendMode: "screen",
+            willChange: "opacity",
             background:
-              "radial-gradient(46% 30% at 62% 70%, rgba(224,169,109,0.55) 0%, transparent 72%)," +
-              "radial-gradient(40% 26% at 30% 58%, rgba(224,169,109,0.4) 0%, transparent 74%)",
+              "radial-gradient(46% 30% at 62% 70%, rgba(238,180,120,0.6) 0%, transparent 72%)," +
+              "radial-gradient(40% 26% at 30% 58%, rgba(238,180,120,0.44) 0%, transparent 74%)",
           }}
         />
 

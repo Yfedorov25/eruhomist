@@ -23,7 +23,11 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       lenis.on("scroll", ScrollTrigger.update);
       rafFn = (time: number) => lenis?.raf(time * 1000);
       gsap.ticker.add(rafFn);
-      gsap.ticker.lagSmoothing(0);
+      // lagSmoothing(500, 33): if a frame takes >500ms GSAP rebases time (avoids a huge jump),
+      // and it clamps per-tick delta to 33ms so a single heavy paint frame is absorbed instead
+      // of cascading into a visible scrub jump. Was lagSmoothing(0) (fully off) — which let the
+      // occasional heavy paint spike show up as a stutter.
+      gsap.ticker.lagSmoothing(500, 33);
     }
 
     // Drive a global 0..1 scroll-progress CSS var on :root for the day->night theme.

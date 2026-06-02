@@ -65,7 +65,11 @@
 html {
   background: var(--bg);
   color: var(--fg);
-  transition: background-color 0.2s linear;
+  /* NO background-color transition: --scroll-progress already interpolates --bg smoothly on
+     the scroll timeline (~one step per 105px). A 0.2s CSS transition on top restarted a fresh
+     full-viewport background tween on every scroll step → the whole-page backdrop repainted
+     continuously every frame = the page-wide scroll stutter. The scroll-driven var alone gives
+     a smooth day→night sweep with no per-frame repaint. */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* clip (not hidden) catches over-scaled/feathered media + glow-bleed layers that escape
