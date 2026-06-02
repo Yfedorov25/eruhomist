@@ -121,11 +121,14 @@ export function DistrictMap({ m }: { m: Messages }) {
           </p>
         )}
 
-        {/* The map stage. perspective on the stage, tilt on the plate (so markers ride the tilt). */}
+        {/* The map stage. perspective on the stage, tilt on the plate (so markers ride the tilt).
+            Padding gives the tilted plate room to project (~6° rotateX + parallax push the
+            edges out ~11-15px) so it never bleeds past the stage; the plate fills the padded box.
+            overflow-x clip is a belt-and-braces guard against horizontal page scroll on the tilt. */}
         <div
           ref={stage}
-          className="relative mt-10 aspect-square w-full max-w-3xl"
-          style={{ perspective: "1400px" }}
+          className="relative mt-10 aspect-square w-full max-w-3xl px-4 pb-5"
+          style={{ perspective: "1400px", overflowX: "clip" }}
         >
           <div
             ref={plate}

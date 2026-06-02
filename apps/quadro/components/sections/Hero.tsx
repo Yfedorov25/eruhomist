@@ -19,9 +19,9 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const SCRUB_VH = 400; // hero occupies 400vh of scroll
 const MOBILE_BREAKPOINT = 768;
 const WINDOW_BACK = 8;
-const WINDOW_AHEAD = 16;
-const INITIAL_PRELOAD = 20;
-const MAX_CONCURRENT = 6;
+const WINDOW_AHEAD = 24; // was 16 — keep ahead of the scrub on fast flicks so drawFrame never
+const INITIAL_PRELOAD = 20; // falls back to a distant nearest-decoded frame (the "image stutter")
+const MAX_CONCURRENT = 8; // was 6 — refill the window faster after a flick
 
 type Decoded = ImageBitmap | HTMLImageElement;
 
@@ -151,7 +151,11 @@ export function Hero({ m }: { m: Messages }) {
     let windowTick = 0;
     function tick() {
       const s = stateRef.current;
-      s.current += (s.target - s.current) * 0.12;
+      // Tight follow (was 0.12 — too floaty on a frame-scrub: it double-eased on top of
+      // ScrollTrigger's own scrub and trailed ~23 frames / 400ms behind a flick, reading
+      // as "the picture keeps moving after I stop"). 0.4 stays buttery but feels locked to
+      // the wheel, and keeps the displayed frame within the decode window below.
+      s.current += (s.target - s.current) * 0.4;
       if (Math.abs(s.target - s.current) < 0.01) s.current = s.target;
       drawFrame(s.current);
       if (++windowTick % 6 === 0) updateWindow();
