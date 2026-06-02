@@ -109,15 +109,15 @@ export function DistrictMap({ m }: { m: Messages }) {
 
   return (
     <Section id="map" className="mx-auto max-w-7xl">
-      {/* Sticky-rail (council verdict): the user's complaint was the heading "ran away" before the
-          map was read — claim divorced from evidence. On lg+ the section becomes a 2-column track
-          (min-h-120vh): the LEFT rail (heading + body + filter) is position:sticky and stays welded
-          beside the enlarged map for the whole scroll, so the privacy-claim is co-present with its
-          proof. Pure CSS sticky (NOT a GSAP pin → no Lenis/teardown fight). Mobile/below-lg keeps
-          the original single-column stack. NOT full-screen (council: full-bleed = "Google-Maps
+      {/* Side-by-side two-column (council fix for "heading ran away before the map"): on lg+ the
+          heading + body + filter sit in the LEFT column, vertically CENTERED beside the enlarged
+          map, so claim and proof are co-present in one viewport. (An earlier sticky-rail + tall
+          min-h track orphaned the shorter map: it scrolled away while the sticky text held — so we
+          use a plain centered two-column grid, no sticky, no orphan, zero CLS.) Mobile/below-lg
+          keeps the single-column stack. NOT full-screen (council: full-bleed reads "Google-Maps
           web-app", cheapens the $10k feel). */}
-      <div ref={wrap} className="lg:grid lg:min-h-[120vh] lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-        <div className="lg:sticky lg:top-[12vh] lg:self-start">
+      <div ref={wrap} className="lg:grid lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
+        <div>
           {m.map.h2 && (
             <SplitReveal as="h2" className="font-display text-4xl leading-[1.1] md:text-6xl">
               {richText(m.map.h2)}
