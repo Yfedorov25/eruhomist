@@ -9,8 +9,11 @@
 ## 0. TL;DR
 QUADRO HOUSE — кінематографічний scroll-сайт нерухомості (клубний дім на 4 квартири, Вінниця).
 Збудований у `apps/quadro/` (Next 16 + Lenis + GSAP, **БЕЗ WebGL** — лише 2D-canvas hero + DOM).
-Базовий сайт (7 секцій) + УСІ 6 фаз ERA-апгрейду готові. ERA-апгрейд завершено. Лишилось:
-копірайт карти від користувача + деплой (push на Vercel — дія користувача, /ship→/land-and-deploy→/canary).
+**LIVE на Vercel: https://quadro-house.vercel.app** (проєкт quadro-house, scope yehor-s-projects3,
+root=apps/quadro, vercel CLI project-local). Усі 6 фаз ERA + копірайт v2 + launch-prep задеплоєно.
+Форма реально доставляє заявки в Telegram (перевірено на prod). Лишилось НЕ-код: ціна/планування/
+забудовник (порожні+сховані, контенту ще нема), POI-фото, EN-копірайт, + список фіксів від користувача.
+Редеплой: `cd apps/quadro && ./node_modules/.bin/vercel --prod --yes --scope yehor-s-projects3`.
 
 ---
 
