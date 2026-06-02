@@ -19,7 +19,10 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     let rafFn: ((time: number) => void) | null = null;
 
     if (!reduced) {
-      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      // lerp 0.12 (was 0.1): once the hero's competing rAF lerp was deleted, Lenis is the
+      // single global smoother — 0.12 is slightly snappier ("less swimming") while keeping
+      // the luxury inertia. The heavy 0.1 only felt right when masking other stacked easings.
+      lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
       lenis.on("scroll", ScrollTrigger.update);
       rafFn = (time: number) => lenis?.raf(time * 1000);
       gsap.ticker.add(rafFn);

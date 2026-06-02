@@ -48,6 +48,12 @@ export function Architecture({ m }: { m: Messages }) {
           start: "top top",
           end: "+=160%",
           pin: true,
+          // pinType:"transform" + anticipatePin avoid the pin-enter "jump" the user felt as
+          // "фіксація на новий екран": under Lenis (which moves the page via transform), the
+          // default position:fixed pin re-layouts and drifts from Lenis's scroll → a snap.
+          // transform-pinning stays in Lenis's coordinate space; anticipatePin pre-applies it.
+          pinType: "transform",
+          anticipatePin: 1,
           scrub: 1,
           onLeaveBack: () => h2 && gsap.set(h2, { clearProps: "" }),
         },

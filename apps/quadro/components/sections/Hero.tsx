@@ -16,7 +16,8 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 // never goes blank (draws nearest decoded frame). Grain + vignette are a CSS overlay.
 // reduced-motion: static day frame, no scrub.
 
-const SCRUB_VH = 400; // hero occupies 400vh of scroll
+const SCRUB_VH = 250; // hero occupies 250vh of scroll (was 400 — too slow: 96 frames over 4
+// screens = ~24 frames/screen, so the building barely moved per screen. 250 = faster traverse.)
 const MOBILE_BREAKPOINT = 768;
 const WINDOW_BACK = 8;
 const WINDOW_AHEAD = 24; // was 16 — keep ahead of the scrub on fast flicks so drawFrame never
@@ -156,23 +157,27 @@ export function Hero({ m }: { m: Messages }) {
 
     let windowTick = 0;
     let aberration = 0;
+    let lastTarget = -1;
     function tick() {
       const s = stateRef.current;
-      const moving = Math.abs(s.target - s.current) >= 0.01;
-      // Idle fast-path: when the scrub is settled AND the aberration has decayed to ~0, do
-      // NOTHING but keep the rAF alive. Previously this loop redrew + WROTE a CSS var every
-      // frame forever — even while scrolling content sections far below the hero — forcing a
-      // page-wide style recalc 60×/s that competed with the rest of the page's scroll.
+      // "moving" = the scrubbed target changed since we last drew (ScrollTrigger scrub:0.6
+      // keeps easing s.target for ~0.6s after the wheel stops, so this stays true through the
+      // settle, then goes quiet).
+      const moving = Math.abs(s.target - lastTarget) >= 0.01;
+      // Idle fast-path: target settled AND aberration decayed → do nothing but keep the rAF
+      // alive. Previously the loop redrew + wrote a CSS var every frame forever, even far below
+      // the hero, forcing a page-wide style recalc 60×/s that competed with content scroll.
       if (!moving && aberration <= 0.001) {
         s.raf = requestAnimationFrame(tick);
         return;
       }
-      // Tight follow (was 0.12 — too floaty on a frame-scrub: it double-eased on top of
-      // ScrollTrigger's own scrub and trailed ~23 frames / 400ms behind a flick, reading
-      // as "the picture keeps moving after I stop"). 0.4 stays buttery but feels locked to
-      // the wheel, and keeps the displayed frame within the decode window below.
-      s.current += (s.target - s.current) * 0.4;
-      if (!moving) s.current = s.target;
+      lastTarget = s.target;
+      // NO manual lerp. The council's #1 finding: a rAF lerp here was a SECOND easing
+      // integrator stacked on top of ScrollTrigger's scrub (and Lenis) — three low-pass
+      // filters with different time-constants fighting = the scroll stutter, and the lag
+      // also made the hero feel "slow". ScrollTrigger `scrub: 0.6` is now the single
+      // smoother; we just mirror its already-eased value, so decode/draw stay in sync.
+      s.current = s.target;
       drawFrame(s.current);
       if (++windowTick % 6 === 0) updateWindow();
       // decay the chromatic-aberration var toward 0 when scrolling settles
@@ -189,7 +194,8 @@ export function Hero({ m }: { m: Messages }) {
         trigger: wrap!,
         start: "top top",
         end: "bottom bottom",
-        scrub: true,
+        scrub: 0.6, // single smoothing authority (was true=instant; the easing was the manual
+        // rAF lerp we just deleted). 0.6 = buttery follow without the double-smoothed lag.
         onUpdate: (self) => {
           stateRef.current.target = self.progress * (HERO_FRAME_COUNT - 1);
           // Film-grade CSS drivers (R-CSS, no WebGL): --hero-night ramps the warm
