@@ -16,8 +16,8 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 // never goes blank (draws nearest decoded frame). Grain + vignette are a CSS overlay.
 // reduced-motion: static day frame, no scrub.
 
-const SCRUB_VH = 250; // hero occupies 250vh of scroll (was 400 — too slow: 96 frames over 4
-// screens = ~24 frames/screen, so the building barely moved per screen. 250 = faster traverse.)
+const SCRUB_VH = 180; // hero occupies 180vh (was 400 then 250 — user wants less scroll to reach
+// full day→night). ~1.8 screens to traverse; crossfade keeps it smooth despite fewer px/frame.
 const MOBILE_BREAKPOINT = 768;
 // Memory/GPU budget tuned for low-RAM machines (the user's M2 has 8GB, ~1.5GB free): each
 // decoded 1920×1080 frame is ~8MB live in RAM/GPU, so the window size directly sets the
@@ -51,7 +51,7 @@ export function Hero({ m }: { m: Messages }) {
     const supportsBitmap = typeof createImageBitmap === "function";
 
     let mounted = true;
-    let lastDrawn = -1;
+    let lastBlend = ""; // last drawn frame-pair+blend key (skip redundant repaints)
     const bitmaps = new Map<number, Decoded>();
     const decoding = new Set<number>();
     let inFlight = 0;
@@ -77,12 +77,14 @@ export function Hero({ m }: { m: Messages }) {
       canvas!.height = Math.round(vh * scale);
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       ctx!.imageSmoothingEnabled = true;
-      ctx!.imageSmoothingQuality = "low";
-      lastDrawn = -1;
+      // "medium": "low" made the downscaled frames look harsh/clicky between steps; medium is
+      // visibly smoother on the day→night blend at negligible extra cost on the small canvas.
+      ctx!.imageSmoothingQuality = "medium";
+      lastBlend = "";
       drawFrame(stateRef.current.current);
     }
 
-    function paint(img: Decoded) {
+    function paint(img: Decoded, alpha = 1, clear = true) {
       const cw = canvas!.width; // cover-fit against the backing store, not the viewport
       const ch = canvas!.height;
       const iw = (img as HTMLImageElement).naturalWidth || (img as ImageBitmap).width;
@@ -96,24 +98,43 @@ export function Hero({ m }: { m: Messages }) {
       } else {
         w = cw; h = cw / ir; x = 0; y = (ch - h) / 2;
       }
-      ctx!.clearRect(0, 0, cw, ch);
+      if (clear) ctx!.clearRect(0, 0, cw, ch);
+      ctx!.globalAlpha = alpha;
       ctx!.drawImage(img, x, y, w, h);
+      ctx!.globalAlpha = 1;
     }
 
-    // Draw requested frame, or nearest already-decoded one (never blank).
-    function drawFrame(idx: number) {
-      const want = Math.max(0, Math.min(HERO_FRAME_COUNT - 1, Math.round(idx)));
-      let pick = -1;
-      if (bitmaps.has(want)) pick = want;
-      else {
-        for (let d = 1; d < HERO_FRAME_COUNT; d++) {
-          if (bitmaps.has(want - d)) { pick = want - d; break; }
-          if (bitmaps.has(want + d)) { pick = want + d; break; }
-        }
+    // Find the nearest decoded frame to `i` (so we never draw blank).
+    function nearestDecoded(i: number): number {
+      if (bitmaps.has(i)) return i;
+      for (let d = 1; d < HERO_FRAME_COUNT; d++) {
+        if (bitmaps.has(i - d)) return i - d;
+        if (bitmaps.has(i + d)) return i + d;
       }
-      if (pick === -1 || pick === lastDrawn) return;
-      lastDrawn = pick;
-      paint(bitmaps.get(pick)!);
+      return -1;
+    }
+
+    // CROSSFADE the two frames bracketing the fractional scrub position. 96 discrete photos
+    // drawn one-at-a-time "click" frame-to-frame (the choppy "обривки"); blending the lower
+    // frame (full) with the upper frame (alpha = fractional part) makes the day→night flow
+    // CONTINUOUSLY between frames — smooth without adding a second easing integrator.
+    function drawFrame(idx: number) {
+      const clamped = Math.max(0, Math.min(HERO_FRAME_COUNT - 1, idx));
+      const lo = Math.floor(clamped);
+      const hi = Math.min(HERO_FRAME_COUNT - 1, lo + 1);
+      const frac = clamped - lo;
+      const pLo = nearestDecoded(lo);
+      const pHi = nearestDecoded(hi);
+      if (pLo === -1 && pHi === -1) return;
+      // skip redundant repaints (same pair + ~same blend) — keeps idle cheap
+      const key = `${pLo}:${pHi}:${frac.toFixed(2)}`;
+      if (key === lastBlend) return;
+      lastBlend = key;
+      if (pLo === -1) { paint(bitmaps.get(pHi)!); return; }
+      paint(bitmaps.get(pLo)!, 1, true); // base frame, clears canvas
+      if (pHi !== -1 && pHi !== pLo && frac > 0.01) {
+        paint(bitmaps.get(pHi)!, frac, false); // blend the next frame on top by fraction
+      }
     }
 
     function pump() {
@@ -145,7 +166,9 @@ export function Hero({ m }: { m: Messages }) {
           });
         if (!mounted) return free(bmp);
         bitmaps.set(i, bmp);
-        if (Math.round(stateRef.current.current) === i) { lastDrawn = -1; drawFrame(i); }
+        // if a just-decoded frame is one of the two bracketing the current scrub position,
+        // force a repaint so the crossfade picks it up (instead of a nearest-decoded stand-in).
+        if (Math.abs(stateRef.current.current - i) <= 1) { lastBlend = ""; drawFrame(stateRef.current.current); }
       } catch {
         /* nearest-frame fallback covers it */
       }
