@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Council — Nahirna Villa Landing Architecture</title>
+<style>
+  :root{--ink:#1a1a1a;--muted:#6b6b6b;--line:#e6e3dc;--bg:#faf8f4;--card:#fff;--accent:#b88a4a;--good:#3f7d57;--bad:#b4513f;--clash:#8a6d3b}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:880px;margin:0 auto;padding:48px 24px 96px}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 32px;font-size:14px}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:28px}
+  .q h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0 0 8px}
+  .q p{margin:0;font-size:14.5px;color:#333}
+  .verdict{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:24px 28px;margin-bottom:32px}
+  .verdict h2{margin:0 0 14px;font-size:20px}
+  .verdict h3{margin:22px 0 8px;font-size:15px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+  .verdict h3:first-of-type{margin-top:0}
+  .verdict ul{margin:8px 0;padding-left:20px}
+  .verdict li{margin:6px 0;font-size:14.5px}
+  .gt{background:#f3efe6;border-radius:4px;padding:1px 6px;font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0 4px}
+  .adv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center;font-size:12px}
+  .adv .name{font-weight:700;font-size:12.5px;margin-bottom:4px}
+  .adv .role{color:var(--muted);font-size:10.5px;line-height:1.3}
+  .pos{display:inline-block;margin-top:6px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+  .win{background:#e6f0ea;color:var(--good)}
+  .flag{background:#f6e7e3;color:var(--bad)}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:0 18px}
+  details[open]{padding-bottom:14px}
+  summary{cursor:pointer;padding:14px 0;font-weight:600;font-size:14.5px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--accent);font-size:20px}
+  details[open] summary::after{content:"–"}
+  details p{font-size:14px;color:#333;margin:6px 0 0}
+  .tag{font-size:11px;color:var(--muted);font-weight:400;margin-left:8px}
+  .decisions{display:grid;gap:10px;margin:14px 0}
+  .d{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px}
+  .d b{color:var(--accent)}
+  .one{background:#1a1a1a;color:#f4efe6;border-radius:14px;padding:22px 26px;margin-top:28px}
+  .one h3{margin:0 0 8px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+  .one p{margin:0;font-size:15px;line-height:1.55}
+  footer{margin-top:40px;color:var(--muted);font-size:12px;text-align:center}
+  code{background:#f0ece3;padding:1px 5px;border-radius:4px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LLM Council — Nahirna Villa Landing</h1>
+  <p class="sub">5 advisors · anonymous peer review · chairman synthesis (cross-verified against the repo) · 2026-06-03</p>
+
+  <div class="q">
+    <h2>The Question</h2>
+    <p>Five architecture decisions for a cinematic scroll-driven <strong>lead-gen</strong> landing to sell ONE $270k riverside villa (Vinnytsia, Southern Bug). Stack locked: Next.js 15 + Lenis + GSAP, <strong>no WebGL</strong>. #1 goal = phone calls. Perf budget sacred. Decisions: (1) repo placement · (2) hero day→night engine · (3) frame-sequence tour decode/memory · (4) interactive floorplan · (5) location map with unknown distances.</p>
+  </div>
+
+  <div class="grid">
+    <div class="adv"><div class="name">Contrarian</div><div class="role">flaw-hunter</div><span class="pos win">Co-strongest</span></div>
+    <div class="adv"><div class="name">1st&nbsp;Principles</div><div class="role">scope discipline</div><span class="pos win">Co-strongest</span></div>
+    <div class="adv"><div class="name">Expansionist</div><div class="role">upside</div><span class="pos flag">Blind spot ×5</span></div>
+    <div class="adv"><div class="name">Outsider</div><div class="role">the buyer</div></div>
+    <div class="adv"><div class="name">Executor</div><div class="role">order-of-ops</div></div>
+  </div>
+
+  <div class="verdict">
+    <h2>Council Verdict</h2>
+
+    <h3>Where the council agrees</h3>
+    <ul>
+      <li><b>Hero → Option A, layered <code>next/image</code> + GSAP opacity</b> (5/5). Day = full-opacity LCP element; fade night 0→1, <code>ease:none</code>. The "muddy middle" is a myth — opaque photos don't grey out. <span class="gt">verified: quadro hero already ships this</span></li>
+      <li><b>Map → never invent distances.</b> A fake/vague map reads as "hiding something" and poisons trust in the price; a missing map goes unnoticed. Escalated to legal liability on a $270k sale. <span class="gt">spec already mandates this</span></li>
+      <li><b>Tour is THE product-defining risk</b> — de-risk first; on a decode miss render the nearest decoded frame, <em>never black</em>.</li>
+      <li><b>Repo → <code>apps/nahirna</code></b> (reversible in minutes). <span class="gt">already at root; wire into monorepo like apps/quadro</span></li>
+      <li><b>The phone number is the product</b> — <code>tel:</code> at top, bottom, and a following pill.</li>
+    </ul>
+
+    <h3>Where the council clashes</h3>
+    <ul>
+      <li><b>Floorplan technique.</b> Hand-redrawn SVG (Expansionist) vs PNG+hotspots (Executor) vs 3-4 hotspots only (1st Principles). The buyer settles it: <em>indifferent to draw technique, cares about correct numbers + the rooms that sell.</em> → <b>PNG/SVG underlay + positioned hotspot buttons.</b> <span class="gt">areas already exact for all 7 rooms → label all 7, lead the eye to terrace 29.83m² + master 16.65m²; no hand-redraw, no gallery scope</span></li>
+      <li><b>The scope war.</b> Adopt the Expansionist's conversion <em>psychology</em> (end-of-tour sticky CTA at the golden-hour climax, magnetic call pill, one honest scarcity line) — reject its <em>engineering ambition</em> (oversized decode window, a speculative "reusable villa engine," an all-room gallery) before villa #1 ships.</li>
+    </ul>
+
+    <h3>Blind spots the peer review caught</h3>
+    <ul>
+      <li>No <b>reduced-motion / no-JS / iOS Low-Power</b> fallback for the tour (untested — scrub may not even fire under Low Power).</li>
+      <li>No <b>total-decode-failure degraded path</b> → must fall back to a static golden-hour hero + CTA.</li>
+      <li>No <b>measurable perf gate</b> on a named mid-tier Android (merge-blocking).</li>
+      <li>No <b>call-conversion instrumentation</b> — the worst omission for an Amplitude-driven team. Log <em>which section</em> was on screen when the call fired.</li>
+      <li><b>Frame colour consistency</b> at the two crossfade seams (three separate AI clips spliced).</li>
+      <li><code>build-frames.sh</code> <b>is the contract</b> the decoder depends on — and it was unrun. <span class="gt">caught a real defect: FPS=30 → ~542 frames, 3× over target; corrected to FPS=10 → 181 frames</span></li>
+      <li>Distances are a <b>content blocker the client owns</b> — but one true line ("own riverbank · 0 min") already exists; get ONE headline distance and express POIs as time.</li>
+    </ul>
+
+    <h3>The recommendation, decision by decision</h3>
+    <div class="decisions">
+      <div class="d"><b>1 · Repo:</b> Move into <code>apps/nahirna</code>; inherit the Vercel + Telegram-lead pipeline from apps/quadro; keep the <code>public/</code> path exact (case-sensitive FS).</div>
+      <div class="d"><b>2 · Hero:</b> Two <code>next/image</code> layers, GSAP opacity scrub, day = priority LCP, fade night 0→1, <code>ease:none</code>. No canvas.</div>
+      <div class="d"><b>3 · Tour:</b> canvas <code>drawImage</code>; <code>createImageBitmap</code>; sliding window current±8 (~16-24 decoded); <code>.close()</code> on eviction; decode-ahead; cap ~200MB; nearest-decoded on miss. Fallbacks: reduced-motion → static first frame; decode-fail/Low-Power → static golden-hour hero + CTA.</div>
+      <div class="d"><b>4 · Floorplan:</b> Flatten the PDF to an underlay; positioned hotspot buttons over real zones; label from exact areas; warm-accent active, dim rest; <code>aria-label</code> + keyboard; mobile tap + docked panel.</div>
+      <div class="d"><b>5 · Map:</b> Static stylized frame + villa pin now (fastest LCP, no Leaflet). POIs as time, verified only ("own riverbank · 0 min" ships today); unverified POIs behind a flag, not a visible TODO.</div>
+      <div class="d"><b>Cross-cutting:</b> call instrumentation from day 1 (tel: everywhere + Amplitude per-section event); magnetic call/callback pill after the water story; perf gate on a real mid-tier Android; every section ships reduced-motion + mobile fallback.</div>
+    </div>
+  </div>
+
+  <div class="one">
+    <h3>The one thing to do first</h3>
+    <p>Run <code>scripts/build-frames.sh</code>, then validate its output (count 150-180, correct widths, no zero-byte) and <strong>eyeball the two crossfade seams for colour/exposure jumps</strong> — before writing any overlay code. The frames didn't exist yet (source is 3 mp4s), and the script's default FPS overshot the target 3×. <em>Done during this session: master built, FPS corrected to 10 → 181 frames.</em></p>
+  </div>
+
+  <h3 style="margin-top:36px;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Full advisor responses</h3>
+  <details><summary>The Contrarian <span class="tag">flaw-hunter · co-strongest</span></summary><p>(1) In-place forks Vercel config; moved assets must keep the <code>public/</code> path or next/image 404s on Vercel's case-sensitive FS. (2) Hero A, but the "muddy middle" is the wrong fear — opaque photos don't grey out; the real flaw is full-res layer overdraw + lerp-0.08 overshoot; use ease:none, fade only the night layer. (3) "Where the project dies": mobile tab-kill ~400MB; createImageBitmap guarantees decoded RAM; window 12-15 + .close() or leak GPU; mobile 60 frames; clamp velocity; render last-decoded on miss. (4) A, but watch exact-area drift; trace + label from PDF numbers. (5) C, hard — invented distances on a legal sale = liability; hide behind a flag; Leaflet = LCP grenade.</p></details>
+  <details><summary>The First Principles Thinker <span class="tag">scope discipline · co-strongest</span></summary><p>(1) False framing, 5-min reversible — apps/nahirna. (2) You invented the muddy middle — day full-opacity beneath, night 0→1 on top; a buyer can't perceive a blend curve. (3) The memory math is fantasy — never decode 180 at once; window current±8, ~20-30MB; decode-starvation is the only real risk. (4) Gold-plating — nobody clicks 14 zones on a phone; 3-4 hotspots max on the rooms that sell. (5) Static frame now (fastest LCP). Net: 2/3/4 over-scoped — the phone call is the product.</p></details>
+  <details><summary>The Expansionist <span class="tag">upside · biggest blind spot (5/5)</span></summary><p>(1) Move → a reusable cinematic-villa engine, villa #3 becomes a fork. (2) Layered, never canvas; a third mid-dusk golden-hour frame = the most screenshot-able moment. (3) Window ~40, decode-ahead; end on the riverbank at golden hour + a sticky "Book a private viewing" the instant it completes = peak emotional arousal. (4) Hand-redrawn; click a room → area + photo, doubles as a gallery. (5) Static map with POIs as time. Plus: a persistent magnetic call/callback pill; one scarcity line. <em>Reviewers: upside-drunk — adds expensive engineering before the centerpiece is de-risked.</em></p></details>
+  <details><summary>The Outsider — the buyer <span class="tag">settled the floorplan + map clashes</span></summary><p>Doesn't know the jargon, neither will the buyer. (1) Internal plumbing — stop discussing. (2) Only notice if broken/muddy ("cheap"). (3) The scroll-film is the ONE thing that could make me call — but a black-flash/stutter screams "amateurs, trust them with $270k?"; broken centerpiece worse than none. (4) I care only that I tap a room and see 18m² + what it overlooks; numbers correct. (5) Leave the map OUT rather than fake/vague — made-up distances = "hiding something" → I distrust the price. Phone number top + bottom + a following button.</p></details>
+  <details><summary>The Executor <span class="tag">order-of-operations</span></summary><p>De-risk Decision 3 first — build nothing else until it's proven. Validate build-frames.sh (count 150-180, 1920w, no zero-byte, eyeball seams), then the overlay. Sliding window ~24 decoded + .close(); nearest-ready on miss; cap ~200MB. (1) Move to apps/nahirna. (2) Hero A, no debate. (4) PNG underlay + positioned hotspot buttons — an afternoon; hand-redraw = 2 days zero gain. (5) Static frame + pin + TODO now. Order: validate frames → move → scaffold → hero → 01-04 → overlay → map stub → facts/CTA/footer.</p></details>
+
+  <footer>LLM Council methodology by Andrej Karpathy · 5 advisors + 5 anonymous peer reviews + chairman · transcript saved alongside this report.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# nahirna-local ignores (root .gitignore already covers node_modules/.next/.env*)
+.npm-cache/
+.review-shots/
+dev.log
+prod.log
+*.tsbuildinfo

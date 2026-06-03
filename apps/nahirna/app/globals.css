@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/*
+  «Дім на Нагірній» — cinematic real-estate, single villa.
+  Dark chocolate / night base with restrained warm-gold accents (CLAUDE.md tokens).
+  The page is night-themed end to end; the HERO owns the day→night sweep on its own
+  layers, so body content reads on a stable dark surface with a guaranteed contrast floor.
+*/
+:root {
+  /* база / ніч (CLAUDE.md) */
+  --color-night: #0f0f0e;
+  --color-brick: #2c2622; /* шоколадна клінкерна цегла */
+  --color-roof: #4f5048; /* олівково-графітовий дах */
+  --color-warm: #e8c9a0; /* тепле світло вікон / золота година */
+  --color-plaster: #edeae3; /* світла штукатурка / тиньк */
+  --color-text: #edeae3;
+  --color-text-muted: #9b978f;
+  --color-accent: #e8c9a0; /* акцент — тепле золото, стримано */
+
+  /* Readability scrim: soft dark veil behind text-over-media. */
+  --scrim: rgba(15, 15, 14, 0.55);
+  --scrim-strong: rgba(15, 15, 14, 0.78);
+
+  /* Luxury motion timing tokens (CLAUDE.md: reveal 1.5–2.5s, power3/expo). */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* ~expo.out for CSS transitions */
+  --dur-reveal: 1.8s;
+}
+
+/* Tailwind v4 theme bridge — expose tokens as utilities (text-accent, bg-night, font-display…). */
+@theme inline {
+  --color-night: var(--color-night);
+  --color-brick: var(--color-brick);
+  --color-roof: var(--color-roof);
+  --color-warm: var(--color-warm);
+  --color-plaster: var(--color-plaster);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-night);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  background: var(--color-night);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-night);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Markdown-style emphasis from COPY: **bold** = warm gold key term; *italic* handled per-section. */
+strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Fine film grain over the whole page — atmosphere, not flat fills (CLAUDE.md). GPU-cheap,
+   pointer-transparent, fixed. Disabled on mobile + reduced-motion (see media queries). */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("/noise.svg");
+  background-size: 180px 180px;
+}
+
+/* Text-over-media legibility helper. */
+.scrim-text {
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Respect reduced-motion globally: kill transitions/animations, drop grain. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .grain::after {
+    display: none;
+  }
+}
+
+/* Mobile: drop the grain shader (CLAUDE.md perf — lighter on mid-tier devices). */
+@media (max-width: 768px) {
+  .grain::after {
+    display: none;
+  }
+}
