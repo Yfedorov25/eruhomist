@@ -4,3 +4,4 @@
 dev.log
 prod.log
 *.tsbuildinfo
+.vercel

@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { Scrim } from "@/components/ui/Scrim";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -72,13 +73,15 @@ export default function Hero() {
       className="relative h-screen w-full overflow-hidden bg-night"
       aria-label="Дім на Нагірній — головний екран"
     >
-      {/* DAY layer — LCP-critical: eager + priority, full opacity beneath. */}
+      {/* DAY layer — LCP-critical: eager + priority, full opacity beneath. onLoad fires the
+          hero-ready signal so the Preloader veil lifts at the LCP moment (not before). */}
       <Image
         src="/images/hero-day-desktop.webp"
         alt="Дім на Нагірній удень: темна клінкерна цегла, колони з білими капітелями, олівковий дах, панорамне скління серед зелені"
         fill
         priority
         sizes="100vw"
+        onLoad={() => window.dispatchEvent(new Event("nahirna:hero-ready"))}
         className="hidden object-cover md:block"
       />
       <Image
@@ -145,6 +148,9 @@ export default function Hero() {
         aria-hidden
       />
 
+      {/* Top scrim — guarantees the kicker reads against the bright daytime sky (readability fix). */}
+      <Scrim direction="top" strength={0.5} />
+
       {/* Content */}
       <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-[16vh] md:pb-[18vh]">
         {/* Kicker: address + river on two spans. The river clause carries the one warm-gold
@@ -166,14 +172,14 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub scrim-text mt-7 max-w-[34rem] text-base leading-relaxed text-[var(--color-text)]/95 md:text-lg">
-          Тупікова вулиця. За огорожею — тільки ріка й дерева. Найближче чуже вікно Вас не побачить.
+          Тупікова вулиця. За огорожею — ріка й дерева, більше нічого. Найближче вікно сусіда — за садом.
         </p>
       </div>
 
       {/* Scroll hint — typographic only, no animated cliché. The day→night scrub IS the cue. */}
       <div className="hero-hint absolute inset-x-0 bottom-6 z-10 flex justify-center text-[var(--color-text-muted)]">
         <span className="text-[10px] uppercase tracking-[0.32em] opacity-70">
-          гортайте — день стає ніччю
+          гортайте — настає вечір
         </span>
       </div>
     </section>

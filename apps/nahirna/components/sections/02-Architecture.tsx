@@ -6,18 +6,19 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { TextShelf } from "@/components/ui/TextShelf";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// 02 · АРХІТЕКТУРА — «Крізь скло». Sticky reveal: the exterior (day) is framed by a window
-// aperture that OPENS on scroll (clip-path inset shrinks to 0), revealing the interior behind
-// it — outside → inside, "looking through the glass". Material detail captions stagger in.
-// clip-path is GPU-composited; only the inset animates (no layout). Reduced-motion → two static
-// frames stacked; mobile → simple fade (no aperture).
+// 02 · АРХІТЕКТУРА — «Зроблено для тих, що залишаються». REBUILT (council + product specs):
+// old "window-reveal крізь скло" removed (read as a glitch). New: TEXT-SHELF DIPTYCH — text on a
+// solid chocolate panel (always legible) beside a media window that DISSOLVES day→night on scroll
+// (NOT a pixel crossfade-morph of mismatched frames: opacity 0→1 + gentle scale = "the same house
+// at another hour", deliberate). The shelf H2 swaps day→night copy in sync. Detail row beneath.
 const DETAILS = [
-  { k: "d1", label: "Клінкерна цегла", sub: "темна, шоколадна — надовго" },
-  { k: "d2", label: "Панорамне скління", sub: "вода в кадрі від світанку" },
-  { k: "d3", label: "Глибокі звиси даху", sub: "ховають вікна від полудня" },
+  { k: "d1", label: "Клінкер.", body: "Темна шоколадна цегла, що з роками тільки темнішає й шляхетнішає." },
+  { k: "d2", label: "Колона.", body: "Цегляна шахта, білий камінь — база й капітель. Не пофарбовано — складено." },
+  { k: "d3", label: "Дах.", body: "Глибокі звиси, олівковий тон. Тінь у спеку, сухі стіни в дощ." },
 ];
 
 export default function Architecture() {
@@ -27,147 +28,126 @@ export default function Architecture() {
   useGSAP(
     () => {
       if (reduced) {
-        gsap.set(".arch-aperture", { clipPath: "inset(0% 0% 0% 0%)" });
-        gsap.set(".arch-interior", { opacity: 1 });
-        gsap.set(".arch-detail", { opacity: 1, x: 0 });
-        gsap.set(".arch-copy", { opacity: 1, y: 0 });
+        // Static: show the night frame (more dramatic) + night copy + details visible.
+        gsap.set(".arch-night", { opacity: 1 });
+        gsap.set(".arch-h2-day", { opacity: 0 });
+        gsap.set(".arch-h2-night", { opacity: 1 });
+        gsap.set(".arch-detail", { opacity: 1, y: 0 });
         return;
       }
 
-      const mm = gsap.matchMedia();
-
-      // Desktop: the window aperture opens (exterior frame retracts to edges → interior fills).
-      mm.add("(min-width: 769px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: "+=160%",
-            scrub: true,
-            pin: ".arch-stage",
-            anticipatePin: 1,
-          },
-        });
-
-        // Exterior layer is clipped from full → a centered window slot, revealing interior.
-        // We animate the EXTERIOR's clip to a window (inset grows), so interior shows through.
-        tl.fromTo(
-          ".arch-exterior",
-          { clipPath: "inset(0% 0% 0% 0%)" },
-          { clipPath: "inset(12% 16% 12% 16%)", ease: "power2.inOut" },
-          0,
-        );
-        // Interior fades up behind as the window opens.
-        tl.fromTo(".arch-interior", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, ease: "none" }, 0);
-        // Detail captions stagger in over the second half.
-        tl.from(
-          ".arch-detail",
-          { opacity: 0, x: -28, duration: 0.18, stagger: 0.12, ease: "power3.out" },
-          0.4,
-        );
-        tl.from(".arch-copy", { opacity: 0, y: 24, duration: 0.2, ease: "power3.out" }, 0.3);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top top",
+          end: "+=150%",
+          scrub: true,
+          pin: ".arch-stage",
+          anticipatePin: 1,
+        },
       });
 
-      // Mobile: no aperture — cross-fade exterior → interior, captions just reveal on enter.
-      mm.add("(max-width: 768px)", () => {
-        gsap.set(".arch-exterior", { clipPath: "inset(0% 0% 0% 0%)" });
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: root.current, start: "top top", end: "+=120%", scrub: true, pin: ".arch-stage" },
-        });
-        tl.fromTo(".arch-interior", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
-        gsap.from(".arch-detail", {
-          opacity: 0,
-          y: 18,
-          stagger: 0.12,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: { trigger: ".arch-copy", start: "top 80%", once: true },
-        });
-        gsap.from(".arch-copy", {
-          opacity: 0,
-          y: 20,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: { trigger: ".arch-copy", start: "top 82%", once: true },
-        });
+      // Day → night dissolve in the media window (opacity + gentle scale, both layers).
+      tl.fromTo(".arch-night", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
+      tl.fromTo(".arch-media-inner", { scale: 1.0 }, { scale: 1.04, ease: "none" }, 0);
+      // H2 copy swaps day→night through the midpoint (fade-through, not abrupt).
+      tl.to(".arch-h2-day", { opacity: 0, ease: "none", duration: 0.4 }, 0.3);
+      tl.fromTo(".arch-h2-night", { opacity: 0 }, { opacity: 1, ease: "none", duration: 0.4 }, 0.45);
+    },
+    { scope: root, dependencies: [reduced] },
+  );
+
+  // Detail row reveal (separate, on enter — not tied to the pin scrub).
+  useGSAP(
+    () => {
+      if (reduced) return;
+      gsap.from(".arch-detail", {
+        opacity: 0,
+        y: 22,
+        duration: 1.5,
+        ease: "power3.out",
+        stagger: 0.14,
+        scrollTrigger: { trigger: ".arch-details", start: "top 80%", once: true },
       });
     },
     { scope: root, dependencies: [reduced] },
   );
 
+  const mediaWindow = (
+    <div className="relative h-[42vh] w-full overflow-hidden md:h-full">
+      <div className="arch-media-inner absolute inset-0 will-change-transform">
+        {/* DAY */}
+        <Image
+          src="/images/exterior-terrace-columns.webp"
+          alt="Тераса вілли вдень: цегляні колони з білим каменем на базі й капітелі, глибокі звиси даху"
+          fill
+          sizes="(max-width: 768px) 100vw, 60vw"
+          loading="lazy"
+          className="object-cover"
+        />
+        {/* NIGHT — dissolves in on scroll */}
+        <Image
+          src="/images/exterior-night-1.webp"
+          alt="Фасад вілли вночі: тепле світло вікон, підсвітка карнизів, кулі-самшити, зоряне небо"
+          fill
+          sizes="(max-width: 768px) 100vw, 60vw"
+          loading="lazy"
+          className="arch-night absolute inset-0 object-cover"
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <section ref={root} className="relative bg-night" aria-label="Архітектура крізь скло">
-      <div className="arch-stage relative flex h-[100svh] min-h-[100svh] w-full items-center overflow-hidden">
-        {/* Interior (behind) — revealed through the opening window. */}
-        <div className="arch-interior absolute inset-0">
-          <Image
-            src="/images/living-day.webp"
-            alt="Інтер'єр кухні-вітальні вдень: панорамне скління з виглядом на воду"
-            fill
-            sizes="100vw"
-            loading="lazy"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-[var(--color-night)]/35" aria-hidden />
-        </div>
+    <section ref={root} className="relative bg-night" aria-label="Архітектура — матеріали">
+      <div className="arch-stage relative h-[100svh] min-h-[100svh] w-full overflow-hidden">
+        <div className="flex h-full flex-col">
+          <TextShelf
+            className="flex-1"
+            shelfSide="left"
+            media={mediaWindow}
+            shelf={
+              <div>
+                <p className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+                  матеріали
+                </p>
+                {/* H2 — day/night copy swap in sync with the media dissolve. */}
+                <div className="relative">
+                  <h2
+                    className="arch-h2-day text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-text)]"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Удень цей дім — про камінь.
+                  </h2>
+                  <h2
+                    className="arch-h2-night absolute inset-0 text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-warm)]"
+                    style={{ fontFamily: "var(--font-display)", opacity: 0 }}
+                  >
+                    А коли темніє — про світло.
+                  </h2>
+                </div>
 
-        {/* Exterior (front) — clipped open on scroll. */}
-        <div className="arch-exterior absolute inset-0" style={{ clipPath: "inset(0% 0% 0% 0%)" }}>
-          <Image
-            src="/images/exterior-day-1.webp"
-            alt="Фасад будинку вдень: темна клінкерна цегла, колони з білим каменем на базі й капітелі, олівковий шатровий дах"
-            fill
-            sizes="100vw"
-            loading="lazy"
-            className="object-cover"
+                <p className="mt-6 max-w-md text-base leading-relaxed text-[var(--color-text)]/85 md:text-lg">
+                  Темна клінкерна цегла й білий камінь на колонах. Такі матеріали не оновлюють кожні
+                  пʼять років — вони просто гарнішають. Цей дім будували для тих, що залишаються.
+                </p>
+                <p className="mt-5 max-w-md text-base italic leading-relaxed text-[var(--color-warm)]/90">
+                  Один поверх. Між Вами і ранковою кавою на терасі — жодної сходинки.
+                </p>
+              </div>
+            }
           />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(15,15,14,0.78) 0%, rgba(15,15,14,0.62) 28%, rgba(15,15,14,0.20) 48%, transparent 62%)",
-            }}
-            aria-hidden
-          />
-        </div>
 
-        {/* Copy + material details (front-most). */}
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
-          <div className="max-w-xl">
-            <div className="arch-copy">
-              <p className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
-                Матеріали
-              </p>
-              <h2
-                className="scrim-text text-[clamp(2.1rem,5.2vw,3.6rem)] font-medium leading-[1.05] tracking-[-0.025em] text-[var(--color-text)]"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Удень — строгий.
-                <br />
-                Надвечір — теплий.
-              </h2>
-              <p className="scrim-text mt-6 max-w-md text-base leading-relaxed text-[var(--color-text)]/90 md:text-lg">
-                Темна клінкерна цегла. Білий камінь на колонах. Глибокі навіси ховають вікна від
-                полуденного сонця, а коли надворі темніє — уздовж карнизів вмикається підсвітка, і
-                фасад теплішає просто на очах.
-              </p>
-              <p className="scrim-text mt-5 max-w-md text-base italic leading-relaxed text-[var(--color-warm)]/90">
-                Один поверх. Між Вами і ранковою кавою на терасі — жодної сходинки.
-              </p>
-            </div>
-
-            {/* Detail chips */}
-            <ul className="mt-9 space-y-3">
-              {DETAILS.map((d) => (
-                <li key={d.k} className="arch-detail flex items-baseline gap-3 scrim-text">
-                  <span className="mt-2 h-px w-10 shrink-0 bg-[var(--color-warm)]/45" aria-hidden />
-                  <span className="text-sm text-[var(--color-text)] md:text-base">
-                    <strong className="font-medium text-[var(--color-text)]">{d.label}</strong>
-                    <span className="text-[var(--color-text-muted)]"> — {d.sub}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+          {/* Detail row — full tezas on the chocolate base, never clipped. */}
+          <div className="arch-details grid grid-cols-1 gap-6 bg-[#15110d] px-6 py-8 md:grid-cols-3 md:px-12">
+            {DETAILS.map((d) => (
+              <div key={d.k} className="arch-detail flex items-baseline gap-3">
+                <span className="mt-2 h-px w-8 shrink-0 bg-[var(--color-warm)]/45" aria-hidden />
+                <p className="text-sm leading-relaxed text-[var(--color-text-muted)] md:text-base">
+                  <strong className="font-medium text-[var(--color-text)]">{d.label}</strong> {d.body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,19 +1,77 @@
 "use client";
 
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { Reveal } from "@/components/ui/Reveal";
-import { POIS } from "@/lib/site";
 
-// 06 · ЛОКАЦІЯ — «Вінниця, вул. Нагірна». Council: NO Leaflet (LCP grenade + no data), and
-// NEVER invent distances (a fake/vague map kills trust on a $270k sale). So this is a static,
-// stylized SVG "map" — a dead-end street ending at the river, with the villa pin. Only VERIFIED
-// POIs render (the "власний берег · 0 хв" line is true today); unverified center/school stay
-// hidden behind POIS[].verified until the client confirms. POIs are framed as TIME, not distance.
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+// 06 · ЛОКАЦІЯ — «Здається, що за містом». REBUILT (council: stylized NOT satellite — legal+dim+
+// privacy-breadcrumb+slop, zero lift). A dense stylized district plate (chocolate streets, the
+// Південний Буг S-bend, a GOLD glowing "own shore" stretch) + scroll-driven gold overlay (pin on
+// the DISTRICT not the exact yard — privacy-safe by construction; an illustration can't leak a
+// yard). Map's job is INFORMATION: the one verified number (0 хв berg) + an honest line for the
+// rest (no invented distances). Subtle pointer-parallax tilt on the plate for premium depth.
 export default function Location() {
-  const verified = POIS.filter((p) => p.verified);
-  const pending = POIS.filter((p) => !p.verified);
+  const wrap = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const plate = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const fine = window.matchMedia("(min-width: 768px) and (pointer: fine)").matches;
+
+      if (reduced) {
+        gsap.set("[data-map-layer]", { opacity: 1, scale: 1, y: 0 });
+        return;
+      }
+
+      // Overlay layers reveal in sequence as the map enters (luxury tempo, stagger).
+      gsap.from("[data-map-layer]", {
+        opacity: 0,
+        y: 14,
+        scale: 0.96,
+        duration: 1.4,
+        ease: "power3.out",
+        stagger: 0.18,
+        transformOrigin: "center",
+        scrollTrigger: { trigger: stage.current, start: "top 72%", once: true },
+      });
+
+      // Pointer-parallax: tilt the plate a few degrees toward the cursor (desktop fine-pointer).
+      if (fine && plate.current && stage.current) {
+        const pl = plate.current;
+        const st = stage.current;
+        const rotX = gsap.quickTo(pl, "rotationX", { duration: 0.6, ease: "power2.out" });
+        const rotY = gsap.quickTo(pl, "rotationY", { duration: 0.6, ease: "power2.out" });
+        const onMove = (e: PointerEvent) => {
+          const r = st.getBoundingClientRect();
+          const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+          const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+          rotX(3 - dy * 2.5);
+          rotY(dx * 3);
+        };
+        const onLeave = () => {
+          rotX(3);
+          rotY(0);
+        };
+        gsap.set(pl, { rotationX: 3 });
+        st.addEventListener("pointermove", onMove);
+        st.addEventListener("pointerleave", onLeave);
+        return () => {
+          st.removeEventListener("pointermove", onMove);
+          st.removeEventListener("pointerleave", onLeave);
+        };
+      }
+    },
+    { scope: wrap },
+  );
 
   return (
-    <section className="relative bg-night py-[14vh]" aria-label="Локація — вул. Нагірна, Вінниця">
+    <section ref={wrap} className="relative bg-night py-[14vh]" aria-label="Локація — вул. Нагірна, Вінниця">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal className="mb-12 max-w-3xl">
           <p data-reveal-child className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
@@ -27,96 +85,84 @@ export default function Location() {
             Здається, що за містом. Насправді — у Вінниці.
           </h2>
           <p data-reveal-child className="mt-6 max-w-2xl text-base leading-relaxed text-[var(--color-text-muted)] md:text-lg">
-            Тупікова вулиця тримає Вас осторонь від руху й шуму, але до міста — рукою подати.
+            Тупікова вулиця тримає Вас осторонь від руху й шуму. Але до міста — рукою подати.
           </p>
         </Reveal>
 
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-          {/* Stylized map — dead-end street → riverbank, villa pin. SVG, no tiles, no SDK. */}
+        <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+          {/* Stylized district plate + scroll-driven gold overlay. */}
           <Reveal>
-            <div className="relative aspect-[16/11] w-full overflow-hidden rounded-sm border border-[var(--color-warm)]/10 bg-[#14110e]">
-              <svg viewBox="0 0 320 220" className="h-full w-full" role="img" aria-label="Схема розташування: тупікова вулиця, що виходить до берега Південного Бугу">
-                {/* river band (bottom) */}
-                <path d="M0 168 C 60 156, 120 180, 200 170 S 300 158, 320 166 L320 220 L0 220 Z" fill="#1d2a2e" />
-                <path d="M0 168 C 60 156, 120 180, 200 170 S 300 158, 320 166" fill="none" stroke="#3a5560" strokeWidth="0.8" opacity="0.6" />
-                {/* faint water highlight */}
-                <path d="M30 188 C 110 180, 180 196, 290 186" fill="none" stroke="#56808c" strokeWidth="0.6" opacity="0.4" />
-
-                {/* the dead-end street (from town edge, top-left, curving down to the plot) */}
-                <path
-                  d="M-10 40 C 70 50, 90 90, 150 110 S 210 140, 220 150"
-                  fill="none"
-                  stroke="#3a342c"
-                  strokeWidth="9"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M-10 40 C 70 50, 90 90, 150 110 S 210 140, 220 150"
-                  fill="none"
-                  stroke="#5b5347"
-                  strokeWidth="1"
-                  strokeDasharray="3 5"
-                  opacity="0.7"
-                />
-
-                {/* the plot — between street end and the water */}
-                <rect x="196" y="138" width="56" height="34" rx="2" fill="#2c2622" stroke="#e8c9a0" strokeOpacity="0.35" />
-
-                {/* neighbouring town blocks (top-left) — abstract, muted */}
-                <g opacity="0.28" fill="#2a2620">
-                  <rect x="6" y="18" width="26" height="18" rx="1" />
-                  <rect x="40" y="14" width="22" height="16" rx="1" />
-                  <rect x="10" y="44" width="20" height="14" rx="1" />
-                </g>
-
-                {/* villa pin */}
-                <g transform="translate(224,150)">
-                  <circle r="13" fill="#e8c9a0" opacity="0.16">
-                    <animate attributeName="r" values="10;16;10" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.18;0.04;0.18" dur="3s" repeatCount="indefinite" />
-                  </circle>
-                  <circle r="4.5" fill="#e8c9a0" />
-                  <circle r="4.5" fill="none" stroke="#0f0f0e" strokeWidth="1" />
-                </g>
-              </svg>
-
-              {/* labels over the svg */}
-              <span className="absolute left-4 top-4 text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-                Вінниця
-              </span>
-              <span className="absolute bottom-4 right-4 text-[10px] uppercase tracking-[0.2em] text-[var(--color-warm)]/70">
-                Південний Буг
-              </span>
-              <span
-                className="absolute text-[11px] text-[var(--color-text)]"
-                style={{ left: "calc(224 / 320 * 100%)", top: "calc(150 / 220 * 100% + 14px)", transform: "translateX(-50%)" }}
+            <div ref={stage} className="relative aspect-[1200/800] w-full" style={{ perspective: "1200px" }}>
+              <div
+                ref={plate}
+                className="relative h-full w-full overflow-hidden rounded-sm border border-[var(--color-warm)]/10"
+                style={{ transformStyle: "preserve-3d", willChange: "transform" }}
               >
-                вул. Нагірна
-              </span>
+                {/* The stylized map plate (inline via background — vector-crisp, themeable, light). */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: "url('/plan/district-map.svg')" }}
+                  aria-hidden
+                />
+                {/* soft inner vignette to seat the plate */}
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{ background: "radial-gradient(120% 100% at 70% 75%, transparent 40%, rgba(15,15,14,0.5) 100%)" }}
+                  aria-hidden
+                />
+
+                {/* Overlay shapes (SVG over the plate, animate on scroll). */}
+                <svg viewBox="0 0 1200 800" className="absolute inset-0 h-full w-full" role="img"
+                     aria-label="Стилізована схема: тупікова вулиця, що виходить до власного берега Південного Бугу">
+                  {/* Gold pin on the DISTRICT (near where the dead-end street meets the shore). */}
+                  <g data-map-layer transform="translate(880,548)">
+                    <circle r="34" fill="#E8C9A0" opacity="0.14">
+                      <animate attributeName="r" values="24;40;24" dur="3.4s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.16;0.04;0.16" dur="3.4s" repeatCount="indefinite" />
+                    </circle>
+                    <circle r="7" fill="#E8C9A0" />
+                    <circle r="7" fill="none" stroke="#0f0f0e" strokeWidth="2" />
+                  </g>
+                </svg>
+
+                {/* Labels (DOM, over the plate). */}
+                <span data-map-layer className="absolute left-5 top-4 text-[10px] uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
+                  Вінниця
+                </span>
+                <span data-map-layer className="absolute bottom-4 right-5 text-[10px] uppercase tracking-[0.24em] text-[var(--color-warm)]/80">
+                  Південний Буг
+                </span>
+                <span
+                  data-map-layer
+                  className="absolute text-[11px] text-[var(--color-text)]"
+                  style={{ left: "73%", top: "73%", transform: "translate(-50%, 14px)" }}
+                >
+                  вул. Нагірна
+                </span>
+              </div>
             </div>
+            <p className="mt-4 text-xs text-[var(--color-text-muted)]/80">
+              Точну адресу показуємо серйозним покупцям на перегляді — задля приватності власника.
+            </p>
           </Reveal>
 
-          {/* POI list — verified only render; framed as time. */}
-          <Reveal className="space-y-6" stagger={0.14}>
-            {verified.map((p) => (
-              <div key={p.id} data-reveal-child className="border-l border-[var(--color-warm)]/25 pl-5">
-                <p className="text-[2rem] font-light leading-none text-[var(--color-warm)]">{p.value}</p>
-                <p className="mt-2 text-base text-[var(--color-text)]">{p.label}</p>
-                {p.note ? <p className="mt-1 text-sm text-[var(--color-text-muted)]">{p.note}</p> : null}
-              </div>
-            ))}
+          {/* Right column — the one verified number + honest line (council: no invented distances). */}
+          <Reveal className="space-y-8" stagger={0.14}>
+            <div data-reveal-child className="border-l border-[var(--color-warm)]/25 pl-6">
+              <p className="text-[clamp(3rem,5vw,4.2rem)] font-light leading-none text-[var(--color-warm)]">0</p>
+              <p className="mt-2 text-lg text-[var(--color-text)]" style={{ fontFamily: "var(--font-display)" }}>
+                хвилин до власного берега
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">Він просто внизу.</p>
+            </div>
 
-            {/* Honest placeholder for the rest — shown as "уточнюється", NOT a fake number.
-                When the client confirms a distance, flip POIS[].verified and it renders above. */}
-            {pending.length > 0 ? (
-              <div data-reveal-child className="border-l border-[var(--color-text-muted)]/20 pl-5">
-                <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
-                  Час до центру міста, школи й садка{" "}
-                  <span className="text-[var(--color-text)]">уточнюємо</span> — назвемо точні
-                  хвилини на перегляді, без округлень.
-                </p>
-              </div>
-            ) : null}
+            <div data-reveal-child className="border-l border-[var(--color-text-muted)]/20 pl-6">
+              <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
+                Час до центру, школи й садка{" "}
+                <span className="text-[var(--color-text)]">назвемо точно на перегляді</span> — без
+                округлень і без «приблизно».
+              </p>
+            </div>
           </Reveal>
         </div>
       </div>

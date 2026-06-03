@@ -10,12 +10,14 @@ import CTA from "@/components/sections/08-CTA";
 import Footer from "@/components/sections/09-Footer";
 import { CallPill } from "@/components/ui/CallPill";
 import { Cursor } from "@/components/ui/Cursor";
+import { Preloader } from "@/components/ui/Preloader";
 
 // The landing assembles sections 00→09 in order. Each is its own component under
 // components/sections. The CallPill rides above everything once past the water section.
 export default function Page() {
   return (
     <>
+      <Preloader />
       <main>
         <Hero />
         <Water />

@@ -69,8 +69,8 @@ export default function Floorplan() {
         </Reveal>
         <Reveal className="mb-10 max-w-2xl">
           <p data-reveal-child className="text-base leading-relaxed text-[var(--color-text-muted)] md:text-lg">
-            Один поверх, три спальні, дві гардеробні, два санвузли. Натисніть кімнату — покажемо
-            площу й куди дивляться вікна.
+            Три спальні, кожна зі своїм світлом. Майстер-спальня з гардеробом і власною ванною.
+            Коридору — рівно, щоб дійти, не більше. Наведіть на кімнату — побачите, скільки в ній метрів.
           </p>
         </Reveal>
 
