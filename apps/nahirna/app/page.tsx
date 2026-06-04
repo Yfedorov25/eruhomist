@@ -2,6 +2,7 @@ import Hero from "@/components/sections/00-Hero";
 import Water from "@/components/sections/01-Water";
 import Architecture from "@/components/sections/02-Architecture";
 import Space from "@/components/sections/03-Space";
+import Landscape from "@/components/sections/03b-Landscape";
 import Floorplan from "@/components/sections/04-Floorplan";
 import Walkthrough from "@/components/sections/05-Walkthrough";
 import Location from "@/components/sections/06-Location";
@@ -23,6 +24,7 @@ export default function Page() {
         <Water />
         <Architecture />
         <Space />
+        <Landscape />
         <Floorplan />
         <Walkthrough />
         <Location />
