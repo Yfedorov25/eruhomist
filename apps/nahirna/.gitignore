@@ -5,3 +5,9 @@ dev.log
 prod.log
 *.tsbuildinfo
 .vercel
+# Orchestrator asset ZIP staging (served copies live in public/)
+nahirna-assets/
+/video/
+/images/night/
+/images/landscape/
+/images/renders-source/

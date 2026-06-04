@@ -2,7 +2,10 @@
 // `npm run frames` (scripts/build-frames.sh → FFmpeg, FPS=10). 181 frames over the
 // overlay scrub. Desktop 1920w, mobile 1080w. First frame = poster (reduced-motion /
 // decode-failure fallback).
-export const TOUR_FRAME_COUNT = 181;
+// 154 desktop / 132 mobile frames, extracted at 14/12fps from the NEW 24fps-native Seedance
+// videos (facade→terrace→water, 11s master). Dense sampling of real 24fps motion = smooth scrub
+// (the old 181 frames came from 10fps-downsampled source → choppy/repeating; fixed).
+export const TOUR_FRAME_COUNT = 154;
 
 export const pad4 = (n: number) => String(n).padStart(4, "0");
 

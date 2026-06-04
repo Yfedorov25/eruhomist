@@ -1,18 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { GalleryCard, type Card } from "@/components/ui/GalleryCard";
 
-// 03 · ПРОСТІР — «Серце дому, 45 м²». A gallery of the open kitchen-living + terrace. Cards
-// reveal with a stagger on enter and lift gently on hover (transform/shadow only). Not pinned
-// → light, lazy, below-the-fold. The "walk the house" CTA lives here and opens the tour overlay
-// (section 05) via a window event the overlay listens for. Reduced-motion → static grid (Reveal
-// handles that); hover effects degrade to nothing on touch.
-const CARDS = [
-  { src: "/images/terrace.webp", title: "Тераса над водою", meta: "29,8 м²", span: "md:col-span-5 md:row-span-2", alt: "Тераса з виходом до Південного Бугу" },
-  { src: "/images/living-day.webp", title: "Кухня-вітальня", meta: "45 м²", span: "md:col-span-7", alt: "Кухня-вітальня вдень: відкритий простір, панорамні вікна на воду" },
-  { src: "/images/living-evening.webp", title: "Вечірнє світло", meta: "тепла підсвітка", span: "md:col-span-7", alt: "Кухня-вітальня ввечері з теплим освітленням" },
-  { src: "/images/water-terrace-golden.webp", title: "Золота година", meta: "вид з тераси", span: "md:col-span-12", alt: "Вид з тераси на воду в золоту годину" },
+// 03 · ПРОСТІР — «Серце дому, 45 м²». Interactive gallery (council/kickoff F2): cards "come alive"
+// on click — the terrace plays a water cinemagraph, the interior crossfades day→evening (lights on,
+// same room — can't morph, can't lie). NOT empty→furnished (buyer: staging an unfinished house reads
+// as "played"). The "walk the house" CTA opens the tour overlay. Reduced-motion → static grid.
+const CARDS: Card[] = [
+  { src: "/images/terrace.webp", title: "Тераса над водою", meta: "29,8 м²", span: "md:col-span-5 md:row-span-2", alt: "Тераса з виходом до Південного Бугу", video: "/video/cinemagraph/terrace-water-loop.mp4" },
+  { src: "/images/living-day.webp", title: "Кухня-вітальня", meta: "45 м²", span: "md:col-span-7", alt: "Кухня-вітальня вдень: відкритий простір, панорамні вікна на воду", night: "/images/living-evening.webp" },
+  { src: "/images/water-terrace-golden.webp", title: "Золота година", meta: "вид з тераси", span: "md:col-span-7", alt: "Вид з тераси на воду в золоту годину", night: "/images/night/night-terrace.png" },
+  { src: "/images/exterior-day-2.webp", title: "Фасад серед зелені", meta: "приватність", span: "md:col-span-12", alt: "Фасад вілли серед дерев — приватна ділянка" },
 ];
 
 export default function Space() {
@@ -47,40 +46,10 @@ export default function Space() {
           </p>
         </Reveal>
 
-        {/* Gallery */}
+        {/* Interactive gallery — click a card to bring it alive (cinemagraph / day→evening). */}
         <Reveal className="grid grid-cols-1 gap-4 md:grid-cols-12 md:auto-rows-[clamp(170px,21vh,230px)]" stagger={0.14}>
           {CARDS.map((c) => (
-            <figure
-              key={c.src}
-              data-reveal-child
-              className={`group relative aspect-[4/3] overflow-hidden rounded-sm md:aspect-auto md:h-full ${c.span}`}
-            >
-              <Image
-                src={c.src}
-                alt={c.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                loading="lazy"
-                className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform group-hover:scale-[1.05]"
-              />
-              {/* Caption scrim */}
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{ background: "linear-gradient(to top, rgba(15,15,14,0.78) 0%, transparent 48%)" }}
-                aria-hidden
-              />
-              <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
-                <span
-                  className="text-lg text-[var(--color-text)] md:text-xl"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {c.title}
-                </span>
-                <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-[var(--color-warm)]/90">
-                  {c.meta}
-                </span>
-              </figcaption>
-            </figure>
+            <GalleryCard key={c.src} c={c} />
           ))}
         </Reveal>
 

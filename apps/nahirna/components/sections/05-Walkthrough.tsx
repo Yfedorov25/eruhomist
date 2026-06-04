@@ -163,6 +163,11 @@ export default function Walkthrough() {
                 гортайте — і Ви всередині
               </span>
 
+              {/* Disclosure (unfinished house): the interior shown is a visualisation. */}
+              <span className="pointer-events-none fixed bottom-3 left-1/2 -translate-x-1/2 px-4 text-center text-[10px] text-[var(--color-text-muted)]/70">
+                Інтер'єр — візуалізація. Будинок передається з чорновим оздобленням.
+              </span>
+
               {/* Climax CTA — surfaces at the golden-hour water (peak emotional moment). */}
               <div
                 className="fixed inset-x-0 bottom-20 flex justify-center transition-all duration-700"
