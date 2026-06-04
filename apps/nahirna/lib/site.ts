@@ -3,7 +3,7 @@
 // they swap in one place when the client answers (anti-slop: never invent these inline).
 
 export const FACTS = {
-  priceUsd: 270000,
+  priceUsd: 300000,
   areaHouse: 150, // м²
   plotSotky: 10, // соток
   bankSotky: 4, // ~соток власного берега

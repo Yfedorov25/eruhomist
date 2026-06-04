@@ -36,6 +36,15 @@ export default function Space() {
             45 квадратів без стін усередині: готуєте — і бачите вітальню, вітальню — і бачите терасу,
             терасу — і бачите Буг. Панорамні вікна тримають воду в кадрі від світанку до вечері.
           </p>
+          {/* Honesty (Творець): the house sells unfinished — these are visualisations of the
+              potential, not a finished interior. Stated plainly so it builds trust, not doubt. */}
+          <p
+            data-reveal-child
+            className="mt-5 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-warm)]/25 px-4 py-2 text-sm text-[var(--color-warm)]/90"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warm)]" aria-hidden />
+            Будинок продається без ремонту. Так він може виглядати — простір уже готовий до цього.
+          </p>
         </Reveal>
 
         {/* Gallery */}

@@ -153,12 +153,15 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-[16vh] md:pb-[18vh]">
-        {/* Kicker: address + river on two spans. The river clause carries the one warm-gold
-            beat in the hero (token + signature). Row layout on md+, stacked on mobile. */}
-        <p className="hero-kicker scrim-text mb-6 flex flex-col gap-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-plaster)]/85 md:mb-7 md:flex-row md:items-center md:gap-3 md:text-[11px] md:tracking-[0.2em]">
-          <span>вул. Нагірна, Вінниця</span>
-          <span aria-hidden className="hidden h-px w-6 bg-[var(--color-plaster)]/35 md:block" />
-          <span className="text-[var(--color-warm)]/85">власний берег Південного Бугу</span>
+        {/* Kicker: address + river on two spans. Sits high over the bright sky, so it carries its
+            OWN local backdrop (soft dark blur + hairline) — guarantees legibility without darkening
+            the whole photo. The river clause is the one warm-gold beat. */}
+        <p className="hero-kicker mb-6 inline-flex w-fit flex-col gap-1 self-start rounded-full bg-[rgba(15,15,14,0.32)] px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-[var(--color-plaster)] backdrop-blur-[2px] md:mb-7 md:flex-row md:items-center md:gap-3 md:text-[11px] md:tracking-[0.2em]">
+          <span style={{ textShadow: "0 1px 10px rgba(0,0,0,0.7)" }}>вул. Нагірна, Вінниця</span>
+          <span aria-hidden className="hidden h-px w-6 bg-[var(--color-plaster)]/40 md:block" />
+          <span className="text-[var(--color-warm)]" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.7)" }}>
+            власний берег Південного Бугу
+          </span>
         </p>
 
         <h1 className="scrim-text max-w-3xl text-[clamp(2.4rem,7vw,5.2rem)] font-normal leading-[1.02] tracking-[-0.025em] text-[var(--color-text)]">
