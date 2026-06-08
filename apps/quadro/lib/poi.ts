@@ -130,11 +130,12 @@ export const POI: Poi[] = [
   },
 ];
 
-export const CATEGORIES: Record<PoiCategory, { icon: string; label: string }> = {
-  water: { icon: "💧", label: "Озеро" },
-  park: { icon: "🌳", label: "Парки" },
-  food: { icon: "🍽", label: "Ресторани" },
-  sport: { icon: "🏋", label: "Спорт" },
-  mall: { icon: "🛍", label: "ТРЦ" },
-  kids: { icon: "🧸", label: "Садочки" },
+// iconId -> a <symbol> in MapIcons.tsx (SVG sprite, per PB_interactive_map playbook).
+export const CATEGORIES: Record<PoiCategory, { iconId: string; label: string }> = {
+  water: { iconId: "ic-water", label: "Озеро" },
+  park: { iconId: "ic-park", label: "Парки" },
+  food: { iconId: "ic-food", label: "Ресторани" },
+  sport: { iconId: "ic-sport", label: "Спорт" },
+  mall: { iconId: "ic-mall", label: "ТРЦ" },
+  kids: { iconId: "ic-kids", label: "Садочки" },
 };

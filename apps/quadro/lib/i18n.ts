@@ -1,5 +1,6 @@
 import uk from "@/messages/uk.json";
 import en from "@/messages/en.json";
+import { typoDeep } from "@/lib/typo";
 
 export const locales = ["uk", "en"] as const;
 export type Locale = (typeof locales)[number];
@@ -9,7 +10,9 @@ export const defaultLocale: Locale = "uk";
 // until real EN copy lands. Types come from the UK dictionary.
 export type Messages = typeof uk;
 
-const dictionaries: Record<Locale, Messages> = { uk, en: en as Messages };
+// Ukrainian micro-typography (non-breaking spaces binding short words) applied to ALL copy once
+// at module load — covers every section without per-string edits.
+const dictionaries: Record<Locale, Messages> = { uk: typoDeep(uk), en: typoDeep(en as Messages) };
 
 export function getMessages(locale: Locale): Messages {
   return dictionaries[locale] ?? dictionaries[defaultLocale];

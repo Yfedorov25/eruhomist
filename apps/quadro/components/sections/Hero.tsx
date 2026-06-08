@@ -7,6 +7,7 @@ import { SplitText } from "gsap/SplitText";
 import { richText } from "@/lib/format";
 import type { Messages } from "@/lib/i18n";
 import { HERO_FRAME_COUNT, heroFramePath } from "@/lib/hero-frames";
+import "@/lib/gsapEase"; // "air" signature ease for the H1 reveal
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -294,9 +295,11 @@ export function Hero({ m }: { m: Messages }) {
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let split: SplitText | null = null;
     const ctx = gsap.context(() => {
-      split = new SplitText(el, { type: "lines", linesClass: "overflow-hidden py-[0.08em]" });
+      // Smooth FADE-rise (dissolve), not a yPercent:110 "slideshow" jump — the rejected pattern
+      // from the sister site. Small y + opacity on the "air" ease = the unified motion language.
+      split = new SplitText(el, { type: "lines" });
       gsap.from(split.lines, {
-        yPercent: 110, opacity: 0, duration: 1.8, ease: "power3.out", stagger: 0.12, delay: 0.25,
+        y: 16, opacity: 0, duration: 1.4, ease: "air", stagger: 0.08, delay: 0.25,
       });
     }, el);
     return () => { split?.revert(); ctx.revert(); };

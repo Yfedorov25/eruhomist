@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { richText, paragraphs } from "@/lib/format";
 import type { Messages } from "@/lib/i18n";
+import "@/lib/gsapEase"; // "air" signature ease for the H2 reveal
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -73,11 +74,12 @@ export function Architecture({ m }: { m: Messages }) {
         // as "turning on" (an event), not a co-timed dissolve
         .fromTo(glow, { opacity: 0 }, { opacity: 0.6, ease: "power1.in" }, 0.45);
 
-      // H2 reveal synced to the opening (split into lines, rises in)
-      split = new SplitText(h2, { type: "lines", linesClass: "overflow-hidden py-[0.06em]" });
+      // H2 reveal synced to the window opening — smooth FADE-rise (small y + opacity on "air"),
+      // NOT a yPercent:110 jump (the rejected "slideshow" pattern). Matches the site-wide language.
+      split = new SplitText(h2, { type: "lines" });
       tl.from(
         split.lines,
-        { yPercent: 110, opacity: 0, duration: 0.4, ease: "power3.out", stagger: 0.12 },
+        { y: 16, opacity: 0, duration: 0.5, ease: "air", stagger: 0.1 },
         0.25,
       );
 

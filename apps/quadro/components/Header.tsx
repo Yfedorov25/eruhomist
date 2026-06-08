@@ -36,13 +36,18 @@ export function Header({ locale, m }: { locale: Locale; m: Messages }) {
       className="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
       style={{
         // At top: warm-white text over the bright daytime hero, lifted by a soft top
-        // scrim. After scroll: theme-tracked --scrim veil + blur as the page darkens.
+        // scrim. After scroll: a theme-tracked --scrim veil darkens with the page.
+        // NO backdrop-filter: a persistent blur on a fixed full-width header forces the GPU to
+        // re-blur the backdrop strip behind it EVERY scroll frame for the whole page below the
+        // hero — a continuous scroll-lag source. The opaque-enough --scrim tint gives the same
+        // "frosted nav" legibility without the per-frame backdrop read-back.
         color: scrolled ? "var(--fg)" : "rgba(245,243,238,0.92)",
-        backgroundColor: scrolled ? "var(--scrim)" : "transparent",
+        // a touch more opaque than --scrim (which is only ~0.18 alpha near the top of the
+        // content range) so nav stays legible over busy renders now that the blur is gone.
+        backgroundColor: scrolled ? "rgba(8,10,16,0.72)" : "transparent",
         backgroundImage: scrolled
           ? "none"
           : "linear-gradient(to bottom, rgba(6,8,14,0.45), rgba(6,8,14,0))",
-        backdropFilter: scrolled ? "blur(8px)" : "none",
       }}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">

@@ -31,12 +31,14 @@ export function Concept({ m }: { m: Messages }) {
             ))}
           </div>
         </div>
-        <CrossfadeMedia
-          day="/renders/render_05.jpg"
-          evening="/renders/render_N_02.jpg"
-          alt="Фасад QUADRO HOUSE удень і ввечері"
-          className="aspect-[4/3] w-full rounded-sm"
-        />
+        <div data-clip="up" data-cursor="дивитися" className="aspect-[4/3] w-full">
+          <CrossfadeMedia
+            day="/renders/render_05.jpg"
+            evening="/renders/render_N_02.jpg"
+            alt="Фасад QUADRO HOUSE удень і ввечері"
+            className="h-full w-full rounded-sm"
+          />
+        </div>
       </div>
     </Section>
   );

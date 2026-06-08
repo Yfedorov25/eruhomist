@@ -49,3 +49,17 @@ scaffold-tmp/
 .playwright-mcp/
 hero-verify.png
 .gstack/
+
+# scratch QA screenshots dropped in the repo root during iteration (never source)
+/hero-*.jpeg
+/arch-*.jpeg
+/arch-*.png
+/loc-*.jpeg
+/water-*.jpeg
+/space*.jpeg
+/browse-*.png
+# heavy local asset staging / generator scratch in root (kept local, not for git)
+/quadro_house/
+# orchestrator scratch notes accidentally written to root (the canonical copies live in references/ and ~/Downloads)
+/NAHIRNA_ORCHESTRATOR_*.md
+/PB_interactive_map.md

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import "@/lib/gsapEase"; // "air" signature ease for the curtain lift
 
 // Phase 6 — cinematic splash. A warm-dark veil over the hero: the QUADRO wordmark
 // reveals slowly while a 0→100 counter runs, then it fades elegantly the moment the
@@ -20,6 +21,7 @@ const SAFETY_MS = 5000; // hard cap — lift no matter what
 
 export function Preloader() {
   const root = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const countRef = useRef<HTMLSpanElement | null>(null);
   const ruleRef = useRef<HTMLSpanElement | null>(null);
 
@@ -72,15 +74,16 @@ export function Preloader() {
       finish();
       const wait = Math.max(0, MIN_MS - (performance.now() - mountedAt));
       liftCall = gsap.delayedCall(wait / 1000, () => {
-        gsap.to(el, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
+        // Choreographed exit: the wordmark lifts away, then the veil slides up like a curtain,
+        // revealing the hero beneath (Vide Infra-style staged entrance) — not a flat opacity fade.
+        const tl = gsap.timeline({
           onComplete: () => {
             el.style.display = "none";
             document.documentElement.classList.remove("splash-lock");
           },
         });
+        tl.to(contentRef.current, { opacity: 0, yPercent: -30, duration: 0.5, ease: "power2.in" }, 0);
+        tl.to(el, { yPercent: -100, duration: 1.0, ease: "air" }, 0.2);
       });
     };
 
@@ -111,6 +114,7 @@ export function Preloader() {
             "radial-gradient(60% 50% at 50% 45%, rgba(224,169,109,0.08) 0%, transparent 70%)",
         }}
       />
+      <div ref={contentRef} className="relative flex flex-col items-center">
       {/* The wordmark IS the entry beat — promoted big (the real fix for "barely visible"). */}
       <div className="splash-word font-display text-6xl tracking-[0.5em] text-[#f1efea] md:text-8xl">
         QUADRO
@@ -131,6 +135,7 @@ export function Preloader() {
         >
           0
         </span>
+      </div>
       </div>
     </div>
   );

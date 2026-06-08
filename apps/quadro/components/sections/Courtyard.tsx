@@ -19,18 +19,20 @@ export function Courtyard({ m }: { m: Messages }) {
         ref={ref}
         className="grid items-center gap-12 md:grid-cols-[1.05fr_0.95fr] md:gap-20 lg:gap-24"
       >
-        <CrossfadeMedia
-          day="/renders/render_10.jpg"
-          evening="/renders/render_N_03.jpg"
-          alt="Спільний двір QUADRO HOUSE удень і ввечері"
-          // The daytime aerial is flat/low-contrast — lift it so the crossfade to the
-          // warm evening pergola actually crosses temperature, not just swaps frames.
-          dayFilter="brightness(1.1) saturate(1.08) contrast(1.04)"
-          // The evening render's path-lights already carry the warmth; soften the added
-          // light-leak so it doesn't double-expose them.
-          glowIntensity={0.45}
-          className="aspect-[4/3] w-full rounded-sm"
-        />
+        <div data-clip="up" data-cursor="дивитися" className="aspect-[4/3] w-full">
+          <CrossfadeMedia
+            day="/renders/render_10.jpg"
+            evening="/renders/render_N_03.jpg"
+            alt="Спільний двір QUADRO HOUSE удень і ввечері"
+            // The daytime aerial is flat/low-contrast — lift it so the crossfade to the
+            // warm evening pergola actually crosses temperature, not just swaps frames.
+            dayFilter="brightness(1.1) saturate(1.08) contrast(1.04)"
+            // The evening render's path-lights already carry the warmth; soften the added
+            // light-leak so it doesn't double-expose them.
+            glowIntensity={0.45}
+            className="h-full w-full rounded-sm"
+          />
+        </div>
         <div>
           <SplitReveal
             as="h2"

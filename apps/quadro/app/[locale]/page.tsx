@@ -10,6 +10,9 @@ import { Roof } from "@/components/sections/Roof";
 import { DistrictMap } from "@/components/sections/DistrictMap";
 import { Specs } from "@/components/sections/Specs";
 import { Contact } from "@/components/sections/Contact";
+import { HairlineDivider } from "@/components/HairlineDivider";
+import { DecodeAhead } from "@/components/DecodeAhead";
+import { Cursor } from "@/components/Cursor";
 
 export default async function HomePage({
   params,
@@ -29,15 +32,21 @@ export default async function HomePage({
             guaranteed contrast floor (the hero owns the full day→night sweep). */}
         <div className="content-surface">
           <Concept m={m} />
+          <HairlineDivider />
           <Architecture m={m} />
+          <HairlineDivider />
           <Courtyard m={m} />
+          <HairlineDivider />
           <Roof m={m} />
+          <HairlineDivider />
           <DistrictMap m={m} />
           <Specs m={m} />
           <Contact m={m} locale={locale} />
         </div>
       </main>
       <Footer locale={locale} m={m} />
+      <DecodeAhead />
+      <Cursor />
     </>
   );
 }

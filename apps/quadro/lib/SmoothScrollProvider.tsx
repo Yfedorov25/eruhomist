@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import "@/lib/gsapEase"; // registers the "air" signature ease once, app-wide
 
 // One Lenis + GSAP ScrollTrigger pipeline for the whole page (R04). Mounted ABOVE
 // the [locale] route so a UK<->EN switch does NOT recreate it (no stacked tickers).
@@ -52,18 +53,47 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    // Global data-parallax layers (R04 pattern D): yPercent driven by scroll.
+    // Global data-parallax layers (R04 pattern D): yPercent driven by scroll. DUAL-RATE DEPTH:
+    // foreground stays locked to scroll (scrub:true); background layers add data-parallax-lag="1.3"
+    // → a scrub catch-up so they TRAIL the foreground (the layered "depth" the award sites get from
+    // a slower second lerp loop — GSAP-native, GPU transforms only). Continuous parallax is
+    // desktop-only (mobile scroll perf). Plus [data-clip]: directional edge wipes on media reveals.
     const parallaxCtx = gsap.context(() => {
       if (reduced) return;
-      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((node) => {
-        const amount = Number(node.dataset.parallax || "0");
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      if (isDesktop)
+        gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((node) => {
+          const amount = Number(node.dataset.parallax || "0");
+          const lag = node.dataset.parallaxLag ? Number(node.dataset.parallaxLag) : true;
+          gsap.fromTo(
+            node,
+            { yPercent: -amount / 2 },
+            {
+              yPercent: amount / 2,
+              ease: "none",
+              scrollTrigger: { trigger: node, start: "top bottom", end: "bottom top", scrub: lag },
+            },
+          );
+        });
+
+      const CLIP_FROM: Record<string, string> = {
+        up: "inset(100% 0% 0% 0%)",
+        down: "inset(0% 0% 100% 0%)",
+        left: "inset(0% 100% 0% 0%)",
+        right: "inset(0% 0% 0% 100%)",
+      };
+      gsap.utils.toArray<HTMLElement>("[data-clip]").forEach((node) => {
+        const from = CLIP_FROM[node.dataset.clip || "up"] || CLIP_FROM.up;
+        const delay = node.dataset.clipDelay ? Number(node.dataset.clipDelay) : 0;
         gsap.fromTo(
           node,
-          { yPercent: -amount / 2 },
+          { clipPath: from },
           {
-            yPercent: amount / 2,
-            ease: "none",
-            scrollTrigger: { trigger: node, start: "top bottom", end: "bottom top", scrub: true },
+            clipPath: "inset(0% 0% 0% 0%)",
+            ease: "air",
+            duration: 1.3,
+            delay,
+            scrollTrigger: { trigger: node, start: "top 85%", once: true },
           },
         );
       });

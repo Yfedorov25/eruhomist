@@ -60,6 +60,14 @@
   /* Readability scrim: a soft dark veil behind text-over-media. Strengthens toward
      night so display/body keep >=3:1 / >=4.5:1 contrast at the dusk crossover. */
   --scrim: rgba(8, 10, 16, calc(0.18 + 0.34 * var(--scroll-progress)));
+
+  /* AIR-calibrated motion (agency doctrine — lifted from aircenter.space). */
+  --ease-signature: cubic-bezier(0.25, 0.74, 0.22, 0.99);
+  --ease-inout: cubic-bezier(0.7, 0, 0.3, 1);
+  --dur-micro: 0.6s;
+  --dur-reveal: 1s;
+  --dur-hero: 2s;
+  --stagger: 0.06s;
 }
 
 html {
@@ -84,10 +92,21 @@ body {
   background: var(--bg);
   color: var(--fg);
   overflow-x: clip;
+  overflow-wrap: break-word; /* never let a long token overflow its container */
 }
 
 .font-display {
   font-family: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+/* Typography canons (agency doctrine): balanced headings, no widows/orphans in body. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
 }
 
 /* Stable evening surface for the scrolling content (post-hero). Guarantees body-copy
@@ -103,7 +122,10 @@ body {
    2D canvas + CSS overlay, no WebGL). SVG fractal-noise, low opacity, screen blend. */
 .hero-grain {
   opacity: 0.05;
-  mix-blend-mode: overlay;
+  /* No mix-blend-mode: overlay-blend over the per-scroll-frame-repainting hero canvas forces the
+     compositor to read back the canvas + re-blend the whole stack EVERY scrub frame — the measured
+     day→night scroll lag. At opacity 0.05 a plain (normal-blend) grain reads identically. Same fix
+     already applied to CrossfadeMedia / Architecture glow; this was the last mix-blend over the canvas. */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   background-size: 160px 160px;
 }
@@ -117,11 +139,14 @@ body {
    reads as "lighting up from inside" as night falls. Screen-blend for additive glow. */
 .hero-window-glow {
   opacity: calc(var(--hero-night, 0) * 0.55);
-  mix-blend-mode: screen;
+  /* No mix-blend-mode: screen-blend over the repainting canvas = per-frame backdrop read-back +
+     re-blend (the scroll lag). Over the dark evening frames a plain warm radial at this opacity
+     reads ~the same as additive screen. Slightly hotter source alphas compensate for the lost
+     additivity. (Same swap already shipped in CrossfadeMedia / Architecture.) */
   background:
-    radial-gradient(40% 16% at 38% 46%, rgba(224, 169, 109, 0.5) 0%, transparent 70%),
-    radial-gradient(40% 16% at 64% 46%, rgba(224, 169, 109, 0.45) 0%, transparent 70%),
-    radial-gradient(50% 12% at 50% 62%, rgba(224, 169, 109, 0.32) 0%, transparent 75%);
+    radial-gradient(40% 16% at 38% 46%, rgba(238, 180, 120, 0.6) 0%, transparent 70%),
+    radial-gradient(40% 16% at 64% 46%, rgba(238, 180, 120, 0.55) 0%, transparent 70%),
+    radial-gradient(50% 12% at 50% 62%, rgba(238, 180, 120, 0.4) 0%, transparent 75%);
   /* No opacity transition: --hero-night already moves smoothly with the hero scrub. A 0.25s
      transition restarted an opacity tween on every scrub step = continuous per-frame repaint
      of this layer during hero scroll (same anti-pattern as the html bg-color transition). */
@@ -132,10 +157,12 @@ body {
    scaled by the var. Subtle by design (≤ a few px feel) so it reads cinematic, not broken. */
 .hero-aberration {
   opacity: calc(var(--hero-aberration, 0) * 0.9);
+  /* No mix-blend-mode: screen-blend over the repainting canvas re-blends the whole backdrop on
+     every velocity change (per scrub frame) — a scroll-lag source. The red/cyan inset edge
+     fringes read as a cinematic split over the dark frames with a plain normal blend. */
   box-shadow:
     inset 3px 0 6px rgba(255, 40, 40, 0.5),
     inset -3px 0 6px rgba(40, 200, 255, 0.5);
-  mix-blend-mode: screen;
 }
 
 @media (prefers-reduced-motion: reduce) {

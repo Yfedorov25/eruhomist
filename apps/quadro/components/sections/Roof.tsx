@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Section } from "../Section";
 import { SplitReveal } from "../SplitReveal";
+import { DrawAccent } from "../DrawAccent";
 import { richText, paragraphs } from "@/lib/format";
 import { useReveal } from "@/lib/useReveal";
 import type { Messages } from "@/lib/i18n";
@@ -81,12 +82,9 @@ export function Roof({ m }: { m: Messages }) {
           >
             {richText(m.roof.h2)}
           </SplitReveal>
-          {/* warm hairline accent under the headline — a single luminous mark for the climax */}
-          <div
-            data-reveal
-            aria-hidden
-            className="mt-6 h-px w-24 origin-left bg-gradient-to-r from-[var(--accent)] to-transparent"
-          />
+          {/* warm self-drawing accent under the headline — a single luminous mark for the climax,
+              drawn in (scaleX) to tie the apex type into the motion language */}
+          <DrawAccent className="mt-6 !w-24" />
           <div className="mt-8 space-y-5 text-lg leading-relaxed text-[var(--ink-muted)] md:text-xl">
             {paragraphs(m.roof.body).map((p, i) => (
               <p key={i} data-reveal>
@@ -109,11 +107,17 @@ export function Roof({ m }: { m: Messages }) {
             tell that clashed (cool daytime lounge over a warm dusk lake) and split the held breath
             the wash is built to deliver. Removed; render_terasa_04 will be re-homed to its own calm
             full-width beat elsewhere (follow-up). One feathered plate + the wash is the apex. */}
-        <div className="relative">
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm">
+        <div className="relative" data-cursor="дивитися">
+          <div
+            data-clip="up"
+            className="relative aspect-[16/10] w-full overflow-hidden rounded-sm"
+          >
             {/* eslint-disable @next/next/no-img-element */}
+            {/* data-parallax drives a gentle trailing drift via the global dual-rate handler
+                (scale-[1.06] gives the headroom; overflow-hidden parent crops it). Real depth on
+                the apex plate — desktop-only, transform-only, no conflict with the clip reveal. */}
             <img
-              data-reveal
+              data-parallax="12"
               src="/renders/render_lake_terasa.jpg"
               alt="Дах QUADRO HOUSE із перголою та видом на озеро на заході сонця"
               loading="lazy"

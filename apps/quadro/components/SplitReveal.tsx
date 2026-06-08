@@ -4,12 +4,13 @@ import { useEffect, useRef, createElement, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import "@/lib/gsapEase"; // "air" signature ease
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// Headline that rises in line-by-line when it scrolls into view (R23 kinetic type).
-// Luxury tempo (R04): lines clipped, yPercent 110 -> 0, power3.out, stagger 0.12.
-// reduced-motion -> shown immediately, no split/anim. Used by S2/S4/S5 section headers.
+// Headline that DISSOLVES in line-by-line when it scrolls into view. Gentle fade + tiny rise
+// (y 14, opacity, "air") — NOT a big yPercent jump (that reads as a slideshow; rejected on the
+// sister site). reduced-motion -> shown immediately. Used by S2/S4/S5 section headers.
 export function SplitReveal({
   children,
   as = "h2",
@@ -35,16 +36,13 @@ export function SplitReveal({
         // Mask each line generously: a tight clip box shears descenders/ascenders
         // during the yPercent rise (the "broken glyph" slop tell). pb leaves room for
         // descenders, the negative margin keeps the visual line-height unchanged.
-        split = new SplitText(el, {
-          type: "lines",
-          linesClass: "overflow-hidden pb-[0.18em] -mb-[0.18em]",
-        });
+        split = new SplitText(el, { type: "lines" });
         gsap.from(split.lines, {
-          yPercent: 110,
+          y: 14,
           opacity: 0,
           duration: 1.1,
-          ease: "power3.out",
-          stagger: 0.12,
+          ease: "air",
+          stagger: 0.08,
           scrollTrigger: { trigger: el, start: "top 82%" },
         });
       };
