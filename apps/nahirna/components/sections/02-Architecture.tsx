@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { TextShelf } from "@/components/ui/TextShelf";
+import { typo } from "@/lib/typo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -16,8 +17,8 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 // (NOT a pixel crossfade-morph of mismatched frames: opacity 0→1 + gentle scale = "the same house
 // at another hour", deliberate). The shelf H2 swaps day→night copy in sync. Detail row beneath.
 const DETAILS = [
-  { k: "d1", label: "Клінкер.", body: "Темна шоколадна цегла, що з роками тільки темнішає й шляхетнішає." },
-  { k: "d2", label: "Колона.", body: "Цегляна шахта, білий камінь — база й капітель. Не пофарбовано — складено." },
+  { k: "d1", label: "Клінкер.", body: "Темна шоколадна цегла. З роками тільки темнішає й стає благороднішою." },
+  { k: "d2", label: "Колона.", body: "Цегляна основа, білий камінь на базі й капітелі. Не пофарбовано, а складено." },
   { k: "d3", label: "Дах.", body: "Глибокі звиси, олівковий тон. Тінь у спеку, сухі стіни в дощ." },
 ];
 
@@ -41,15 +42,20 @@ export default function Architecture() {
           trigger: root.current,
           start: "top top",
           end: "+=150%",
-          scrub: true,
+          scrub: 1,
           pin: ".arch-stage",
           anticipatePin: 1,
+          // settle on day or night, not a half-faded middle
+          snap: { snapTo: [0, 1], duration: { min: 0.2, max: 0.5 }, delay: 0.05, ease: "power1.inOut" },
         },
       });
 
       // Day → night dissolve in the media window (opacity + gentle scale, both layers).
       tl.fromTo(".arch-night", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
-      tl.fromTo(".arch-media-inner", { scale: 1.0 }, { scale: 1.04, ease: "none" }, 0);
+      // Parallax-in-frame (base E13): scale stays >1 to keep a cover-margin, yPercent drifts the
+      // media slowly inside its overflow-hidden window → depth on the architecture hero shot.
+      tl.fromTo(".arch-media-inner", { scale: 1.05 }, { scale: 1.1, ease: "none" }, 0);
+      tl.fromTo(".arch-media-inner", { yPercent: -2 }, { yPercent: 2, ease: "none" }, 0);
       // H2 copy swaps day→night through the midpoint (fade-through, not abrupt).
       tl.to(".arch-h2-day", { opacity: 0, ease: "none", duration: 0.4 }, 0.3);
       tl.fromTo(".arch-h2-night", { opacity: 0 }, { opacity: 1, ease: "none", duration: 0.4 }, 0.45);
@@ -61,6 +67,18 @@ export default function Architecture() {
   useGSAP(
     () => {
       if (reduced) return;
+      // Media window uncovers with a clip-path curtain on first enter (base E7 — "revealed,
+      // not just there"). Runs on the outer window; the inner scrub transforms are untouched.
+      gsap.fromTo(
+        ".arch-reveal",
+        { clipPath: "inset(100% 0% 0% 0%)" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 1.4,
+          ease: "expo.out",
+          scrollTrigger: { trigger: ".arch-stage", start: "top 72%", once: true },
+        },
+      );
       gsap.from(".arch-detail", {
         opacity: 0,
         y: 22,
@@ -74,7 +92,7 @@ export default function Architecture() {
   );
 
   const mediaWindow = (
-    <div className="relative h-[42vh] w-full overflow-hidden md:h-full">
+    <div className="arch-reveal relative h-[42vh] w-full overflow-hidden md:h-full">
       <div className="arch-media-inner absolute inset-0 will-change-transform">
         {/* DAY */}
         <Image
@@ -112,39 +130,38 @@ export default function Architecture() {
                   матеріали
                 </p>
                 {/* H2 — day/night copy swap in sync with the media dissolve. */}
-                <div className="relative">
+                <div className="grid">
                   <h2
-                    className="arch-h2-day text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-text)]"
+                    className="arch-h2-day [grid-area:1/1] text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-text)]"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    Удень цей дім — про камінь.
+                    Удень цей дім про камінь.
                   </h2>
                   <h2
-                    className="arch-h2-night absolute inset-0 text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-warm)]"
+                    className="arch-h2-night [grid-area:1/1] text-[clamp(2rem,3.4vw,3rem)] font-medium leading-[1.08] tracking-[-0.025em] text-[var(--color-warm)]"
                     style={{ fontFamily: "var(--font-display)", opacity: 0 }}
                   >
-                    А коли темніє — про світло.
+                    А коли темніє, цей дім про світло.
                   </h2>
                 </div>
 
                 <p className="mt-6 max-w-md text-base leading-relaxed text-[var(--color-text)]/85 md:text-lg">
-                  Темна клінкерна цегла й білий камінь на колонах. Такі матеріали не оновлюють кожні
-                  пʼять років — вони просто гарнішають. Цей дім будували для тих, що залишаються.
+                  {typo("Темна клінкерна цегла, білий камінь на колонах. Такі матеріали не оновлюють кожні п'ять років. Вони просто гарнішають із часом. Цей дім будували для тих, хто лишається надовго.")}
                 </p>
                 <p className="mt-5 max-w-md text-base italic leading-relaxed text-[var(--color-warm)]/90">
-                  Один поверх. Між Вами і ранковою кавою на терасі — жодної сходинки.
+                  {typo("Один поверх. Від ліжка до ранкової кави на терасі жодної сходинки.")}
                 </p>
               </div>
             }
           />
 
           {/* Detail row — full tezas on the chocolate base, never clipped. */}
-          <div className="arch-details grid grid-cols-1 gap-6 bg-[#15110d] px-6 py-8 md:grid-cols-3 md:px-12">
+          <div className="arch-details grid grid-cols-1 gap-6 bg-[var(--color-night-raised)] px-6 pt-8 pb-24 md:grid-cols-3 md:px-12 md:pb-24">
             {DETAILS.map((d) => (
               <div key={d.k} className="arch-detail flex items-baseline gap-3">
                 <span className="mt-2 h-px w-8 shrink-0 bg-[var(--color-warm)]/45" aria-hidden />
                 <p className="text-sm leading-relaxed text-[var(--color-text-muted)] md:text-base">
-                  <strong className="font-medium text-[var(--color-text)]">{d.label}</strong> {d.body}
+                  <strong className="font-medium text-[var(--color-text)]">{d.label}</strong> {typo(d.body)}
                 </p>
               </div>
             ))}

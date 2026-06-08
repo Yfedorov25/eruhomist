@@ -16,14 +16,44 @@
   --color-text: #edeae3;
   --color-text-muted: #9b978f;
   --color-accent: #e8c9a0; /* акцент — тепле золото, стримано */
+  --color-night-raised: #17130f; /* один крок від ночі — підняті поверхні (панелі, рядки деталей) */
 
   /* Readability scrim: soft dark veil behind text-over-media. */
   --scrim: rgba(15, 15, 14, 0.55);
   --scrim-strong: rgba(15, 15, 14, 0.78);
 
-  /* Luxury motion timing tokens (CLAUDE.md: reveal 1.5–2.5s, power3/expo). */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* ~expo.out for CSS transitions */
+  /* Easing-token library (award must-have — confirmed across 4 award studios, A1 #18).
+     Named curves so every transition is intentional, never the browser default. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* ~expo.out — dramatic reveals (default) */
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* gentle UI */
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1); /* luxury-slow settle */
+  --ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1); /* smooth brake */
+  --ease-back-out: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* subtle overshoot */
   --dur-reveal: 1.8s;
+
+  /* AIR-calibrated motion (exact timings lifted from aircenter.space). */
+  --ease-signature: cubic-bezier(0.25, 0.74, 0.22, 0.99); /* primary reveal: slow→fast→settle */
+  --ease-inout: cubic-bezier(0.7, 0, 0.3, 1); /* symmetric — crossfades / state change */
+  --dur-micro: 0.6s; /* hovers, small UI */
+  --dur-hero: 2s; /* big hero reveals */
+  --stagger: 0.06s; /* per-item cascade (60ms) */
+
+  /* Type scale — 4 deliberate tiers (kills heading-size drift; one provable hierarchy). */
+  --text-hero: clamp(2.8rem, 8.5vw, 7rem); /* §00 H1 only */
+  --text-statement: clamp(2.2rem, 6vw, 4.4rem); /* big editorial statements */
+  --text-h2: clamp(2rem, 4.6vw, 3.2rem); /* section H2 */
+  --text-h3: clamp(1.7rem, 3.6vw, 2.6rem); /* sub-heads inside sections */
+
+  /* Alpha-scale of the night base (A1 #8 — depth via tinted alpha, not flat grey). */
+  --night-12: rgba(15, 15, 14, 0.12);
+  --night-25: rgba(15, 15, 14, 0.25);
+  --night-40: rgba(15, 15, 14, 0.4);
+  --night-60: rgba(15, 15, 14, 0.6);
+  --night-80: rgba(15, 15, 14, 0.8);
+  /* Warm-gold alpha-scale (hairlines, accents). */
+  --warm-15: rgba(232, 201, 160, 0.15);
+  --warm-30: rgba(232, 201, 160, 0.3);
+  --warm-60: rgba(232, 201, 160, 0.6);
 }
 
 /* Tailwind v4 theme bridge — expose tokens as utilities (text-accent, bg-night, font-display…). */
@@ -36,6 +66,7 @@
   --color-text: var(--color-text);
   --color-text-muted: var(--color-text-muted);
   --color-accent: var(--color-accent);
+  --color-night-raised: var(--color-night-raised);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
 }
@@ -56,6 +87,7 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
   background: var(--color-night);
   overflow-x: hidden;
+  overflow-wrap: break-word; /* never let a long token overflow its container */
 }
 
 ::selection {
@@ -69,6 +101,12 @@ h3 {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
   margin: 0;
+  text-wrap: balance; /* even, non-ragged heading line breaks */
+}
+
+/* Body paragraphs: prettier last-line breaks (no widows/orphans) where supported. */
+p {
+  text-wrap: pretty;
 }
 
 /* Markdown-style emphasis from COPY: **bold** = warm gold key term; *italic* handled per-section. */
@@ -90,8 +128,10 @@ a {
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.04;
-  mix-blend-mode: overlay;
+  opacity: 0.05;
+  /* NO mix-blend-mode: a blended fixed layer must re-composite the whole viewport every scroll
+     frame (the main scroll-jank cause in the perf trace). A plain low-opacity noise overlay reads
+     near-identical at this opacity but composites cheaply. */
   background-image: url("/noise.svg");
   background-size: 180px 180px;
 }
@@ -99,6 +139,12 @@ a {
 /* Text-over-media legibility helper. */
 .scrim-text {
   text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Kinetic heading (SplitReveal) line-mask: room for descenders without shifting layout. */
+.split-line {
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
 }
 
 /* Respect reduced-motion globally: kill transitions/animations, drop grain. */
@@ -121,4 +167,19 @@ a {
   .grain::after {
     display: none;
   }
+}
+
+/* Scroll-down cue — a dot travels down a hairline rail (GPU transform only). */
+@keyframes scroll-cue-travel {
+  0%   { transform: translate(-50%, -120%); opacity: 0; }
+  18%  { opacity: 1; }
+  70%  { transform: translate(-50%, 420%); opacity: 1; }
+  100% { transform: translate(-50%, 420%); opacity: 0; }
+}
+.scroll-cue-dot {
+  animation: scroll-cue-travel 1.9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-dot { animation: none; transform: translate(-50%, 150%); }
 }

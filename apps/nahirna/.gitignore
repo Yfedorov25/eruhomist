@@ -13,3 +13,8 @@ nahirna-assets/
 /images/renders-source/
 /landscape/
 /*.jpg
+# living media: deploy only the optimized web/ subdir; big sources + prototypes stay local
+/prototypes/
+/public/video/living/*.mp4
+/public/video/living/*.webm
+/public/video/living/*-poster.jpg

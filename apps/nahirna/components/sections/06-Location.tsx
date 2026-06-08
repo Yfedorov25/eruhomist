@@ -1,259 +1,303 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { CONTACT, phoneReady } from "@/lib/site";
+import { trackCall, trackCta } from "@/lib/analytics";
+import { typo } from "@/lib/typo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// 06 · ЛОКАЦІЯ — «Здається, що за містом». SELF-DRAWING map (kickoff ⭐): the map DRAWS ITSELF on
-// scroll — river, streets, POIs and labels appear in sequence via stroke-dashoffset driven by a
-// pinned ScrollTrigger scrub. The visitor "draws" their own map. All geometry is from REAL OSM data
-// (docs/MAP_DATA): river south, infrastructure N/W, centre NE ~2.5km. Pin on the DISTRICT (privacy).
-// After drawing, the river flows (animated dash) so it's never static. reduced-motion → static final.
-//
-// SVG space: 1200×800, home (вул. Нагірна) near bottom-centre. North = up. Scale tuned so the full
-// real spread fits: центр (~2516m NE) sits near the top, the school/садок/банк cluster (~1050m N)
-// lands mid-map, and the river stays just below home. POI positions = real relative offsets
-// (m, +x E / +y N). Horizontal exaggerated ×1.7 so the W/E POIs don't collapse onto the vertical axis.
-const HOME = { x: 560, y: 660 };
-const MY = 0.245; // metres → px, north/south
-const MX = 0.42; // metres → px, east/west (exaggerated so lateral POIs read)
-const pos = (eastM: number, northM: number) => ({ x: HOME.x + eastM * MX, y: HOME.y - northM * MY });
+// 06 · ЛОКАЦІЯ — «Близько до міста. Далеко від усіх.» (user-picked V3 «аеро-спуск»).
+// Background = a CINEMATIC AERIAL DESCENT video (Higgsfield, golden-hour drone gliding down to a
+// private river bend). It plays in place — NOT scrubbed, NO scale — so it never "recedes" as you
+// scroll; the scroll only drives the copy choreography. The kept mechanic (user loves it):
+//   DESKTOP+motion → pinned beat: LEFT copy + honest OSM distances DIM as focus shifts right;
+//     RIGHT the count-down lands on "0 хвилин" and the payoff blooms (peak). The aerial = mood.
+//   MOBILE / reduced-motion → static stacked panels (aerial still + distances, then riverbank +
+//     payoff), each with its own scrim. No pin/scrub/video (light). Reads expensive AT REST.
+// CTA sits at the "0 хвилин" peak (lead-gen). Privacy: district-level only, no street, no map link.
+// Honesty: the aerial is an atmospheric establishing shot (a river bend), not a geo-exact map —
+// the factual claims (distances, privacy) live in the copy.
 
-// dx/dy = manual label nudge (px) to de-collide the tight real-world clusters (school/садок/банк
-// sit within ~20m of each other in OSM → fan their labels out so they read).
-const POIS = [
-  { e: 2, n: 6, label: "Зупинка", note: "150 м", kind: "stop", dx: 0, dy: 16, anchor: "middle" },
-  { e: -861, n: 44, label: "Клініка", note: "", kind: "infra", dx: -8, dy: 0, anchor: "end" },
-  { e: -910, n: 107, label: "Аптека", note: "", kind: "infra", dx: -8, dy: 0, anchor: "end" },
-  { e: -911, n: 250, label: "Парк", note: "", kind: "park", dx: -8, dy: 0, anchor: "end" },
-  { e: 912, n: 156, label: "Магазини", note: "", kind: "infra", dx: 8, dy: 0, anchor: "start" },
-  { e: -582, n: 1042, label: "Банк", note: "", kind: "infra", dx: 9, dy: 8, anchor: "start" },
-  { e: -583, n: 1080, label: "Школа", note: "", kind: "infra", dx: -9, dy: -2, anchor: "end" },
-  { e: -584, n: 1117, label: "Садок", note: "", kind: "infra", dx: 9, dy: -8, anchor: "start" },
-  { e: 793, n: 2516, label: "Центр Вінниці", note: "кілька хв", kind: "center", dx: 0, dy: -10, anchor: "middle" },
+// Honest distances — REAL OSM data (docs/MAP_DATA). NEVER fake exact drive-times: "≈/<" stay.
+const DISTANCES = [
+  { place: "Центр Вінниці", value: "≈ 2.5 км", note: "кілька хв автомобілем" },
+  { place: "Зупинка", value: "≈ 150 м", note: "" },
+  { place: "Аптека, клініка, парк", value: "< 1 км", note: "" },
+  { place: "Школа, садок, магазини", value: "пішки", note: "" },
 ] as const;
 
-// Mobile shows fewer POIs (kickoff): stop, school, shop, centre.
-const MOBILE_KEEP = new Set(["Зупинка", "Школа", "Магазини", "Центр Вінниці"]);
+function DistanceList() {
+  return (
+    <ul className="mt-7 max-w-md space-y-3">
+      {DISTANCES.map((d) => (
+        <li
+          key={d.place}
+          className="flex items-baseline justify-between gap-4 border-b border-[var(--color-warm)]/15 pb-2.5"
+        >
+          <span className="text-[15px] text-[var(--color-text)] md:text-base">
+            {d.place}
+            {d.note ? (
+              <span className="ml-2 text-[13px] text-[var(--color-text-muted)]">· {d.note}</span>
+            ) : null}
+          </span>
+          <span
+            className="shrink-0 text-[15px] tracking-[0.01em] text-[var(--color-warm)] md:text-base"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {d.value}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-const kindColor: Record<string, string> = {
-  stop: "#E8C9A0",
-  infra: "#7d8a93",
-  park: "#5f8a5f",
-  center: "#E8C9A0",
-};
+function CtaButton({ ready, label }: { ready: boolean; label: string }) {
+  return ready ? (
+    <a
+      href={`tel:${CONTACT.phoneTel}`}
+      onClick={() => trackCall("location")}
+      className="mt-7 inline-flex items-center gap-2.5 rounded-full bg-[var(--color-warm)] px-7 py-3.5 text-sm font-medium text-[var(--color-night)] transition-transform duration-300 hover:scale-[1.04]"
+    >
+      {label}
+    </a>
+  ) : (
+    <a
+      href="#cta"
+      onClick={() => trackCta("location_callback")}
+      className="mt-7 inline-flex items-center gap-2.5 rounded-full bg-[var(--color-warm)] px-7 py-3.5 text-sm font-medium text-[var(--color-night)] transition-transform duration-300 hover:scale-[1.04]"
+    >
+      Приїхати на берег
+    </a>
+  );
+}
+
+function Payoff({ ready, big }: { ready: boolean; big?: boolean }) {
+  return (
+    <div className="loc-payoff">
+      <p
+        className="text-[clamp(1.5rem,3vw,2.1rem)] font-normal leading-[1.15] tracking-[-0.02em] text-[var(--color-warm)]"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        А річка просто внизу.
+      </p>
+
+      <div className="mt-3 flex items-end gap-3">
+        <span
+          className={`loc-count font-light leading-[0.85] text-[var(--color-warm)] ${
+            big ? "text-[clamp(3.5rem,8vw,5.5rem)]" : "text-[3.5rem]"
+          }`}
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          0
+        </span>
+        <span className="pb-2 text-lg leading-tight text-[var(--color-text)]">
+          хвилин
+          <br />
+          до власного берега
+        </span>
+      </div>
+
+      <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[var(--color-text)]">
+        <span className="text-[var(--color-warm)]">{typo("Чотири сотки власного берега.")}</span> {typo("Не вид на річку, а сама річка. Ні сусідів, ні чужих поглядів.")}
+      </p>
+
+      <CtaButton ready={ready} label="Подзвонити й приїхати на берег" />
+    </div>
+  );
+}
+
+// Bottom-weighted scrim used on both photos so copy always reads over them.
+const SCRIM =
+  "linear-gradient(to top, rgba(15,15,14,0.92) 0%, rgba(15,15,14,0.6) 32%, rgba(15,15,14,0.15) 60%, transparent 80%)";
 
 export default function Location() {
-  const wrap = useRef<HTMLElement>(null);
+  const root = useRef<HTMLElement>(null);
+  const ready = phoneReady();
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const root = wrap.current!;
+      // The choreography is DESKTOP + motion only. The mobile/reduced markup is static by default
+      // (no GSAP needed) — it renders as a plain stacked composition. matchMedia guarantees the pin
+      // never registers on mobile (that's exactly where scrub/pin janks).
+      const mm = gsap.matchMedia();
 
-      // Prime drawable paths: set dasharray = length so dashoffset can hide → reveal them.
-      const drawables = root.querySelectorAll<SVGPathElement>("[data-draw]");
-      drawables.forEach((p) => {
-        const len = p.getTotalLength();
-        p.style.strokeDasharray = String(len);
-        p.style.strokeDashoffset = reduced ? "0" : String(len);
+      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+        // Background = the cinematic AERIAL DESCENT video (Higgsfield), playing in place. It is
+        // NOT scrubbed and has NO scale animation, so it never "recedes" as you scroll — it just
+        // glides down toward the water on its own. The scroll only drives the copy choreography.
+        const v = root.current!.querySelector<HTMLVideoElement>(".loc-aerial-video");
+        if (v) {
+          v.preload = "auto";
+          // Play the descent ONCE as the section arrives, then hold the last frame. No loop →
+          // no jump back to the start (which read as the drone "reversing" mid-flight).
+          ScrollTrigger.create({
+            trigger: ".loc-stage",
+            start: "top 75%",
+            once: true,
+            onEnter: () => {
+              gsap.to(v, { opacity: 1, duration: 1.0, ease: "power2.out" });
+              v.play().catch(() => {});
+            },
+          });
+          // Pause off-screen (no decode work while not visible); resume if scrolled back in.
+          ScrollTrigger.create({
+            trigger: ".loc-stage",
+            start: "top bottom",
+            end: "bottom top",
+            onLeave: () => v.pause(),
+            onLeaveBack: () => v.pause(),
+            onEnterBack: () => { if (!v.ended) v.play().catch(() => {}); },
+          });
+        }
+        gsap.set(".loc-city", { autoAlpha: 1 });
+        gsap.set(".loc-d-payoff", { autoAlpha: 0, y: 24 });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".loc-stage",
+            start: "top top",
+            end: "+=120%", // short pin — the buyer scans, doesn't ride
+            scrub: 1,
+            pin: ".loc-pin-target",
+            anticipatePin: 1,
+          },
+        });
+
+        // left copy dims (focus shifts right) — exactly as before.
+        tl.to(".loc-city", { autoAlpha: 0.2, y: -10, ease: "power1.in" }, 0.0);
+        // count down 10 → 0 in WHOLE integers on the right (10 9 8 … 0), gold payoff blooms.
+        // Integer ticks read like a countdown; tenths (1.6 1.5…) read like a stopwatch glitch.
+        const counter = { v: 10 };
+        const num = root.current!.querySelector<HTMLElement>(".loc-d-payoff .loc-count");
+        if (num) num.textContent = "10"; // start integer so the pin-engage doesn't flash 0→10
+        tl.to(
+          counter,
+          {
+            v: 0,
+            ease: "none",
+            onUpdate: () => {
+              if (num) num.textContent = String(Math.max(0, Math.round(counter.v)));
+            },
+          },
+          0.0,
+        );
+        tl.to(".loc-d-payoff", { autoAlpha: 1, y: 0, ease: "power2.out" }, 0.2);
       });
 
-      if (reduced) {
-        gsap.set("[data-fade]", { opacity: 1 });
-        gsap.set("[data-pop]", { opacity: 1, scale: 1 });
-        return;
-      }
-
-      // Pinned scrub timeline — the visitor draws the map as they scroll.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root,
-          start: "top top",
-          end: "+=220%",
-          scrub: true,
-          pin: ".loc-stage",
-          anticipatePin: 1,
-        },
-      });
-
-      // 0.0–0.1 — ВІННИЦЯ label
-      tl.to(".loc-vinnytsia", { opacity: 0.5, duration: 0.1 }, 0);
-      // 0.1–0.4 — RIVER draws L→R + fills + label
-      tl.to(".loc-river-line", { strokeDashoffset: 0, ease: "none", duration: 0.3 }, 0.1);
-      tl.to(".loc-river-fill", { opacity: 0.95, duration: 0.15 }, 0.28);
-      tl.to(".loc-bug-label", { opacity: 0.8, duration: 0.1 }, 0.33);
-      // 0.4–0.5 — вул. Нагірна short line to the river
-      tl.to(".loc-street", { strokeDashoffset: 0, ease: "none", duration: 0.1 }, 0.4);
-      // 0.5–0.6 — district PIN + label
-      tl.to(".loc-pin", { opacity: 1, scale: 1, ease: "back.out(2)", duration: 0.1 }, 0.5);
-      tl.to(".loc-pin-label", { opacity: 1, duration: 0.08 }, 0.56);
-      // 0.6–0.8 — POIs stagger in
-      tl.to(".loc-poi", { opacity: 1, scale: 1, ease: "power2.out", duration: 0.04, stagger: 0.025 }, 0.6);
-      // 0.8–0.9 — dashed line to centre
-      tl.to(".loc-centre-line", { strokeDashoffset: 0, ease: "none", duration: 0.1 }, 0.8);
-      // 0.9–1.0 — the "0 хвилин" phrase
-      tl.to(".loc-phrase", { opacity: 1, y: 0, duration: 0.1 }, 0.9);
-
-      // After draw: the river "flows" forever (slow dash drift on a top current line).
-      gsap.to(".loc-river-current", {
-        strokeDashoffset: -40,
-        duration: 6,
-        ease: "none",
-        repeat: -1,
-      });
+      return () => mm.revert();
     },
-    { scope: wrap },
+    { scope: root },
   );
 
-  const street = pos(2, -180); // a short stub from home down toward the river (south)
-  const centre = pos(793, 2516);
-
   return (
-    <section ref={wrap} className="relative bg-night" aria-label="Локація — вул. Нагірна, Вінниця">
-      <div className="loc-stage relative flex h-[100svh] min-h-[100svh] w-full items-center overflow-hidden">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 lg:grid-cols-[1.55fr_1fr] lg:items-center">
-          {/* The drawable map */}
-          <div className="relative aspect-[1200/800] w-full overflow-hidden rounded-sm border border-[var(--color-warm)]/10 bg-[#100d09]">
-            {/* soft aerial vignette so it isn't a flat fill */}
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(130% 110% at 50% 40%, #181309 0%, #100d09 60%, #0c0a07 100%)" }}
-              aria-hidden
+    <section ref={root} className="relative bg-night" aria-label="Локація — вул. Нагірна, Вінниця">
+      {/* ════════ DESKTOP — pinned gate→water crossfade (the ONE wow beat) ════════ */}
+      <div className="loc-stage relative hidden md:block">
+        <div className="loc-pin-target relative flex min-h-[100svh] w-full items-end overflow-hidden">
+          <div className="loc-media absolute inset-0">
+            {/* poster / base — the aerial still (instant, also the load-in frame) */}
+            <Image
+              src="/video/living/web/aerial-river.png"
+              alt="Аеро-вид на вигин річки серед лісу — приватний берег"
+              fill
+              sizes="100vw"
+              loading="lazy"
+              className="object-cover"
             />
-            <svg viewBox="0 0 1200 800" className="absolute inset-0 h-full w-full"
-                 role="img" aria-label="Карта розташування: вул. Нагірна біля Південного Бугу у Вінниці, з орієнтирами">
-              {/* faint district street hatching (static, atmospheric) */}
-              <g stroke="#3a3026" strokeWidth="0.8" opacity="0.35">
-                {Array.from({ length: 11 }).map((_, i) => (
-                  <line key={`h${i}`} x1="0" y1={60 + i * 64} x2="1200" y2={60 + i * 64} />
-                ))}
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <line key={`v${i}`} x1={40 + i * 76} y1="0" x2={40 + i * 76} y2="800" />
-                ))}
-              </g>
-
-              {/* ВІННИЦЯ background label */}
-              <text className="loc-vinnytsia" x="64" y="80" fill="#9B978F" opacity="0" style={{ opacity: 0, letterSpacing: "0.3em", fontSize: 22, fontWeight: 600 }}>
-                ВІННИЦЯ
-              </text>
-
-              {/* RIVER — south band. Draws L→R, then fills, then a flowing current line. */}
-              <path
-                className="loc-river-fill"
-                d="M-40 712 C 220 686, 430 742, 660 720 S 1010 676, 1240 706 L1240 820 L-40 820 Z"
-                fill="#16323d"
-                opacity="0"
-              />
-              <path
-                data-draw
-                className="loc-river-line"
-                d="M-40 712 C 220 686, 430 742, 660 720 S 1010 676, 1240 706"
-                fill="none"
-                stroke="#2a5562"
-                strokeWidth="3"
-              />
-              <path
-                className="loc-river-current"
-                d="M-40 718 C 220 692, 430 748, 660 726 S 1010 682, 1240 712"
-                fill="none"
-                stroke="#E8C9A0"
-                strokeWidth="1.5"
-                strokeDasharray="3 9"
-                opacity="0.5"
-              />
-              <text className="loc-bug-label" x="1140" y="760" textAnchor="end" fill="#E8C9A0" opacity="0" style={{ opacity: 0, letterSpacing: "0.22em", fontSize: 13 }}>
-                ПІВДЕННИЙ БУГ
-              </text>
-
-              {/* вул. Нагірна — short street stub down to the river */}
-              <path
-                data-draw
-                className="loc-street"
-                d={`M ${HOME.x} ${HOME.y} L ${street.x} ${street.y}`}
-                fill="none"
-                stroke="#7a6647"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-
-              {/* dashed line to the centre (NE) */}
-              <path
-                data-draw
-                className="loc-centre-line"
-                d={`M ${HOME.x} ${HOME.y} L ${centre.x} ${Math.max(centre.y, 28)}`}
-                fill="none"
-                stroke="#E8C9A0"
-                strokeWidth="1.4"
-                strokeDasharray="2 7"
-                opacity="0.6"
-              />
-
-              {/* POIs — dot + de-collided label (dx/dy/anchor per real-world cluster). */}
-              {POIS.map((p) => {
-                const { x, y } = pos(p.e, p.n);
-                const yc = Math.max(24, Math.min(792, y));
-                const labelY = p.dy >= 0 ? 4 + p.dy + 11 : p.dy - 6;
-                return (
-                  <g key={p.label} className="loc-poi" data-pop style={{ opacity: 0, transformBox: "fill-box", transformOrigin: "center" }} transform={`translate(${x},${yc})`}>
-                    <circle r={p.kind === "center" ? 5.5 : 3.5} fill={kindColor[p.kind]} />
-                    {p.kind === "center" ? <circle r="5.5" fill="none" stroke="#0f0f0e" strokeWidth="1.5" /> : null}
-                    <text
-                      x={p.dx}
-                      y={labelY}
-                      textAnchor={p.anchor}
-                      fill={p.kind === "center" || p.kind === "stop" ? "#E8C9A0" : "#cfc9bf"}
-                      style={{ fontSize: p.kind === "center" ? 12 : 11 }}
-                    >
-                      {p.label}{p.note ? ` · ${p.note}` : ""}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* District PIN (gold, pulsing) + label — on the DISTRICT, near home */}
-              <g className="loc-pin" data-pop transform={`translate(${HOME.x},${HOME.y})`} style={{ opacity: 0, transformBox: "fill-box", transformOrigin: "center" }}>
-                <circle r="26" fill="#E8C9A0" opacity="0.14">
-                  <animate attributeName="r" values="18;30;18" dur="3.2s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="0.16;0.04;0.16" dur="3.2s" repeatCount="indefinite" />
-                </circle>
-                <circle r="6.5" fill="#E8C9A0" />
-                <circle r="6.5" fill="none" stroke="#0f0f0e" strokeWidth="2" />
-              </g>
-              <text className="loc-pin-label" x={HOME.x} y={HOME.y + 22} textAnchor="middle" fill="#EDEAE3" opacity="0" style={{ opacity: 0, fontSize: 12 }}>
-                вул. Нагірна
-              </text>
-
-              {/* The "0 хвилин" phrase, lower-left over the river */}
-              <g className="loc-phrase" data-fade transform="translate(64,610)" style={{ opacity: 0 }}>
-                <text fill="#E8C9A0" style={{ fontSize: 40, fontWeight: 300 }}>0 хвилин</text>
-                <text y="26" fill="#EDEAE3" style={{ fontSize: 15 }}>до власного берега — він просто внизу ↓</text>
-              </g>
-            </svg>
+            {/* AERIAL DESCENT video — plays in place, no scroll-scrub, no scale (never recedes) */}
+            <video
+              data-living
+              className="loc-aerial-video absolute inset-0 h-full w-full object-cover opacity-0"
+              muted
+              playsInline
+              preload="none"
+              poster="/video/living/web/aerial-river.png"
+              aria-hidden
+            >
+              <source src="/video/living/web/aerial-descent.mp4" type="video/mp4" />
+            </video>
           </div>
 
-          {/* Right column — headline + honest copy on real OSM data */}
-          <div>
-            <p className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">Локація</p>
+          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
+
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-[10vh]">
+            <p className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+              Локація
+            </p>
+            <div className="grid items-end gap-10 md:grid-cols-[1.05fr_0.95fr]">
+              <div className="loc-city">
+                <h2
+                  className="scrim-text text-balance text-[clamp(2rem,4.6vw,3.2rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[var(--color-text)]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Близько до міста.
+                  <br />
+                  Далеко від усіх.
+                </h2>
+                <DistanceList />
+                <p className="mt-5 max-w-md text-[13px] leading-relaxed text-[var(--color-text-muted)]">
+                  {typo("Скільки хвилин до міста й школи, скажемо на зустрічі. Точну адресу називаємо тим, хто планує приїхати, щоб зберегти спокій власника.")}
+                </p>
+              </div>
+              <div className="loc-d-payoff md:pb-1">
+                <Payoff ready={ready} big />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ MOBILE / reduced-motion — stacked two-panel composition (the scan product) ════════
+          Panel 1: gate photo + claim + honest distances. Panel 2: water photo + the 0-хвилин payoff.
+          Each panel has its own scrim so every line is legible (no copy stranded over bright water). */}
+      <div className="md:hidden">
+        {/* Panel 1 — aerial establishing (the river bend) + distances */}
+        <div className="relative flex min-h-[88svh] w-full items-end overflow-hidden">
+          <Image
+            src="/video/living/web/aerial-river.png"
+            alt="Аеро-вид на вигин річки серед лісу — приватний берег"
+            fill
+            sizes="100vw"
+            loading="lazy"
+            className="object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
+          <div className="relative z-10 w-full px-6 pb-[8vh]">
+            <p className="mb-4 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+              Локація
+            </p>
             <h2
-              className="text-balance text-[clamp(1.9rem,4.2vw,3rem)] font-normal leading-[1.12] tracking-[-0.02em] text-[var(--color-text)]"
+              className="text-balance text-[clamp(2rem,9vw,2.6rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[var(--color-text)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Здається, що за містом. Насправді — у Вінниці.
+              Близько до міста. Далеко від усіх.
             </h2>
-            <p className="mt-6 text-base leading-relaxed text-[var(--color-text-muted)] md:text-lg">
-              Зупинка — за 150 метрів. Аптека, клініка, парк — менш ніж за кілометр. Школа, садок,
-              магазини — в межах пів години пішки. Центр Вінниці — кілька хвилин автівкою.
+            <DistanceList />
+            <p className="mt-5 text-[13px] leading-relaxed text-[var(--color-text-muted)]">
+              {typo("Скільки хвилин до міста й школи, скажемо на зустрічі. Точну адресу називаємо тим, хто планує приїхати, щоб зберегти спокій власника.")}
             </p>
-            <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)]/85">
-              А точний час у дорозі назвемо на перегляді — без округлень.
-            </p>
-            <p className="mt-6 border-l border-[var(--color-warm)]/25 pl-5 text-sm text-[var(--color-text-muted)]">
-              Точну адресу показуємо серйозним покупцям на перегляді — задля приватності власника.
-            </p>
+          </div>
+        </div>
+
+        {/* Panel 2 — the water (it's yours) + payoff + CTA */}
+        <div className="relative flex min-h-[88svh] w-full items-end overflow-hidden">
+          <Image
+            src="/images/landscape/riverbank-reeds-lilies.webp"
+            alt="Берег Південного Бугу біля будинку: спокійна вода й дерева"
+            fill
+            sizes="100vw"
+            loading="lazy"
+            className="object-cover [object-position:50%_50%]"
+          />
+          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
+          <div className="relative z-10 w-full px-6 pb-[10vh]">
+            <Payoff ready={ready} />
           </div>
         </div>
       </div>

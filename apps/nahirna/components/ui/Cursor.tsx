@@ -3,11 +3,14 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
-// Custom cursor — a small warm ring that trails the pointer (gsap.quickTo) and grows softly
-// over interactive elements. Desktop + fine-pointer only; off on touch and reduced-motion.
-// Restrained, not gimmicky: low opacity, blend-mode so it reads on dark and light media.
+// Custom cursor — a warm ring that trails the pointer (gsap.quickTo) with three contextual modes:
+//   • default: small ring (blend-difference so it reads on any media)
+//   • grow:    larger ring over generic clickables (a, button, input…)
+//   • label:   a filled warm disc with a short word over [data-cursor="…"] elements (the award
+//              "contextual cursor"). Desktop + fine-pointer only; off on touch / reduced-motion.
 export function Cursor() {
   const dotRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches;
@@ -15,14 +18,33 @@ export function Cursor() {
     if (!fine || reduced) return;
 
     const dot = dotRef.current;
-    if (!dot) return;
-    dot.style.opacity = "0";
+    const label = labelRef.current;
+    if (!dot || !label) return;
 
+    gsap.set(dot, { xPercent: -50, yPercent: -50, opacity: 0 }); // centre on pointer at any size
     const xTo = gsap.quickTo(dot, "x", { duration: 0.35, ease: "power3.out" });
     const yTo = gsap.quickTo(dot, "y", { duration: 0.35, ease: "power3.out" });
-    const scaleTo = gsap.quickTo(dot, "scale", { duration: 0.3, ease: "power2.out" });
 
     let shown = false;
+    let mode = "";
+    let labelText = "";
+    const apply = (next: "default" | "grow" | "label", text = "") => {
+      if (next === mode && text === labelText) return;
+      mode = next;
+      labelText = text;
+      if (next === "label") {
+        label.textContent = text;
+        dot.style.mixBlendMode = "normal";
+        gsap.to(dot, { width: 56, height: 56, backgroundColor: "var(--color-warm)", borderColor: "rgba(0,0,0,0)", duration: 0.32, ease: "power3.out" });
+        gsap.to(label, { opacity: 1, duration: 0.25 });
+      } else {
+        dot.style.mixBlendMode = "difference";
+        gsap.to(label, { opacity: 0, duration: 0.12 });
+        const size = next === "grow" ? 30 : 12;
+        gsap.to(dot, { width: size, height: size, backgroundColor: "rgba(0,0,0,0)", borderColor: "var(--color-warm)", duration: 0.3, ease: "power3.out" });
+      }
+    };
+
     const onMove = (e: MouseEvent) => {
       if (!shown) {
         shown = true;
@@ -30,10 +52,11 @@ export function Cursor() {
       }
       xTo(e.clientX);
       yTo(e.clientY);
-      // Grow over anything clickable.
       const t = e.target as HTMLElement;
-      const interactive = t.closest("a, button, input, label, [role=button], summary");
-      scaleTo(interactive ? 2.4 : 1);
+      const labeled = t.closest<HTMLElement>("[data-cursor]");
+      if (labeled?.dataset.cursor) apply("label", labeled.dataset.cursor);
+      else if (t.closest("a, button, input, label, [role=button], summary")) apply("grow");
+      else apply("default");
     };
     const onLeave = () => gsap.to(dot, { opacity: 0, duration: 0.3 });
 
@@ -49,12 +72,10 @@ export function Cursor() {
     <div
       ref={dotRef}
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[200] hidden h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full md:block"
-      style={{
-        border: "1px solid var(--color-warm)",
-        mixBlendMode: "difference",
-        willChange: "transform",
-      }}
-    />
+      className="pointer-events-none fixed left-0 top-0 z-[200] hidden h-3 w-3 items-center justify-center rounded-full md:flex"
+      style={{ border: "1px solid var(--color-warm)", mixBlendMode: "difference", willChange: "transform" }}
+    >
+      <span ref={labelRef} className="pointer-events-none max-w-[46px] select-none text-center text-[8.5px] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-night)] opacity-0" />
+    </div>
   );
 }

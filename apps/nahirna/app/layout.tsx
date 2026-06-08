@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Lora, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import { SmoothScrollProvider } from "@/lib/SmoothScrollProvider";
 import { listingJsonLd } from "@/lib/jsonld";
 import "./globals.css";
 
-// Display: serif with character (CLAUDE.md: PT Serif / Lora — NOT Inter/Roboto/Space Grotesk).
-// Lora has full Cyrillic.
-const display = Lora({
+// Display: high-contrast editorial serif (award polish — more distinctive than Lora; A1 #2).
+// Cormorant Garamond ships a Cyrillic subset (verified: renders ї/ґ/є/апостроф distinctly,
+// not a system fallback). Weights 400/500/600 — 400 is gorgeous at monumental hero sizes.
+const display = Cormorant_Garamond({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
   variable: "--font-display",

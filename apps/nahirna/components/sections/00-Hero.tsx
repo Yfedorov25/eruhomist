@@ -5,66 +5,61 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Scrim } from "@/components/ui/Scrim";
+import { typo } from "@/lib/typo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// 00 · HERO — day→night crossfade on scroll-scrub (council: Option A, two layered images).
-// The DAY layer sits at full opacity beneath; the NIGHT layer fades 0→1 on top with ease:none
-// over the whole pin. No "muddy middle" (opaque photos don't grey) and no canvas (day stays the
-// LCP element, SSR-rendered). H1 is real text (in SSR for LCP/SEO), revealed line-by-line.
+// 00 · HERO — day→night on scroll-scrub (proto-D «Один день»). STILLS only: the day and night
+// renders share the EXACT composition, so the crossfade keeps the house pinned in place. (The
+// living-video pair was removed — the day/night clips were different shots, so the house jumped
+// position and the loops reset visibly mid-scrub.) Layers (bottom→top):
+//   1. day STILL  — priority, the LCP element (instant paint, SSR). Dispatches hero-ready.
+//   2. night STILL — lazy; opacity 0→1 on scrub (works on every device, no video cost).
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
 
   useGSAP(
     () => {
-      if (reduced) {
-        // Static: night hidden, day shown, text fully visible. No pin, no scrub.
-        gsap.set(".hero-night", { opacity: 0 });
-        gsap.set([".hero-line", ".hero-kicker", ".hero-sub"], { opacity: 1, yPercent: 0 });
-        gsap.set(".hero-hint", { opacity: 1 });
-        return;
-      }
+      const mm = gsap.matchMedia();
 
-      // Pin the hero for ~150vh and scrub day→night across it.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: "top top",
-          end: "+=150%",
-          scrub: true,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-        },
+      // ---- Reduced motion: fully static (day shown, night hidden, text visible). ----
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(".hero-night-still", { opacity: 0 });
+        gsap.set([".hero-line", ".hero-kicker", ".hero-sub", ".hero-hint"], { opacity: 1, yPercent: 0 });
       });
 
-      // Crossfade: night layer 0→1 over the full pin, linear (a blend curve is imperceptible).
-      tl.fromTo(".hero-night", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
-      // Warm window glow grows slightly faster than the sky darkens — the house "wakes up".
-      tl.fromTo(".hero-glow", { opacity: 0 }, { opacity: 1, ease: "power1.in" }, 0);
-      // Day-scrim: the bright sky needs a top veil for kicker legibility; the night photo
-      // carries its own contrast, so fade the day-scrim down (not out) as night arrives.
-      tl.fromTo(".hero-day-scrim", { opacity: 1 }, { opacity: 0.35, ease: "none" }, 0);
+      // ---- Motion: pinned day→night scrub on the STILLS only (identical composition, so the
+      // house never shifts and nothing loops/resets — the video pair drifted, removed). ----
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top top",
+            end: "+=110%",
+            scrub: 1,
+            pin: true,
+            pinSpacing: true,
+            anticipatePin: 1,
+          },
+        });
+        tl.fromTo(".hero-night-still", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
+        tl.fromTo(".hero-glow", { opacity: 0 }, { opacity: 1, ease: "power1.in" }, 0);
+        tl.fromTo(".hero-day-scrim", { opacity: 1 }, { opacity: 0.35, ease: "none" }, 0);
+        tl.to(".hero-hint", { opacity: 0, ease: "none", duration: 0.1 }, 0);
 
-      // Scroll hint fades out almost immediately (first ~10%).
-      tl.to(".hero-hint", { opacity: 0, ease: "none", duration: 0.1 }, 0);
+        // Intro reveals (once, not tied to scrub).
+        const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+        intro
+          .from(".hero-kicker", { opacity: 0, y: 16, duration: 1.2, delay: 0.2 })
+          .from(".hero-line", { opacity: 0, yPercent: 110, duration: 1.6, stagger: 0.12 }, "-=0.9")
+          .from(".hero-sub", { opacity: 0, y: 18, duration: 1.4 }, "-=1.0")
+          .from(".hero-hint", { opacity: 0, duration: 1.0 }, "-=0.8");
+      });
 
-      // --- Entrance reveals (run once on load, NOT tied to the scrub) ---------------------
-      const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
-      intro
-        .from(".hero-kicker", { opacity: 0, y: 16, duration: 1.2, delay: 0.2 })
-        .from(
-          ".hero-line",
-          { opacity: 0, yPercent: 110, duration: 1.6, stagger: 0.12 },
-          "-=0.9",
-        )
-        .from(".hero-sub", { opacity: 0, y: 18, duration: 1.4 }, "-=1.0")
-        .from(".hero-hint", { opacity: 0, duration: 1.0 }, "-=0.8");
+      return () => mm.revert();
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root },
   );
 
   return (
@@ -73,8 +68,7 @@ export default function Hero() {
       className="relative h-screen w-full overflow-hidden bg-night"
       aria-label="Дім на Нагірній — головний екран"
     >
-      {/* DAY layer — LCP-critical: eager + priority, full opacity beneath. onLoad fires the
-          hero-ready signal so the Preloader veil lifts at the LCP moment (not before). */}
+      {/* 1 · DAY STILL — LCP-critical (priority, eager). Fires hero-ready for the Preloader. */}
       <Image
         src="/images/hero-day-desktop.webp"
         alt="Дім на Нагірній удень: темна клінкерна цегла, колони з білими капітелями, олівковий дах, панорамне скління серед зелені"
@@ -94,68 +88,36 @@ export default function Hero() {
         aria-hidden
       />
 
-      {/* NIGHT layer — fades in on scroll. Lazy: revealed only on scrub, never the LCP element. */}
-      <div className="hero-night absolute inset-0">
-        <Image
-          src="/images/hero-night-desktop.webp"
-          alt=""
-          fill
-          loading="lazy"
-          sizes="100vw"
-          aria-hidden
-          className="hidden object-cover md:block"
-        />
-        <Image
-          src="/images/hero-night-mobile.webp"
-          alt=""
-          fill
-          loading="lazy"
-          sizes="100vw"
-          aria-hidden
-          className="object-cover md:hidden"
-        />
+      {/* 2 · NIGHT STILL — EAGER (it's the scrubbed crossfade layer; lazy = it decodes mid-scrub
+          and the day→night drag stutters). Loads right after the priority day image. */}
+      <div className="hero-night-still absolute inset-0">
+        <Image src="/images/hero-night-desktop.webp" alt="" fill loading="eager" sizes="100vw" aria-hidden className="hidden object-cover md:block" />
+        <Image src="/images/hero-night-mobile.webp" alt="" fill loading="eager" sizes="100vw" aria-hidden className="object-cover md:hidden" />
       </div>
 
-      {/* Warm window glow — narrow radial on the window band of the night photo (58%/56%),
-          off the driveway, low alpha so the render's own bloom leads (not a fake vignette). */}
+      {/* Warm window glow — narrow radial over the night window band. */}
       <div
         className="hero-glow pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(60% 35% at 58% 56%, rgba(232,201,160,0.14), transparent 70%)",
-        }}
+        style={{ background: "radial-gradient(60% 35% at 58% 56%, rgba(232,201,160,0.14), transparent 70%)" }}
         aria-hidden
       />
 
-      {/* Legibility: bottom-up gradient scrim so text reads on both day and night. */}
+      {/* Legibility: bottom-up gradient scrim. */}
       <div
         className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(15,15,14,0.72) 0%, rgba(15,15,14,0.28) 32%, transparent 60%)",
-        }}
+        style={{ background: "linear-gradient(to top, rgba(15,15,14,0.72) 0%, rgba(15,15,14,0.28) 32%, transparent 60%)" }}
         aria-hidden
       />
-
-      {/* Day-scrim: extra veil over the text band, strong while the sky is bright, faded
-          (not removed) as night arrives. Scrubbed in the timeline. */}
+      {/* Day-scrim over the text band — strong while bright, faded as night arrives (scrubbed). */}
       <div
         className="hero-day-scrim pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(15,15,14,0) 0%, rgba(15,15,14,0) 38%, rgba(15,15,14,0.5) 64%, rgba(15,15,14,0.74) 100%)",
-        }}
+        style={{ background: "linear-gradient(180deg, rgba(15,15,14,0) 0%, rgba(15,15,14,0) 38%, rgba(15,15,14,0.5) 64%, rgba(15,15,14,0.74) 100%)" }}
         aria-hidden
       />
-
-      {/* Top scrim — guarantees the kicker reads against the bright daytime sky (readability fix). */}
       <Scrim direction="top" strength={0.5} />
 
       {/* Content */}
       <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-[16vh] md:pb-[18vh]">
-        {/* Kicker: address + river on two spans. Sits high over the bright sky, so it carries its
-            OWN local backdrop (soft dark blur + hairline) — guarantees legibility without darkening
-            the whole photo. The river clause is the one warm-gold beat. */}
         <p className="hero-kicker mb-6 inline-flex w-fit flex-col gap-1 self-start rounded-full bg-[rgba(15,15,14,0.32)] px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-[var(--color-plaster)] backdrop-blur-[2px] md:mb-7 md:flex-row md:items-center md:gap-3 md:text-[11px] md:tracking-[0.2em]">
           <span style={{ textShadow: "0 1px 10px rgba(0,0,0,0.7)" }}>вул. Нагірна, Вінниця</span>
           <span aria-hidden className="hidden h-px w-6 bg-[var(--color-plaster)]/40 md:block" />
@@ -164,26 +126,21 @@ export default function Hero() {
           </span>
         </p>
 
-        <h1 className="scrim-text max-w-3xl text-[clamp(2.4rem,7vw,5.2rem)] font-normal leading-[1.02] tracking-[-0.025em] text-[var(--color-text)]">
+        <h1 className="scrim-text max-w-[15ch] text-[clamp(2.8rem,8.5vw,7rem)] font-normal leading-[0.94] tracking-[-0.035em] text-[var(--color-text)]">
           {["Прокидатися", "від води,", "не від сусідів"].map((line, i) => (
             <span key={line} className="block overflow-hidden pt-[0.02em] pb-[0.05em]">
-              <span className={`hero-line block ${i === 2 ? "text-[var(--color-warm)]/90" : ""}`}>
-                {line}
-              </span>
+              <span className={`hero-line block ${i === 2 ? "text-[var(--color-warm)]/90" : ""}`}>{line}</span>
             </span>
           ))}
         </h1>
 
         <p className="hero-sub scrim-text mt-7 max-w-[34rem] text-base leading-relaxed text-[var(--color-text)]/95 md:text-lg">
-          Тупікова вулиця. За огорожею — ріка й дерева, більше нічого. Найближче вікно сусіда — за садом.
+          {typo("Тупікова вулиця, далі тільки річка й дерева. Найближче сусідське вікно аж за садом.")}
         </p>
       </div>
 
-      {/* Scroll hint — typographic only, no animated cliché. The day→night scrub IS the cue. */}
       <div className="hero-hint absolute inset-x-0 bottom-6 z-10 flex justify-center text-[var(--color-text-muted)]">
-        <span className="text-[10px] uppercase tracking-[0.32em] opacity-70">
-          гортайте — настає вечір
-        </span>
+        <span className="text-[10px] uppercase tracking-[0.32em] opacity-70">гортайте, настає вечір</span>
       </div>
     </section>
   );

@@ -39,7 +39,8 @@ export function GalleryCard({ c }: { c: Card }) {
       onClick={toggle}
       onKeyDown={interactive ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } } : undefined}
       aria-pressed={interactive ? live : undefined}
-      data-reveal-child
+      data-clip="up"
+      data-cursor={interactive ? (c.video ? "грати" : "вечір") : undefined}
       className={`group relative aspect-[4/3] overflow-hidden rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-warm)] md:aspect-auto md:h-full ${c.span} ${
         interactive ? "cursor-pointer" : ""
       }`}

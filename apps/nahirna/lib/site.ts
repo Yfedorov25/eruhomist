@@ -61,5 +61,5 @@ export const POIS = [
 // Completion year / status — TODO_CLIENT. Status copy (honest tone) is safe to show now.
 export const STATUS = {
   year: "", // TODO_CLIENT
-  line: "Зараз завершують фасад і ставлять огорожу. Будинок — на фінішній прямій.",
+  line: "Зараз завершують фасад і ставлять огорожу. Будинок на фінішній прямій.",
 } as const;

@@ -4,19 +4,20 @@ import { useRef, type ElementType, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import "@/lib/gsapEase"; // "air" signature ease
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// Shared reveal: fade + small rise when the element enters the viewport, luxury timing
-// (power3.out, ~1.4s). Children with [data-reveal-child] stagger in. Under reduced-motion
-// everything is simply visible (no transform). One source for the site's entrance feel.
+// Shared reveal: fade + small rise when the element enters the viewport, AIR-calibrated timing
+// (signature "air" ease, ~1.2s, 60ms cascade). Children with [data-reveal-child] stagger in.
+// Under reduced-motion everything is simply visible. One source for the site's entrance feel.
 export function Reveal({
   children,
   as: Tag = "div",
   className,
   y = 28,
   delay = 0,
-  stagger = 0.12,
+  stagger = 0.06,
   start = "top 82%",
 }: {
   children: ReactNode;
@@ -43,9 +44,9 @@ export function Reveal({
       gsap.from(targets, {
         opacity: 0,
         y,
-        duration: 1.4,
+        duration: 1.2,
         delay,
-        ease: "power3.out",
+        ease: "air",
         stagger: targets.length > 1 ? stagger : 0,
         scrollTrigger: { trigger: ref.current, start, once: true },
       });

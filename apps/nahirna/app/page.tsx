@@ -4,14 +4,14 @@ import Architecture from "@/components/sections/02-Architecture";
 import Space from "@/components/sections/03-Space";
 import Landscape from "@/components/sections/03b-Landscape";
 import Floorplan from "@/components/sections/04-Floorplan";
-import Walkthrough from "@/components/sections/05-Walkthrough";
 import Location from "@/components/sections/06-Location";
 import Facts from "@/components/sections/07-Facts";
 import CTA from "@/components/sections/08-CTA";
-import Footer from "@/components/sections/09-Footer";
 import { CallPill } from "@/components/ui/CallPill";
 import { Cursor } from "@/components/ui/Cursor";
 import { Preloader } from "@/components/ui/Preloader";
+import { DecodeAhead } from "@/components/ui/DecodeAhead";
+import { HairlineDivider } from "@/components/ui/HairlineDivider";
 
 // The landing assembles sections 00→09 in order. Each is its own component under
 // components/sections. The CallPill rides above everything once past the water section.
@@ -22,18 +22,21 @@ export default function Page() {
       <main>
         <Hero />
         <Water />
-        <Architecture />
         <Space />
+        <HairlineDivider />
         <Landscape />
+        <HairlineDivider />
+        <Architecture />
+        <HairlineDivider />
         <Floorplan />
-        <Walkthrough />
-        <Location />
+        <HairlineDivider />
         <Facts />
+        <Location />
         <CTA />
       </main>
-      <Footer />
       <CallPill />
       <Cursor />
+      <DecodeAhead />
     </>
   );
 }

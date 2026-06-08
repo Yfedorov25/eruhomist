@@ -1,8 +1,11 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { DrawAccent } from "@/components/ui/DrawAccent";
 import { CountUp } from "@/components/ui/CountUp";
 import { FACTS, STATUS } from "@/lib/site";
+import { typo } from "@/lib/typo";
 
-// 07 · ФАКТИ + СТАТУС — rational close after the emotion. Honest, dignified, open price.
+// 07 · ФАКТИ + СТАТУС — the rational beat (numbers + open price) before the §06 location peak
+// and the ask. Honest, dignified, open price.
 // count-up on scroll-into-view (reduced-motion → instant). Semantic <dl> for SEO/a11y: the
 // numbers are real text (the CountUp span is aria-hidden, the <dd> carries the accessible value).
 const STATS = [
@@ -15,23 +18,24 @@ const STATS = [
 
 export default function Facts() {
   return (
-    <section className="relative bg-night py-[14vh]" aria-label="Факти про будинок">
+    <section className="relative bg-night pt-[14vh] pb-[16vh]" aria-label="Факти про будинок">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal className="mb-14 max-w-3xl">
-          <p data-reveal-child className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
-            Без прикрас
+          <p data-reveal-child className="mb-3 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+            Факти
           </p>
+          <DrawAccent className="mb-5" />
           <h2
             data-reveal-child
             className="text-balance text-[clamp(2rem,5vw,3.4rem)] font-normal leading-[1.12] tracking-[-0.02em] text-[var(--color-text)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Лише цифри.
+            Те, що можна виміряти.
           </h2>
         </Reveal>
 
         {/* Stats grid — semantic dl. */}
-        <Reveal as="dl" className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3 lg:grid-cols-5" stagger={0.1}>
+        <Reveal as="dl" className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3 lg:grid-cols-5" stagger={0.07}>
           {STATS.map((s) => (
             <div key={s.label} data-reveal-child>
               <dt className="sr-only">{s.label}</dt>
@@ -57,9 +61,9 @@ export default function Facts() {
             </p>
           </div>
           <div data-reveal-child className="max-w-md">
-            <p className="text-base leading-relaxed text-[var(--color-text)]">{STATUS.line}</p>
+            <p className="text-base leading-relaxed text-[var(--color-text)]">{typo(STATUS.line)}</p>
             <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-              За бажанням — басейн, сауна, камін, пірс.
+              {typo("За бажанням: басейн, сауна, камін, пірс.")}
             </p>
           </div>
         </Reveal>

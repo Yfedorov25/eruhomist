@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import "@/lib/gsapEase"; // "air" signature ease for the curtain lift
 
 // Cinematic splash — a warm-dark veil over the hero. The concept word «Власний берег» reveals
 // while a 0→100 counter runs, then the veil fades the moment the hero's day-image paints
@@ -17,6 +18,7 @@ const SAFETY_MS = 5000; // hard cap — lift no matter what
 
 export function Preloader() {
   const root = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const countRef = useRef<HTMLSpanElement | null>(null);
   const ruleRef = useRef<HTMLSpanElement | null>(null);
 
@@ -62,14 +64,11 @@ export function Preloader() {
       finish();
       const wait = Math.max(0, MIN_MS - (performance.now() - mountedAt));
       liftCall = gsap.delayedCall(wait / 1000, () => {
-        gsap.to(el, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
-          onComplete: () => {
-            el.style.display = "none";
-          },
-        });
+        // Choreographed exit: the concept word lifts away, then the veil slides up like a curtain,
+        // revealing the hero beneath (Vide Infra-style staged entrance) — not a flat opacity fade.
+        const tl = gsap.timeline({ onComplete: () => { el.style.display = "none"; } });
+        tl.to(contentRef.current, { opacity: 0, yPercent: -30, duration: 0.5, ease: "power2.in" }, 0);
+        tl.to(el, { yPercent: -100, duration: 1.0, ease: "air" }, 0.2);
       });
     };
 
@@ -97,6 +96,7 @@ export function Preloader() {
           background: "radial-gradient(60% 50% at 50% 45%, rgba(232,201,160,0.08) 0%, transparent 70%)",
         }}
       />
+      <div ref={contentRef} className="relative flex flex-col items-center">
       {/* The concept word IS the entry beat — the whole product thesis in two words. */}
       <div
         className="text-[clamp(2.2rem,6vw,4.5rem)] font-medium tracking-[0.04em] text-[var(--color-plaster)]"
@@ -119,6 +119,7 @@ export function Preloader() {
         >
           0
         </span>
+      </div>
       </div>
     </div>
   );

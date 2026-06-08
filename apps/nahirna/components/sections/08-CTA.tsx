@@ -3,19 +3,22 @@
 import { useActionState, useEffect } from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { DrawAccent } from "@/components/ui/DrawAccent";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { sendLead, type LeadResult } from "@/app/actions/sendLead";
-import { CONTACT, phoneReady } from "@/lib/site";
+import { CONTACT, FACTS, STATUS, phoneReady } from "@/lib/site";
+import { typo } from "@/lib/typo";
 import { trackCall, trackFormSubmit } from "@/lib/analytics";
 
-// 08 · CTA — the main conversion. Calm, dignified, no pressure. Primary = the call (tel: +
-// magnetic button); secondary = a 3-field callback form → Telegram (server action). Human
-// microcopy from COPY (no "Error"). Analytics fire on call-click and form submit.
-// Error messages map to the human lines from COPY §МІКРОКОПІ.
+// 08 · ФІНАЛ — the merged closing (was CTA + Footer). Award pattern: one crescendo screen that
+// closes on the WATER (the «власний берег» promise, NOT the house again — the villa already
+// appeared in §00/§02), bookending the hero ("Прокидатися від води" → "Прокидатися саме тут").
+// Holds the conversion (callback form / call) + the footer essentials (price, contacts, concept)
+// + a minimal footer line. Real text in SSR (SEO + no-JS): price, address.
 const ERRORS: Record<string, string> = {
   fill: "Заповніть, будь ласка, імʼя і номер.",
   phone: "Здається, у номері загубилася цифра. Перевірте, будь ласка.",
-  length: "Трохи задовгий запис — скоротіть, будь ласка.",
+  length: "Трохи задовгий запис, скоротіть, будь ласка.",
   consent: "Підтвердіть згоду на обробку даних, будь ласка.",
   config: "Форма тимчасово недоступна. Зателефонуйте, будь ласка.",
   api: "Не вдалося надіслати. Спробуйте ще раз або зателефонуйте.",
@@ -24,124 +27,138 @@ const ERRORS: Record<string, string> = {
 
 export default function CTA() {
   const [state, formAction, pending] = useActionState<LeadResult | null, FormData>(sendLead, null);
+  const ready = phoneReady();
+  const year = STATUS.year || "2026";
 
   useEffect(() => {
     if (state?.ok) trackFormSubmit(true);
     else if (state && !state.ok) trackFormSubmit(false);
   }, [state]);
 
-  const ready = phoneReady();
-
   return (
-    <section id="cta" className="relative overflow-hidden bg-night py-[16vh]" aria-label="Звʼязатися — записатися на перегляд">
-      {/* Warm evening backdrop (subtle, behind a heavy scrim). */}
-      <Image
-        src="/images/exterior-night-2.webp"
-        alt=""
-        fill
-        sizes="100vw"
-        loading="lazy"
+    <section id="cta" className="relative overflow-hidden bg-night" aria-label="Звʼязатися — записатися на перегляд">
+      {/* Backdrop = the river at blue hour from the terrace — closes the hero's day→night arc
+          on the water (the «власний берег» promise), and stops reusing §01's day frame.
+          Lagged background parallax (dual-rate depth): the water trails the content scrolling over it. */}
+      <div className="absolute inset-[-6%]" data-parallax="14" data-parallax-lag="1.35" aria-hidden>
+        <Image
+          src="/images/water-night-finale.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          loading="lazy"
+          className="object-cover"
+        />
+      </div>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(to top, rgba(15,15,14,0.95) 0%, rgba(15,15,14,0.82) 30%, rgba(15,15,14,0.5) 62%, rgba(15,15,14,0.55) 100%)" }}
         aria-hidden
-        className="object-cover opacity-25"
       />
-      <div className="absolute inset-0 bg-[var(--color-night)]/70" aria-hidden />
 
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-14 px-6 lg:grid-cols-2 lg:items-center">
-        {/* Left — the invitation + the call */}
-        <Reveal>
-          <p data-reveal-child className="mb-5 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-[10vh] pb-10">
+        {/* Invite */}
+        <Reveal className="max-w-3xl">
+          <p data-reveal-child className="mb-3 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/85">
             Перегляд
           </p>
+          <DrawAccent className="mb-6" />
           <h2
             data-reveal-child
-            className="text-balance text-[clamp(2rem,5vw,3.4rem)] font-normal leading-[1.12] tracking-[-0.02em] text-[var(--color-text)]"
+            className="scrim-text text-balance text-[clamp(2.6rem,7vw,5.5rem)] font-normal leading-[0.98] tracking-[-0.02em] text-[var(--color-text)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Це з тих домів, які треба відчути ногами
+            Прокидатися саме тут.
           </h2>
-          <p data-reveal-child className="mt-6 max-w-md text-base leading-relaxed text-[var(--color-text-muted)] md:text-lg">
-            Один будинок. Один господар. Якщо відгукнулося — приїдьте, постійте на терасі,
-            послухайте воду. Решту зрозумієте самі.
+          <p data-reveal-child className="mt-6 max-w-xl text-base leading-relaxed text-[var(--color-text)]/90 md:text-lg">
+            {typo("Такий берег у Вінниці один. Приїдьте, постійте на ньому, послухайте воду. Без агентів і без тиску. Далі Ви все зрозумієте самі.")}
           </p>
-
-          <div data-reveal-child className="mt-9">
-            {ready ? (
-              <MagneticButton
-                href={`tel:${CONTACT.phoneTel}`}
-                onClick={() => trackCall("cta")}
-                ariaLabel={`Зателефонувати ${CONTACT.phoneDisplay}`}
-                className="inline-flex items-center gap-3 rounded-full bg-[var(--color-warm)] px-8 py-4 text-sm font-medium uppercase tracking-[0.14em] text-[var(--color-night)] will-change-transform"
-              >
-                Зателефонувати
-                <span className="font-normal tracking-normal">{CONTACT.phoneDisplay}</span>
-              </MagneticButton>
-            ) : (
-              // No real number yet — show it as text TODO and lead with the form.
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Телефон:{" "}
-                <span className="text-[var(--color-text)]">{CONTACT.phoneDisplay}</span>{" "}
-                <span className="text-[var(--color-warm)]/60">(уточнюється)</span>
-              </p>
-            )}
-          </div>
         </Reveal>
 
-        {/* Right — callback form (3 fields) */}
-        <Reveal>
-          <div data-reveal-child className="rounded-sm border border-[var(--color-warm)]/15 bg-[var(--color-brick)]/30 p-7 backdrop-blur-sm">
-            <p className="text-lg text-[var(--color-text)]" style={{ fontFamily: "var(--font-display)" }}>
-              Передзвоніть мені
-            </p>
-            {/* Owner signature (psych P0 — biggest trust lever): the buyer wants to know a person
-                answers, not an agent farm. Names the owner when provided, role-only meanwhile. */}
-            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-              {CONTACT.ownerName
-                ? `Відповідає ${CONTACT.ownerName}, господар будинку. Передзвонимо протягом дня.`
-                : "Відповідає господар будинку особисто. Передзвонимо протягом дня."}
-            </p>
-
-            {state?.ok ? (
-              <p className="mt-5 text-base text-[var(--color-warm)]">
-                Дякуємо. Передзвонимо у зручний час.
+        {/* Conversion (left) + details (right) */}
+        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
+          {/* Form / call */}
+          <Reveal>
+            <div data-reveal-child className="max-w-md rounded-sm border border-[var(--color-warm)]/15 bg-[var(--color-night)]/55 p-7 backdrop-blur-md">
+              <p className="text-lg text-[var(--color-text)]" style={{ fontFamily: "var(--font-display)" }}>
+                Залиште номер
               </p>
-            ) : (
-              <form action={formAction} className="mt-5 space-y-4">
-                {/* Field order (psych): name → WHEN → phone. Asking "when" before the phone number
-                    frames the exchange as scheduling on the buyer's terms, not number-capture. */}
-                <Field name="name" label="Як до Вас звертатися" type="text" autoComplete="name" />
-                <Field name="when" label="Коли Вам зручно" type="text" required={false} />
-                <Field name="phone" label="Номер телефону" type="tel" autoComplete="tel" inputMode="tel" />
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                {typo(
+                  CONTACT.ownerName
+                    ? `Відповідає ${CONTACT.ownerName}, господар. Без посередників. Передзвонимо сьогодні.`
+                    : "Відповідає господар особисто, без посередників. Передзвонимо сьогодні.",
+                )}
+              </p>
 
-                {state && !state.ok ? (
-                  <p className="text-sm text-[#d98a6a]">{ERRORS[state.error] ?? ERRORS.api}</p>
-                ) : null}
+              {state?.ok ? (
+                <p className="mt-5 text-base text-[var(--color-warm)]">Дякуємо. Передзвонимо вам сьогодні.</p>
+              ) : (
+                <form action={formAction} className="mt-5 space-y-4">
+                  <Field name="name" label="Як до Вас звертатися" type="text" autoComplete="name" />
+                  <Field name="phone" label="Номер телефону" type="tel" autoComplete="tel" inputMode="tel" />
+                  {state && !state.ok ? <p className="text-sm text-[#d98a6a]">{ERRORS[state.error] ?? ERRORS.api}</p> : null}
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className="group flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-warm)] px-6 py-3.5 text-sm font-medium uppercase tracking-[0.14em] text-[var(--color-night)] transition-[transform,opacity] duration-300 ease-[var(--ease-out-quad)] hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
+                  >
+                    <span>{pending ? "Надсилаємо…" : "Хочу подивитися берег"}</span>
+                    {!pending ? (
+                      <span aria-hidden className="transition-transform duration-300 ease-[var(--ease-out-quad)] group-hover:translate-x-1 motion-reduce:transition-none">
+                        →
+                      </span>
+                    ) : null}
+                  </button>
+                  <label className="flex items-start gap-2.5 text-xs leading-relaxed text-[var(--color-text-muted)]">
+                    <input type="checkbox" name="consent" required className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-warm)]" />
+                    <span>Натискаючи кнопку, погоджуюся на обробку даних для звʼязку щодо цього обʼєкта. Без розсилок.</span>
+                  </label>
+                </form>
+              )}
+            </div>
+          </Reveal>
 
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="w-full rounded-full bg-[var(--color-warm)] px-6 py-3.5 text-sm font-medium uppercase tracking-[0.14em] text-[var(--color-night)] transition-opacity duration-300 disabled:opacity-60"
-                >
-                  {pending ? "Надсилаємо…" : "Передзвоніть мені"}
-                </button>
+          {/* Details (price · contacts · concept) */}
+          <Reveal>
+            <div data-reveal-child className="border-t border-[var(--color-warm)]/15 pt-7 lg:border-t-0 lg:pt-1">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-text-muted)]">Ціна, відкрито</p>
+              <p className="mt-2 text-[clamp(2.6rem,4vw,3.4rem)] font-light leading-none text-[var(--color-warm)]">
+                ${FACTS.priceUsd.toLocaleString("uk-UA")}
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                {typo("Дім, ділянка 10 соток і ~4 сотки власного берега. Усе у вартості.")}
+              </p>
 
-                {/* Consent as fine-print UNDER the submit (PDPL-valid, lower friction than a
-                    blocking checkbox before the button). Still required server-side. */}
-                <label className="flex items-start gap-2.5 text-xs leading-relaxed text-[var(--color-text-muted)]">
-                  <input
-                    type="checkbox"
-                    name="consent"
-                    required
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-warm)]"
-                  />
-                  <span>
-                    Натискаючи кнопку, погоджуюся на обробку даних для звʼязку щодо цього обʼєкта.
-                    Передзвонимо у вказаний час. Без розсилок.
-                  </span>
-                </label>
-              </form>
-            )}
-          </div>
-        </Reveal>
+              <div className="mt-7 border-t border-[var(--color-warm)]/12 pt-6">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-text-muted)]">Контакти</p>
+                {ready ? (
+                  <a href={`tel:${CONTACT.phoneTel}`} onClick={() => trackCall("footer")} className="mt-2 block text-lg text-[var(--color-text)] hover:text-[var(--color-warm)]">
+                    {CONTACT.phoneDisplay}
+                  </a>
+                ) : (
+                  <p className="mt-2 text-base leading-relaxed text-[var(--color-text)]">
+                    {typo("Передзвонимо протягом дня. Залиште номер у формі поруч.")}
+                  </p>
+                )}
+                <p className="mt-2 text-sm text-[var(--color-text-muted)]">{FACTS.address}</p>
+              </div>
+
+              <div className="mt-7 border-t border-[var(--color-warm)]/12 pt-6">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-text-muted)]">Власний берег</p>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--color-text-muted)]">
+                  {typo("Єдиний дім у Вінниці, де власний берег Бугу починається там, де закінчується Ваша тераса.")}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Minimal footer line — essentials only, no giant wordmark. */}
+        <div className="mt-[12vh] flex flex-wrap justify-between gap-3 border-t border-[var(--color-warm)]/12 pt-5 text-xs text-[var(--color-text-muted)]/70">
+          <span>Вінниця · Південний Буг</span>
+          <span>{year}</span>
+        </div>
       </div>
     </section>
   );
@@ -164,8 +181,6 @@ function Field({
 }) {
   return (
     <label className="block">
-      {/* Sentence-case (not uppercase): the form should feel like a private conversation,
-          not a contract. Uppercase tracking stays the brand voice everywhere ELSE. */}
       <span className="mb-1.5 block text-[13px] text-[var(--color-text-muted)]">{label}</span>
       <input
         name={name}
