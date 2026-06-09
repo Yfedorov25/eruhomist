@@ -110,6 +110,7 @@ export default function Gallery() {
           onPointerUp={onUp}
           onPointerLeave={onUp}
           data-cursor="дивитись"
+          data-lenis-prevent
           className="hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] md:gap-5 md:px-[max(1.5rem,calc((100vw-72rem)/2))]"
           style={{ cursor: "grab" }}
         >
