@@ -193,6 +193,34 @@ export default function Location() {
         tl.to(".loc-d-payoff", { autoAlpha: 1, y: 0, ease: "power2.out" }, 0.2);
       });
 
+      // MOBILE — simplified pinned crossfade (no video, no scrub-counter). Scroll fades the city
+      // claim out and the river payoff in over the one held background. The payoff number is set to
+      // "0" statically (the desktop 10→0 count is intentionally dropped on touch for perf).
+      mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
+        gsap.set(".loc-m-city", { autoAlpha: 1 });
+        gsap.set(".loc-m-payoff", { autoAlpha: 0, y: 18 });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".loc-m-stage",
+            start: "top top",
+            end: "+=110%", // short pin — one deliberate beat, then release
+            scrub: 1,
+            pin: ".loc-m-pin",
+            anticipatePin: 1,
+          },
+        });
+        tl.to(".loc-m-city", { autoAlpha: 0, y: -12, ease: "power1.in" }, 0.0);
+        tl.to(".loc-m-payoff", { autoAlpha: 1, y: 0, ease: "power2.out" }, 0.35);
+      });
+
+      // MOBILE reduced-motion — no pin; both layers flow vertically (un-stack the grid overlap).
+      mm.add("(max-width: 767px) and (prefers-reduced-motion: reduce)", () => {
+        gsap.set([".loc-m-city", ".loc-m-payoff"], { autoAlpha: 1, y: 0, gridArea: "auto" });
+        gsap.set(".loc-m-payoff", { marginTop: "8vh" });
+        gsap.set(".loc-m-pin", { minHeight: "auto" });
+      });
+
       return () => mm.revert();
     },
     { scope: root },
@@ -256,40 +284,13 @@ export default function Location() {
         </div>
       </div>
 
-      {/* ════════ MOBILE / reduced-motion — stacked two-panel composition (the scan product) ════════
-          Panel 1: gate photo + claim + honest distances. Panel 2: water photo + the 0-хвилин payoff.
-          Each panel has its own scrim so every line is legible (no copy stranded over bright water). */}
-      <div className="md:hidden">
-        {/* Panel 1 — aerial establishing (the river bend) + distances */}
-        <div className="relative flex min-h-[88svh] w-full items-end overflow-hidden">
-          <Image
-            src="/video/living/web/aerial-river.png"
-            alt="Аеро-вид на вигин річки серед лісу — приватний берег"
-            fill
-            sizes="100vw"
-            loading="lazy"
-            className="object-cover"
-          />
-          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
-          <div className="relative z-10 w-full px-6 pb-[8vh]">
-            <p className="mb-4 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
-              Локація
-            </p>
-            <h2
-              className="text-balance text-[clamp(2rem,9vw,2.6rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[var(--color-text)]"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Близько до міста. Далеко від усіх.
-            </h2>
-            <DistanceList />
-            <p className="mt-5 text-[13px] leading-relaxed text-[var(--color-text-muted)]">
-              {typo("Скільки хвилин до міста й школи, скажемо на зустрічі. Точну адресу називаємо тим, хто планує приїхати, щоб зберегти спокій власника.")}
-            </p>
-          </div>
-        </div>
-
-        {/* Panel 2 — the water (it's yours) + payoff + CTA */}
-        <div className="relative flex min-h-[88svh] w-full items-end overflow-hidden">
+      {/* ════════ MOBILE — pinned crossfade beat (the desktop wow, simplified for touch) ════════
+          ONE held background (the river). Scroll pins the stage for ~1 screen and drives a fade:
+          the "Близько до міста" claim + distances dissolve out, the "0 хвилин до берега" payoff
+          dissolves in over the same water. No video, no scrub-counter on touch (perf). On
+          reduced-motion both layers are simply shown stacked (no pin). */}
+      <div className="loc-m-stage relative md:hidden">
+        <div className="loc-m-pin relative flex min-h-[100svh] w-full items-end overflow-hidden">
           <Image
             src="/images/landscape/riverbank-reeds-lilies.webp"
             alt="Берег Південного Бугу біля будинку: спокійна вода й дерева"
@@ -299,8 +300,30 @@ export default function Location() {
             className="object-cover [object-position:50%_50%]"
           />
           <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
-          <div className="relative z-10 w-full px-6 pb-[10vh]">
-            <Payoff ready={ready} />
+
+          {/* Both copy layers stack in the same bottom area; GSAP crossfades them on scroll. */}
+          <div className="relative z-10 grid w-full px-6 pb-[12vh]">
+            {/* Layer 1 — claim + distances */}
+            <div className="loc-m-city [grid-area:1/1]">
+              <p className="mb-4 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">
+                Локація
+              </p>
+              <h2
+                className="text-balance text-[clamp(2rem,9vw,2.6rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[var(--color-text)]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Близько до міста. Далеко від усіх.
+              </h2>
+              <DistanceList />
+              <p className="mt-5 text-[13px] leading-relaxed text-[var(--color-text-muted)]">
+                {typo("Скільки хвилин до міста й школи, скажемо на зустрічі. Точну адресу називаємо тим, хто планує приїхати, щоб зберегти спокій власника.")}
+              </p>
+            </div>
+
+            {/* Layer 2 — the payoff (fades in as you scroll) */}
+            <div className="loc-m-payoff [grid-area:1/1]">
+              <Payoff ready={ready} big />
+            </div>
           </div>
         </div>
       </div>

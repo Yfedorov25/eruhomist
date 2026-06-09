@@ -12,6 +12,7 @@ import { trackCall, trackCta, setActiveSection, trackScroll90 } from "@/lib/anal
 export function CallPill() {
   const [shown, setShown] = useState(false);
   const [dim, setDim] = useState(false); // fade when the CTA section is in view (redundant there)
+  const [hiddenByScroll, setHiddenByScroll] = useState(false); // mobile: hide while scrolling down
   const ready = phoneReady();
 
   // Section-in-view tracking → analytics.setActiveSection. Lets lead events record their origin.
@@ -35,17 +36,34 @@ export function CallPill() {
     return () => io.disconnect();
   }, []);
 
-  // Show the pill after the water section; fire scroll_90 once.
+  // Show the pill after the water section; fire scroll_90 once; on mobile, hide while the user
+  // scrolls DOWN (reading) and bring it back on scroll-up or pause — so it never nags over content.
   useEffect(() => {
     let fired90 = false;
+    let lastY = window.scrollY;
+    let pauseTimer: ReturnType<typeof setTimeout> | null = null;
+    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
+
     const onScroll = () => {
-      const water = document.querySelector('section[aria-label*="Власний берег"]') as HTMLElement | null;
+      const y = window.scrollY;
+      const water = document.querySelector('section[aria-label*="берег"]') as HTMLElement | null;
       const trigger = water ? water.offsetTop + water.offsetHeight * 0.5 : window.innerHeight * 2;
-      setShown(window.scrollY > trigger);
+      setShown(y > trigger);
+
+      // Mobile only: a sustained scroll DOWN hides it (reading), scroll UP or a pause reveals it.
+      // Desktop never hides (isMobile false) so the pill stays put there.
+      if (isMobile()) {
+        const dy = y - lastY;
+        if (dy > 8) setHiddenByScroll(true);
+        else if (dy < -8) setHiddenByScroll(false);
+        if (pauseTimer) clearTimeout(pauseTimer);
+        pauseTimer = setTimeout(() => setHiddenByScroll(false), 600);
+      }
+      lastY = y;
 
       if (!fired90) {
         const max = document.documentElement.scrollHeight - window.innerHeight;
-        if (max > 0 && window.scrollY / max >= 0.9) {
+        if (max > 0 && y / max >= 0.9) {
           fired90 = true;
           trackScroll90();
         }
@@ -53,16 +71,20 @@ export function CallPill() {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (pauseTimer) clearTimeout(pauseTimer);
+    };
   }, []);
 
   return (
     <div
       className="fixed bottom-5 right-5 z-50 transition-all duration-500 md:bottom-7 md:right-7"
       style={{
-        opacity: shown ? (dim ? 0.35 : 1) : 0,
-        transform: shown ? "translateY(0)" : "translateY(20px)",
-        pointerEvents: shown && !dim ? "auto" : "none",
+        // Visible when past the water hook AND not dimmed on the CTA AND not hidden by scroll-down.
+        opacity: shown && !hiddenByScroll ? (dim ? 0.35 : 1) : 0,
+        transform: shown && !hiddenByScroll ? "translateY(0)" : "translateY(20px)",
+        pointerEvents: shown && !dim && !hiddenByScroll ? "auto" : "none",
       }}
     >
       {ready ? (
