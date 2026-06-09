@@ -37,6 +37,22 @@ export default function Architecture() {
         return;
       }
 
+      // MOBILE — NO pin, NO scrub, NO snap. The pinned scrub-with-snap was a top jank source on
+      // touch (snap fights native momentum; the scrubbed dissolve desynced and jumped). On mobile
+      // the day→night dissolve + H2 swap play ONCE on enter as a clean timed reveal — same beat,
+      // buttery on touch. (Desktop keeps the scrubbed pin below.)
+      // (the .arch-detail row + .arch-reveal clip-curtain are handled by the second useGSAP below,
+      // on all viewports — so the mobile branch only owns the day→night dissolve + H2 swap.)
+      const mobile = window.matchMedia("(max-width: 767px)").matches;
+      if (mobile) {
+        gsap.set(".arch-media-inner", { scale: 1.06 });
+        const tlm = gsap.timeline({ scrollTrigger: { trigger: ".arch-stage", start: "top 65%", once: true } });
+        tlm.fromTo(".arch-night", { opacity: 0 }, { opacity: 1, duration: 1.6, ease: "power1.inOut" }, 0.2)
+          .to(".arch-h2-day", { opacity: 0, duration: 0.6, ease: "power1.inOut" }, 0.6)
+          .fromTo(".arch-h2-night", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power1.inOut" }, 0.9);
+        return;
+      }
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,

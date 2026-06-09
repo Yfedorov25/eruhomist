@@ -170,6 +170,13 @@ p {
   .hero-aberration { display: none; }
 }
 
+/* Mobile: kill the velocity-driven chromatic aberration. Its box-shadow fringes repaint every
+   scroll frame and spike with touch-flick velocity — a real jank source on phones, for an effect
+   barely visible mid-gesture. The day→night glow stays (cheap opacity). */
+@media (max-width: 767px) {
+  .hero-aberration { display: none; }
+}
+
 /* Phase 6 splash. While the veil is up, lock scroll so the reveal isn't scrolled past.
    The wordmark eases in from tight tracking + low opacity (luxury: slow, never a blink). */
 .splash-lock { overflow: hidden; }

@@ -41,6 +41,31 @@ export function Architecture({ m }: { m: Messages }) {
       return;
     }
 
+    // MOBILE — NO pin, NO scrub. The pinned scrub-clip was the worst offender on touch: native
+    // momentum desynced from the rAF scrub and the window-reveal "jumped". On mobile the window
+    // opens ONCE on enter (a clean timed reveal) and day→night crossfades once. Buttery on touch,
+    // same story beat, zero pin. (Desktop keeps the scrubbed window below.)
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    if (mobile) {
+      const ctx = gsap.context(() => {
+        gsap.set([day, night], { scale: 1.04 });
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: el, start: "top 70%", once: true },
+        });
+        tl.fromTo(
+          mask,
+          { clipPath: "inset(30% 14% 30% 14% round 12px)" },
+          { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.4, ease: "power3.inOut" },
+          0,
+        )
+          .fromTo(night, { opacity: 0 }, { opacity: 1, duration: 1.6, ease: "power1.inOut" }, 0.3)
+          .fromTo(glow, { opacity: 0 }, { opacity: 0.55, duration: 1.2, ease: "power1.in" }, 0.7);
+        const split = new SplitText(h2, { type: "lines" });
+        tl.from(split.lines, { y: 16, opacity: 0, duration: 0.6, ease: "air", stagger: 0.1 }, 0.5);
+      }, el);
+      return () => ctx.revert();
+    }
+
     const ctx = gsap.context(() => {
       let split: SplitText | null = null;
       const tl = gsap.timeline({
@@ -60,17 +85,10 @@ export function Architecture({ m }: { m: Messages }) {
         },
       });
 
-      // window opens + camera push-in. The starting "window" inset is WIDER on mobile: at the
-      // desktop 41% side-inset the frame is only ~18% of the viewport, which on a ~390px phone
-      // shrinks to an ugly ~70px vertical sliver. On mobile start at 14% side-inset (≈72% wide)
-      // so the architecture render always reads as a building, never a strip.
-      const narrow = window.matchMedia("(max-width: 767px)").matches;
-      const startClip = narrow
-        ? "inset(30% 14% 30% 14% round 12px)"
-        : "inset(36% 41% 36% 41% round 12px)";
+      // window opens + camera push-in (desktop only — mobile handled above without pin/scrub).
       tl.fromTo(
         mask,
-        { clipPath: startClip },
+        { clipPath: "inset(36% 41% 36% 41% round 12px)" },
         { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none" },
         0,
       )

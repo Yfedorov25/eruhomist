@@ -23,7 +23,12 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       // lerp 0.12 (was 0.1): once the hero's competing rAF lerp was deleted, Lenis is the
       // single global smoother — 0.12 is slightly snappier ("less swimming") while keeping
       // the luxury inertia. The heavy 0.1 only felt right when masking other stacked easings.
-      lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
+      // syncTouch:true — on touch, Lenis INTERPOLATES the scroll (instead of native), so the
+      // pinned/scrubbed sections (hero canvas-scrub, architecture clip-reveal) stay locked to the
+      // same scroll position ScrollTrigger reads. Without it, native touch momentum moved the page
+      // in big steps while the rAF-driven scrub lagged behind → the violent "jump" on mobile. A
+      // light touchLerp keeps the interpolation snappy so touch doesn't feel rubbery.
+      lenis = new Lenis({ lerp: 0.12, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.1 });
       lenis.on("scroll", ScrollTrigger.update);
       rafFn = (time: number) => lenis?.raf(time * 1000);
       gsap.ticker.add(rafFn);
