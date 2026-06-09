@@ -4,6 +4,7 @@ import Architecture from "@/components/sections/02-Architecture";
 import Space from "@/components/sections/03-Space";
 import Landscape from "@/components/sections/03b-Landscape";
 import Floorplan from "@/components/sections/04-Floorplan";
+import Gallery from "@/components/sections/05-Gallery";
 import Location from "@/components/sections/06-Location";
 import Facts from "@/components/sections/07-Facts";
 import CTA from "@/components/sections/08-CTA";
@@ -29,6 +30,8 @@ export default function Page() {
         <Architecture />
         <HairlineDivider />
         <Floorplan />
+        <HairlineDivider />
+        <Gallery />
         <HairlineDivider />
         <Facts />
         <Location />

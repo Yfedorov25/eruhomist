@@ -37,12 +37,13 @@ export default function CTA() {
 
   return (
     <section id="cta" className="relative overflow-hidden bg-night" aria-label="Звʼязатися — записатися на перегляд">
-      {/* Backdrop = the river at blue hour from the terrace — closes the hero's day→night arc
-          on the water (the «власний берег» promise), and stops reusing §01's day frame.
-          Lagged background parallax (dual-rate depth): the water trails the content scrolling over it. */}
+      {/* Backdrop = the house facade at night, eaves lit and windows warm — the final image before
+          the call is the home itself at its most expensive hour ("here you could live"), which sells
+          harder than abstract water. Lagged background parallax (dual-rate depth): the facade trails
+          the content scrolling over it. */}
       <div className="absolute inset-[-6%]" data-parallax="14" data-parallax-lag="1.35" aria-hidden>
         <Image
-          src="/images/water-night-finale.webp"
+          src="/images/gallery/facade-night.webp"
           alt=""
           fill
           sizes="100vw"

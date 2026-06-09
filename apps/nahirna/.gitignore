@@ -15,6 +15,9 @@ nahirna-assets/
 /*.jpg
 # living media: deploy only the optimized web/ subdir; big sources + prototypes stay local
 /prototypes/
+# raw source renders from the developer (~120MB) — optimized copies live in public/images/gallery/
+/newimages/
 /public/video/living/*.mp4
 /public/video/living/*.webm
 /public/video/living/*-poster.jpg
+.gstack/

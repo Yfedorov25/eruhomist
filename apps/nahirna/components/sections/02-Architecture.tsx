@@ -96,8 +96,8 @@ export default function Architecture() {
       <div className="arch-media-inner absolute inset-0 will-change-transform">
         {/* DAY */}
         <Image
-          src="/images/exterior-terrace-columns.webp"
-          alt="Тераса вілли вдень: цегляні колони з білим каменем на базі й капітелі, глибокі звиси даху"
+          src="/images/gallery/exterior-day-hero.webp"
+          alt="Будинок на Нагірній удень: повний ракурс, темна клінкерна цегла, білий камінь на колонах, шатровий дах"
           fill
           sizes="(max-width: 768px) 100vw, 60vw"
           loading="lazy"

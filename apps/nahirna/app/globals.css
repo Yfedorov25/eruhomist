@@ -183,3 +183,16 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue-dot { animation: none; transform: translate(-50%, 150%); }
 }
+
+/* Gallery swipe strip — hide the native scrollbar (drag/swipe is the affordance). */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; }
+
+/* Lightbox open — gentle fade on the signature ease. */
+@keyframes lb-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [role="dialog"] { animation: none !important; }
+}
