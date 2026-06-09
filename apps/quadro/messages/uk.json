@@ -64,7 +64,7 @@
       "shelter": { "label": "Укриття", "value": "Є" },
       "storage": { "label": "Комори", "value": "Цокольний рівень" },
       "architect": { "label": "Архітектура", "value": "Бюро A2+" },
-      "construction": { "label": "Будівництво", "value": "Червень — листопад 2026" },
+      "construction": { "label": "Будівництво", "value": "з червня по листопад 2026" },
       "landscaping": { "label": "Благоустрій", "value": "Березень 2027" }
     }
   },

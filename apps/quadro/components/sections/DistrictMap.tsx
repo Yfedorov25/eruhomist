@@ -165,22 +165,27 @@ export function DistrictMap({ m }: { m: Messages }) {
           <span className="font-display text-sm tracking-[0.3em]">QUADRO HOUSE</span>
         </div>
 
-        {/* big card (LOCATIONS active) */}
+        {/* big card (LOCATIONS active). Desktop: floats bottom-left. Mobile: docks TOP, full-width
+            horizontal so it never collides with the bottom-docked POI panel (PB_responsive §2 —
+            no overlapping map panels on small screens). */}
         {mode === "loc" && (
-          <div className="pointer-events-none absolute bottom-10 left-6 z-10 w-[300px] max-w-[78vw] rounded-xl bg-white p-7 text-[#0a0a0a] shadow-2xl md:left-12">
-            <div className="flex items-start justify-between">
-              <span className="font-display text-7xl leading-none">{bigNum}</span>
-              <span className="mt-2 text-sm tracking-wide text-[#0a0a0a]/60">{place.km} км</span>
+          <div className="pointer-events-none absolute left-4 right-4 top-5 z-10 flex items-center justify-between rounded-xl bg-white p-5 text-[#0a0a0a] shadow-2xl md:bottom-10 md:left-12 md:right-auto md:top-auto md:w-[300px] md:max-w-[78vw] md:flex-col md:items-stretch md:p-7">
+            <div className="flex items-baseline gap-3 md:items-start md:justify-between">
+              <span className="font-display text-5xl leading-none md:text-7xl">{bigNum}</span>
+              <span className="text-sm tracking-wide text-[#0a0a0a]/60 md:mt-2">{place.km} км</span>
             </div>
-            <div className="mt-4 text-xs uppercase leading-snug tracking-[0.18em] text-[#0a0a0a]/70">
-              {bigLabel}
+            <div className="text-right md:mt-4 md:text-left">
+              <div className="text-[10px] uppercase leading-snug tracking-[0.18em] text-[#0a0a0a]/70 md:text-xs">
+                {bigLabel}
+              </div>
+              <div className="font-display text-base leading-tight md:mt-3 md:text-lg">{place.title}</div>
             </div>
-            <div className="mt-3 font-display text-lg leading-tight">{place.title}</div>
           </div>
         )}
 
-        {/* right panel — blue-tinted to match the re-tinted plan (was neutral grey #141414) */}
-        <div className="absolute right-5 top-1/2 z-20 flex max-h-[78%] w-[300px] max-w-[80vw] -translate-y-1/2 flex-col rounded-xl bg-[#0f1422]/85 p-6 ring-1 ring-white/10 backdrop-blur">
+        {/* POI panel — blue-tinted. Desktop: right-center floating. Mobile: full-width bottom strip
+            (PB_responsive §2 — map nav → bottom strip; tabs + scrollable list, no overlap). */}
+        <div className="absolute inset-x-3 bottom-3 z-20 flex max-h-[46%] flex-col rounded-xl bg-[#0f1422]/90 p-5 ring-1 ring-white/10 backdrop-blur md:inset-x-auto md:bottom-auto md:right-5 md:top-1/2 md:max-h-[78%] md:w-[300px] md:max-w-[80vw] md:-translate-y-1/2 md:p-6">
           {/* mode tabs */}
           <div className="mb-6 flex gap-5 text-[11px] uppercase tracking-[0.22em]">
             <button type="button" onClick={() => setMode("loc")}

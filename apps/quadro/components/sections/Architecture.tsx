@@ -60,10 +60,17 @@ export function Architecture({ m }: { m: Messages }) {
         },
       });
 
-      // window opens + camera push-in
+      // window opens + camera push-in. The starting "window" inset is WIDER on mobile: at the
+      // desktop 41% side-inset the frame is only ~18% of the viewport, which on a ~390px phone
+      // shrinks to an ugly ~70px vertical sliver. On mobile start at 14% side-inset (≈72% wide)
+      // so the architecture render always reads as a building, never a strip.
+      const narrow = window.matchMedia("(max-width: 767px)").matches;
+      const startClip = narrow
+        ? "inset(30% 14% 30% 14% round 12px)"
+        : "inset(36% 41% 36% 41% round 12px)";
       tl.fromTo(
         mask,
-        { clipPath: "inset(36% 41% 36% 41% round 12px)" },
+        { clipPath: startClip },
         { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none" },
         0,
       )
