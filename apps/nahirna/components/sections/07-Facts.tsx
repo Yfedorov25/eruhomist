@@ -11,7 +11,7 @@ import { typo } from "@/lib/typo";
 const STATS = [
   { value: FACTS.areaHouse, decimals: 0, unit: "м²", label: "площа будинку", a11y: "150 м²" },
   { value: FACTS.plotSotky, decimals: 0, unit: "соток", label: "ділянка", a11y: "10 соток" },
-  { value: FACTS.bankSotky, decimals: 0, prefix: "~", unit: "сотки", label: "власний берег", a11y: "близько 4 соток" },
+  { value: FACTS.bankSotky, decimals: 0, prefix: "~", unit: "сотки", label: "прибережна зона", a11y: "близько 4 соток" },
   { value: FACTS.bedrooms, decimals: 0, unit: "", label: "спальні", a11y: "3" },
   { value: FACTS.floors, decimals: 0, unit: "", label: "поверх", a11y: "1" },
 ];

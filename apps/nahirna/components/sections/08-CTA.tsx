@@ -11,7 +11,7 @@ import { typo } from "@/lib/typo";
 import { trackCall, trackFormSubmit } from "@/lib/analytics";
 
 // 08 · ФІНАЛ — the merged closing (was CTA + Footer). Award pattern: one crescendo screen that
-// closes on the WATER (the «власний берег» promise, NOT the house again — the villa already
+// closes on the WATER (the «перша лінія до берега» promise, NOT the house again — the villa already
 // appeared in §00/§02), bookending the hero ("Прокидатися від води" → "Прокидатися саме тут").
 // Holds the conversion (callback form / call) + the footer essentials (price, contacts, concept)
 // + a minimal footer line. Real text in SSR (SEO + no-JS): price, address.
@@ -128,7 +128,7 @@ export default function CTA() {
                 ${FACTS.priceUsd.toLocaleString("uk-UA")}
               </p>
               <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                {typo("Дім, ділянка 10 соток і ~4 сотки власного берега. Усе у вартості.")}
+                {typo("Дім, ділянка 10 соток і ~4 сотки прибережної зони. Усе у вартості.")}
               </p>
 
               <div className="mt-7 border-t border-[var(--color-warm)]/12 pt-6">
@@ -146,9 +146,9 @@ export default function CTA() {
               </div>
 
               <div className="mt-7 border-t border-[var(--color-warm)]/12 pt-6">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-text-muted)]">Власний берег</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-text-muted)]">Перша лінія до берега</p>
                 <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--color-text-muted)]">
-                  {typo("Єдиний дім у Вінниці, де власний берег Бугу починається там, де закінчується Ваша тераса.")}
+                  {typo("Єдиний дім у Вінниці, де берег Бугу починається там, де закінчується Ваша тераса.")}
                 </p>
               </div>
             </div>

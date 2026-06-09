@@ -8,8 +8,8 @@ export function listingJsonLd(siteUrl: string) {
     "@type": "SingleFamilyResidence",
     name: "Дім на Нагірній",
     description:
-      "Приватний одноповерховий будинок 150 м² на власному березі Південного Бугу, " +
-      "вул. Нагірна, Вінниця. Тупікова вулиця, ~4 сотки приватного берега.",
+      "Приватний одноповерховий будинок 150 м² на першій лінії до Південного Бугу, " +
+      "вул. Нагірна, Вінниця. Тупікова вулиця, ~4 сотки прибережної зони.",
     url: siteUrl,
     image: `${siteUrl}/images/hero-night-desktop.webp`,
     numberOfRooms: FACTS.bedrooms,

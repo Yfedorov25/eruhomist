@@ -71,7 +71,7 @@ export default function Hero() {
       {/* 1 · DAY STILL — LCP-critical (priority, eager). Fires hero-ready for the Preloader. */}
       <Image
         src="/images/hero-day-desktop.webp"
-        alt="Дім на Нагірній удень: темна клінкерна цегла, колони з білими капітелями, олівковий дах, панорамне скління серед зелені"
+        alt="Дім на Нагірній удень: темна клінкерна цегла, колони з білими капітелями, оливковий дах, панорамне скління серед зелені"
         fill
         priority
         sizes="100vw"
@@ -122,7 +122,7 @@ export default function Hero() {
           <span style={{ textShadow: "0 1px 10px rgba(0,0,0,0.7)" }}>вул. Нагірна, Вінниця</span>
           <span aria-hidden className="hidden h-px w-6 bg-[var(--color-plaster)]/40 md:block" />
           <span className="text-[var(--color-warm)]" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.7)" }}>
-            власний берег Південного Бугу
+            перша лінія до Південного Бугу
           </span>
         </p>
 

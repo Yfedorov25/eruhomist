@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import "@/lib/gsapEase"; // "air" signature ease for the curtain lift
 
-// Cinematic splash — a warm-dark veil over the hero. The concept word «Власний берег» reveals
+// Cinematic splash — a warm-dark veil over the hero. The concept word «Перша лінія» reveals
 // while a 0→100 counter runs, then the veil fades the moment the hero's day-image paints
 // (`nahirna:hero-ready` = the LCP moment). Ported from the proven apps/quadro Preloader.
 //
@@ -102,7 +102,7 @@ export function Preloader() {
         className="text-[clamp(2.2rem,6vw,4.5rem)] font-medium tracking-[0.04em] text-[var(--color-plaster)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        Власний берег
+        Перша лінія
       </div>
       {/* Restrained loading signal: a hairline rule filling left→right + a small tabular count. */}
       <div className="mt-8 flex flex-col items-center gap-3">

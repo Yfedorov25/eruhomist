@@ -28,5 +28,5 @@ export const TOUR_CLIMAX = {
 export const TOUR_CAPTIONS = [
   { at: 0.06, until: 0.2, text: "Двір" },
   { at: 0.52, until: 0.66, text: "Вітальня" },
-  { at: 0.82, until: 0.98, text: "Власний берег" },
+  { at: 0.82, until: 0.98, text: "Перша лінія до берега" },
 ] as const;

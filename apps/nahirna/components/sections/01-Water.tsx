@@ -9,7 +9,7 @@ import { typo } from "@/lib/typo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// 01 · ВОДА — «Власний берег». Pinned scroll-story. Backdrop = two golden-hour STILLS that
+// 01 · ВОДА — «Перша лінія до берега». Pinned scroll-story. Backdrop = two golden-hour STILLS that
 // crossfade (golden terrace → riverbank) under a slow Ken-Burns zoom, all driven by the pinned
 // scroll. NO video / NO canvas: both the living-video and the frame-scrub versions fought the
 // scrub (visible loop-restart / decode-jank / load hangs). Stills + transform are buttery and
@@ -18,7 +18,7 @@ const BEATS = [
   { key: "b1", text: "За огорожею закінчується місто." },
   {
     key: "b2",
-    text: "Власний берег. Близько чотирьох соток лінії води. Рівно стільки, щоб поставити пірс, розпалити вогнище, спустити човен. І нікому не пояснювати, чому Ви тут.",
+    text: "Перша лінія до берега. Близько чотирьох соток лінії води. Рівно стільки, щоб поставити пірс, розпалити вогнище, спустити човен. І нікому не пояснювати, чому Ви тут.",
   },
   { key: "b3", text: "Тут не чути сусідів. Чути воду." },
 ];
@@ -75,11 +75,11 @@ export default function Water() {
   );
 
   return (
-    <section ref={root} className="relative bg-night" aria-label="Власний берег Південного Бугу">
+    <section ref={root} className="relative bg-night" aria-label="Перша лінія до берега Південного Бугу">
       <div className="water-stage relative flex h-[100svh] min-h-[100svh] w-full items-center justify-center overflow-hidden">
         <div className="water-bg absolute inset-0 will-change-transform">
           <Image src="/images/water-terrace-golden.webp" alt="Тераса будинку з виходом на Південний Буг у золоту годину" fill sizes="100vw" loading="lazy" className="object-cover" />
-          <Image src="/images/water-finale.webp" alt="Власний берег Південного Бугу — ріка й дерева у золоту годину" fill sizes="100vw" loading="lazy" className="water-shore absolute inset-0 object-cover" />
+          <Image src="/images/water-finale.webp" alt="Берег Південного Бугу — ріка й дерева у золоту годину" fill sizes="100vw" loading="lazy" className="water-shore absolute inset-0 object-cover" />
         </div>
 
         {/* Scrim for legibility — strong center band where the beats live. */}
@@ -91,7 +91,7 @@ export default function Water() {
 
         {/* Beats — stacked, cross-faded by the timeline. */}
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-          <p className="mb-8 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">Власний берег</p>
+          <p className="mb-8 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">Перша лінія до берега</p>
           <div className="relative min-h-[8.5rem] md:min-h-[7.5rem]">
             {BEATS.map((b, i) => (
               <p

@@ -55,7 +55,7 @@ export default function Landscape() {
   );
 
   return (
-    <section ref={root} className="relative bg-night" aria-label="Життя на власному березі">
+    <section ref={root} className="relative bg-night" aria-label="Життя на першій лінії до берега">
       {/* Statement lands centered & alone → scroll → photo masks open + parallax */}
       <div className="ls-statement relative flex min-h-[80svh] flex-col items-center justify-center px-6 pt-[12vh] text-center">
         <p className="ls-eyebrow mb-6 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">Життя надворі</p>

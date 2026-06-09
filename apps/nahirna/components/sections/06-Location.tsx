@@ -102,12 +102,12 @@ function Payoff({ ready, big }: { ready: boolean; big?: boolean }) {
         <span className="pb-2 text-lg leading-tight text-[var(--color-text)]">
           хвилин
           <br />
-          до власного берега
+          до берега
         </span>
       </div>
 
       <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[var(--color-text)]">
-        <span className="text-[var(--color-warm)]">{typo("Чотири сотки власного берега.")}</span> {typo("Не вид на річку, а сама річка. Ні сусідів, ні чужих поглядів.")}
+        <span className="text-[var(--color-warm)]">{typo("Чотири сотки прибережної зони.")}</span> {typo("Не вид на річку, а сама річка. Ні сусідів, ні чужих поглядів.")}
       </p>
 
       <CtaButton ready={ready} label="Подзвонити й приїхати на берег" />
@@ -235,7 +235,7 @@ export default function Location() {
             {/* poster / base — the aerial still (instant, also the load-in frame) */}
             <Image
               src="/video/living/web/aerial-river.png"
-              alt="Аеро-вид на вигин річки серед лісу — приватний берег"
+              alt="Аеро-вид на вигин річки серед лісу — перша лінія до берега"
               fill
               sizes="100vw"
               loading="lazy"

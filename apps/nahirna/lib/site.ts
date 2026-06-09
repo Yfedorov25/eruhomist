@@ -6,7 +6,7 @@ export const FACTS = {
   priceUsd: 300000,
   areaHouse: 150, // м²
   plotSotky: 10, // соток
-  bankSotky: 4, // ~соток власного берега
+  bankSotky: 4, // ~соток прибережної зони (перша лінія до берега)
   terrace: 29.83, // м²
   kitchenLiving: 45, // м²
   carport: 36.92, // м²
@@ -53,7 +53,7 @@ export const phoneReady = (): boolean => CONTACT.phoneTel.trim().length > 0;
 // Location POIs. Only `verified: true` rows render; the rest stay hidden behind this flag
 // until the client confirms a real distance (council: a fake/vague map kills trust).
 export const POIS = [
-  { id: "bank", label: "Власний берег", value: "0 хвилин", note: "Він просто внизу.", verified: true },
+  { id: "bank", label: "Перша лінія до берега", value: "0 хвилин", note: "Він просто внизу.", verified: true },
   { id: "center", label: "Центр Вінниці", value: "TODO_CLIENT", note: "хв авто", verified: false },
   { id: "school", label: "Школа й садок", value: "TODO_CLIENT", note: "хв", verified: false },
 ] as const;

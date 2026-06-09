@@ -22,7 +22,7 @@ const SHOTS: Shot[] = [
   { src: "/images/gallery/from-gate-day.webp", title: "Від воріт", meta: "Екстер'єр, день", alt: "Будинок від воріт у зелені, гравійна доріжка" },
   { src: "/images/gallery/corner-clinker-day.webp", title: "Клінкер зблизька", meta: "Деталь, день", alt: "Кут будинку зблизька: фактура темної клінкерної цегли й білий камінь" },
   { src: "/images/gallery/behind-fence-day.webp", title: "З-за паркану", meta: "Екстер'єр, день", alt: "Будинок з-за паркану: приватна ділянка в глухому куті" },
-  { src: "/images/gallery/riverbank-day.webp", title: "Власний берег", meta: "Природа, день", alt: "Берег Південного Бугу біля будинку: вода, латаття, дерева" },
+  { src: "/images/gallery/riverbank-day.webp", title: "Перша лінія до берега", meta: "Природа, день", alt: "Берег Південного Бугу біля будинку: вода, латаття, дерева" },
   { src: "/images/gallery/garden-umbrellas-day.webp", title: "Сад із парасолями", meta: "Подвір'я, день", alt: "Сад біля будинку: парасолі, лежаки, підстрижені самшити" },
   { src: "/images/gallery/loungers-day.webp", title: "Лежаки під деревами", meta: "Подвір'я, день", alt: "Зона відпочинку з лежаками під деревами" },
   { src: "/images/gallery/firepit-day.webp", title: "Зона з вогнищем", meta: "Подвір'я, день", alt: "Лаунж-зона з вогнищем і кріслами вдень" },
