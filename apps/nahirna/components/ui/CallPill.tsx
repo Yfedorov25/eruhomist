@@ -11,7 +11,7 @@ import { trackCall, trackCta, setActiveSection, trackScroll90 } from "@/lib/anal
 // callback form. Hidden until past-water so it never competes with the hero.
 export function CallPill() {
   const [shown, setShown] = useState(false);
-  const [dim, setDim] = useState(false); // fade when the CTA section is in view (redundant there)
+  const [dim, setDim] = useState(false); // fade when a section with its own CTA is in view
   const [hiddenByScroll, setHiddenByScroll] = useState(false); // mobile: hide while scrolling down
   const ready = phoneReady();
 
@@ -25,8 +25,10 @@ export function CallPill() {
           if (e.isIntersecting) {
             const label = e.target.getAttribute("aria-label") || "";
             setActiveSection(label);
-            // The pill is redundant while the CTA form is on screen — dim it there.
-            setDim(label.includes("записатися на перегляд"));
+            // The pill is redundant on sections that already carry their own call CTA:
+            // §08 (the form) and §06 Location ("Приїхати на берег"). Hide it there so there
+            // are never two competing call buttons on one screen.
+            setDim(label.includes("записатися на перегляд") || label.includes("Локація"));
           }
         }
       },
@@ -81,9 +83,10 @@ export function CallPill() {
     <div
       className="fixed bottom-5 right-5 z-50 transition-all duration-500 md:bottom-7 md:right-7"
       style={{
-        // Visible when past the water hook AND not dimmed on the CTA AND not hidden by scroll-down.
-        opacity: shown && !hiddenByScroll ? (dim ? 0.35 : 1) : 0,
-        transform: shown && !hiddenByScroll ? "translateY(0)" : "translateY(20px)",
+        // Visible when past the water hook, NOT on a section with its own CTA (§06/§08), and
+        // not hidden by mobile scroll-down. Hidden fully on CTA sections (no double call buttons).
+        opacity: shown && !dim && !hiddenByScroll ? 1 : 0,
+        transform: shown && !dim && !hiddenByScroll ? "translateY(0)" : "translateY(20px)",
         pointerEvents: shown && !dim && !hiddenByScroll ? "auto" : "none",
       }}
     >

@@ -115,9 +115,15 @@ function Payoff({ ready, big }: { ready: boolean; big?: boolean }) {
   );
 }
 
-// Bottom-weighted scrim used on both photos so copy always reads over them.
+// Bottom-weighted scrim used on the desktop photo so copy always reads over it.
 const SCRIM =
   "linear-gradient(to top, rgba(15,15,14,0.92) 0%, rgba(15,15,14,0.6) 32%, rgba(15,15,14,0.15) 60%, transparent 80%)";
+
+// Mobile copy spans most of the frame (long distance list + payoff) over a BRIGHT image
+// (foliage + sky), so it needs a much heavier veil than the desktop bottom-scrim — otherwise
+// white text bleeds into the leaves. Near-opaque at the bottom, still dark through the middle.
+const SCRIM_MOBILE =
+  "linear-gradient(to top, rgba(15,15,14,0.96) 0%, rgba(15,15,14,0.9) 28%, rgba(15,15,14,0.74) 55%, rgba(15,15,14,0.5) 80%, rgba(15,15,14,0.32) 100%)";
 
 export default function Location() {
   const root = useRef<HTMLElement>(null);
@@ -193,12 +199,14 @@ export default function Location() {
         tl.to(".loc-d-payoff", { autoAlpha: 1, y: 0, ease: "power2.out" }, 0.2);
       });
 
-      // MOBILE — simplified pinned crossfade (no video, no scrub-counter). Scroll fades the city
-      // claim out and the river payoff in over the one held background. The payoff number is set to
-      // "0" statically (the desktop 10→0 count is intentionally dropped on touch for perf).
+      // MOBILE — simplified pinned crossfade WITH the count-down (5 → 0, a light number-tick, no
+      // video). Scroll fades the city claim out and the river payoff in; the number counts down as
+      // the payoff arrives, landing on 0 ("0 хвилин до берега").
       mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
         gsap.set(".loc-m-city", { autoAlpha: 1 });
         gsap.set(".loc-m-payoff", { autoAlpha: 0, y: 18 });
+        const mnum = root.current!.querySelector<HTMLElement>(".loc-m-payoff .loc-count");
+        if (mnum) mnum.textContent = "5"; // start integer so the pin-engage doesn't flash 0→5
 
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -212,6 +220,19 @@ export default function Location() {
         });
         tl.to(".loc-m-city", { autoAlpha: 0, y: -12, ease: "power1.in" }, 0.0);
         tl.to(".loc-m-payoff", { autoAlpha: 1, y: 0, ease: "power2.out" }, 0.35);
+        // Count 5 → 0 in whole integers as the payoff blooms.
+        const mcounter = { v: 5 };
+        tl.to(
+          mcounter,
+          {
+            v: 0,
+            ease: "none",
+            onUpdate: () => {
+              if (mnum) mnum.textContent = String(Math.max(0, Math.round(mcounter.v)));
+            },
+          },
+          0.1,
+        );
       });
 
       // MOBILE reduced-motion — no pin; both layers flow vertically (un-stack the grid overlap).
@@ -299,7 +320,7 @@ export default function Location() {
             loading="lazy"
             className="object-cover [object-position:50%_50%]"
           />
-          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} aria-hidden />
+          <div className="pointer-events-none absolute inset-0" style={{ background: SCRIM_MOBILE }} aria-hidden />
 
           {/* Both copy layers stack in the same bottom area; GSAP crossfades them on scroll. */}
           <div className="relative z-10 grid w-full px-6 pb-[12vh]">
