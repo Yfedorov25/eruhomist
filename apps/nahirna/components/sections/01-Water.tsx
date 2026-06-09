@@ -35,7 +35,18 @@ export default function Water() {
         gsap.set(".water-shore", { opacity: 1 });
       });
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // MOBILE — NO pin/scrub/snap (the 260% pin + 3-way snap was a top jank source on touch).
+      // The section is one screen; the beats flow vertically (un-stacked via .water-stage-m) and
+      // each fades in on enter; the shore image crossfades once. Clean on native touch.
+      mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
+        gsap.set(".water-shore", { opacity: 1 }); // show the finale shore (richer) as the still
+        gsap.from(".water-beat", {
+          opacity: 0, y: 22, duration: 1.1, ease: "power3.out", stagger: 0.18,
+          scrollTrigger: { trigger: ".water-stage", start: "top 70%", once: true },
+        });
+      });
+
+      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: root.current,
@@ -92,7 +103,9 @@ export default function Water() {
         {/* Beats — stacked, cross-faded by the timeline. */}
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
           <p className="mb-8 text-[11px] uppercase tracking-[0.34em] text-[var(--color-warm)]/80">Перша лінія до берега</p>
-          <div className="relative min-h-[8.5rem] md:min-h-[7.5rem]">
+          {/* Mobile: beats flow vertically (space-y), no overlap. Desktop: stacked & cross-faded
+              (beats 2-3 absolute over beat 1) by the pinned timeline. */}
+          <div className="relative flex flex-col gap-5 md:block md:min-h-[7.5rem] md:gap-0">
             {BEATS.map((b, i) => (
               <p
                 key={b.key}
@@ -100,7 +113,7 @@ export default function Water() {
                   i === 1
                     ? "mx-0 max-w-xl text-left text-xl md:text-[1.6rem] md:leading-[1.45]"
                     : "mx-auto max-w-3xl text-center text-2xl md:text-[2.2rem] md:leading-[1.25]"
-                } ${i === 0 ? "relative" : "absolute inset-x-0 top-0"}`}
+                } ${i === 0 ? "relative" : "relative md:absolute md:inset-x-0 md:top-0"}`}
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {typo(b.text)}

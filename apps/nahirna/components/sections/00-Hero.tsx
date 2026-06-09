@@ -29,9 +29,9 @@ export default function Hero() {
         gsap.set([".hero-line", ".hero-kicker", ".hero-sub", ".hero-hint"], { opacity: 1, yPercent: 0 });
       });
 
-      // ---- Motion: pinned day→night scrub on the STILLS only (identical composition, so the
-      // house never shifts and nothing loops/resets — the video pair drifted, removed). ----
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // ---- DESKTOP motion: pinned day→night scrub on the STILLS only (identical composition, so
+      // the house never shifts and nothing loops/resets — the video pair drifted, removed). ----
+      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: root.current,
@@ -49,6 +49,37 @@ export default function Hero() {
         tl.to(".hero-hint", { opacity: 0, ease: "none", duration: 0.1 }, 0);
 
         // Intro reveals (once, not tied to scrub).
+        const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+        intro
+          .from(".hero-kicker", { opacity: 0, y: 16, duration: 1.2, delay: 0.2 })
+          .from(".hero-line", { opacity: 0, yPercent: 110, duration: 1.6, stagger: 0.12 }, "-=0.9")
+          .from(".hero-sub", { opacity: 0, y: 18, duration: 1.4 }, "-=1.0")
+          .from(".hero-hint", { opacity: 0, duration: 1.0 }, "-=0.8");
+      });
+
+      // ---- MOBILE motion: NO pin. The day→night crossfade is still scroll-linked (scrub) but the
+      // section is NOT pinned — native touch just scrolls past it while the night fades in. Pinning
+      // on touch was a jank source; an un-pinned scrub rides native momentum cleanly. ----
+      mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(
+          ".hero-night-still",
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 0.5 },
+          },
+        );
+        gsap.fromTo(
+          ".hero-glow",
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: { trigger: root.current, start: "top top", end: "bottom center", scrub: 0.5 },
+          },
+        );
+        // Intro reveals (once on load).
         const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
         intro
           .from(".hero-kicker", { opacity: 0, y: 16, duration: 1.2, delay: 0.2 })

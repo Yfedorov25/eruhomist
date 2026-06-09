@@ -20,12 +20,13 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     let rafFn: ((time: number) => void) | null = null;
 
     if (!reduced) {
-      // syncTouch:true — on touch, Lenis INTERPOLATES the scroll (instead of native), so the
-      // pinned/scrubbed story sections (water, architecture, mobile location) stay locked to the
-      // scroll position ScrollTrigger reads. Without it, native touch momentum jumped the page in
-      // big steps while the rAF-driven scrub lagged → the site-wide "jumpy scroll" on mobile.
-      // A light syncTouchLerp keeps the interpolation snappy so touch doesn't feel rubbery.
-      lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.1 });
+      // NATIVE touch (no syncTouch): native touch scroll is the smoothest and lets horizontal
+      // scroll-snap children (the gallery strip) work. syncTouch made touch feel heavy/rubbery and
+      // swallowed the gallery's sideways scroll. The jumpy-pin problem is instead solved by NOT
+      // pinning heavy sections on mobile (each story section has a max-width:767px no-pin branch),
+      // so there is nothing for native momentum to desync from. (perf-doctrine: one smoother; the
+      // smoother is desktop-only — touch stays native.)
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
       lenis.on("scroll", ScrollTrigger.update);
       rafFn = (time: number) => lenis?.raf(time * 1000);
       gsap.ticker.add(rafFn);
