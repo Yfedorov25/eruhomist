@@ -31,6 +31,9 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
         smoothWheel: true,
         syncTouch: true,
         syncTouchLerp: 0.1,
+        // touchMultiplier < 1 slows how far one finger-swipe travels — the page was too "fast"
+        // (one flick passed too much content). 0.7 = noticeably more controlled, not heavy.
+        touchMultiplier: 0.7,
         prevent: (node) =>
           node.hasAttribute("data-lenis-prevent") ||
           !!node.closest("[data-lenis-prevent]"),
