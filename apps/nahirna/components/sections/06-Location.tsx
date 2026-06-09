@@ -42,7 +42,10 @@ function DistanceList() {
           <span className="text-[15px] text-[var(--color-text)] md:text-base">
             {d.place}
             {d.note ? (
-              <span className="ml-2 text-[13px] text-[var(--color-text-muted)]">· {d.note}</span>
+              // Mobile: note drops to its own line so it never crowds the distance value.
+              <span className="mt-0.5 block text-[13px] text-[var(--color-text-muted)] md:mt-0 md:ml-2 md:inline">
+                <span className="hidden md:inline">· </span>{d.note}
+              </span>
             ) : null}
           </span>
           <span

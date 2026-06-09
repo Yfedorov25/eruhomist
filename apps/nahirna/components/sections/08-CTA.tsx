@@ -189,7 +189,7 @@ function Field({
         required={required}
         autoComplete={autoComplete}
         inputMode={inputMode}
-        className="w-full rounded-sm border border-[var(--color-warm)]/20 bg-[var(--color-night)]/40 px-4 py-3 text-[var(--color-text)] outline-none transition-colors duration-300 placeholder:text-[var(--color-text-muted)]/60 focus:border-[var(--color-warm)]/60"
+        className="w-full rounded-sm border border-[var(--color-warm)]/20 bg-[var(--color-night)]/40 px-4 py-3 text-base text-[var(--color-text)] outline-none transition-colors duration-300 placeholder:text-[var(--color-text-muted)]/60 focus:border-[var(--color-warm)]/60"
       />
     </label>
   );

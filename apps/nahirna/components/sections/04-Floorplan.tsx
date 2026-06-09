@@ -100,7 +100,7 @@ export default function Floorplan() {
                     aria-label={`${r.name}, ${r.area.toLocaleString("uk")} м²${r.img ? ", є фото" : ""}`}
                     onClick={() => { setActive(r.id); setEvening(false); }}
                     onMouseEnter={() => setActive(r.id)}
-                    className="absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-full outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[var(--color-warm)]"
+                    className="absolute z-10 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[var(--color-warm)] md:h-auto md:w-auto"
                     style={{ left: `${r.x}%`, top: `${r.y}%` }}
                   >
                     <span
@@ -174,15 +174,16 @@ export default function Floorplan() {
                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-[var(--color-text-muted)]">{typo(current.desc)}</p>
               </div>
 
-              {/* caption overlay for photo rooms */}
+              {/* caption overlay for photo rooms — DESKTOP only (on mobile it sits below the photo
+                  to avoid the long description overlapping the area/name in the short 16/10 card). */}
               {current.img ? (
                 <>
                   <div
-                    className="pointer-events-none absolute inset-0"
+                    className="pointer-events-none absolute inset-0 hidden md:block"
                     style={{ background: "linear-gradient(to top, rgba(15,15,14,0.85) 0%, rgba(15,15,14,0.1) 42%, transparent 65%)" }}
                     aria-hidden
                   />
-                  <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-3 p-4 md:p-6">
+                  <div className="absolute inset-x-0 bottom-0 z-10 hidden items-end justify-between gap-3 p-4 md:flex md:p-6">
                     <div className="max-w-md">
                       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                         <span className="text-[1.9rem] font-light leading-none text-[var(--color-warm)] tabular-nums md:text-[2.4rem]">
@@ -208,6 +209,34 @@ export default function Floorplan() {
                 </>
               ) : null}
             </div>
+
+            {/* MOBILE caption — below the photo (stacked), so the description never overlaps the
+                area/name inside the short card. Photo rooms only; spec rooms render their text in-card. */}
+            {current.img ? (
+              <div className="mt-4 flex items-start justify-between gap-4 md:hidden">
+                <div>
+                  <p className="flex items-baseline gap-x-2">
+                    <span className="text-[1.8rem] font-light leading-none text-[var(--color-warm)] tabular-nums">
+                      {current.area.toLocaleString("uk")}
+                    </span>
+                    <span className="text-xs text-[var(--color-warm)]/70">м²</span>
+                    <span className="ml-1 text-[1.1rem] leading-tight text-[var(--color-text)]" style={{ fontFamily: "var(--font-display)" }}>
+                      {current.name}
+                    </span>
+                  </p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-text-muted)]">{typo(current.desc)}</p>
+                </div>
+                {current.imgAlt ? (
+                  <button
+                    type="button"
+                    onClick={() => setEvening((v) => !v)}
+                    className="mt-1 shrink-0 rounded-full border border-[var(--color-warm)]/40 px-4 py-2.5 text-[11px] uppercase tracking-[0.12em] text-[var(--color-warm)]"
+                  >
+                    {evening ? "День" : "Вечір"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
 
             {/* features line under viewer */}
             {current.look ? (
